@@ -24,7 +24,7 @@ today_str  = today.strftime("%Y-%m-%d")
 today_ymd  = today.strftime("%Y%m%d")
 
 HEADERS = {
-    "User-Agent": "YosoNoTessoku-Bot/1.0 (予想の鉄則; 1日1回; contact: yoso-tessoku@oyatojikka.online)"
+    "User-Agent": "YosoNoTessoku-Bot/1.0"
 }
 
 def check_robots(base, path):
