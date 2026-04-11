@@ -1,0 +1,24 @@
+name: 毎朝レース情報自動更新
+
+on:
+  schedule:
+    - cron: '30 23 * * *'
+  workflow_dispatch:
+
+jobs:
+  update-races:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: スクレイピング実行
+        run: python scraper.py
+      - name: ConoHa FTPアップロード
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USER: ${{ secrets.FTP_USER }}
+          FTP_PASS: ${{ secrets.FTP_PASS }}
+          FTP_REMOTE: ${{ secrets.FTP_REMOTE }}
+        run: python upload.py
