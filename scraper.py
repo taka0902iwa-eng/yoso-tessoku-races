@@ -871,52 +871,67 @@ def fetch_boat_riders(base, jcd, rno):
         html = fetch(url)
         time.sleep(1)
 
-        # 選手名
-        names = re.findall(r'<td[^>]*class="[^"]*name[^"]*"[^>]*>([^<]{2,8})</td>', html)
+        # 選手名（複数パターンで取得）
+        names = re.findall(r'class="is-fs18[^"]*"[^>]*>\s*([^\s<]{2,6})\s*</span>', html)
         if not names:
-            names = re.findall(r'(\S{2,5})\s*(?:A1|A2|B1|B2)', html)
+            names = re.findall(r'<td[^>]*class="[^"]*name[^"]*"[^>]*>\s*([^<\s]{2,6})\s*</td>', html)
+        if not names:
+            names = re.findall(r'(?:選手名|name)[^>]*>\s*([^\s<]{2,6})\s*<', html)
+        if not names:
+            # boatrace.jpの出走表から選手名を直接抽出
+            names = re.findall(r'<span[^>]*>\s*([^\s<]{2,5})\s*</span>', html)
+            names = [n for n in names if 2 <= len(n) <= 5 and not n.isdigit() and 'class' not in n][:6]
+        if not names:
+            # フォールバック：艇番1〜6で仮名
+            names = [f"{i+1}号艇" for i in range(6)]
 
         # オッズ
-        odds_html = fetch(f"{base}/owpc/pc/race/odds2tf?hd={today_ymd}&jcd={jcd}&rno={rno}")
-        time.sleep(1)
-        odds_list = [float(o) for o in re.findall(r'(\d+\.\d)', odds_html)
-                     if 1.0 <= float(o) <= 999.0]
+        try:
+            odds_html = fetch(f"{base}/owpc/pc/race/odds2tf?hd={today_ymd}&jcd={jcd}&rno={rno}")
+            time.sleep(1)
+            odds_list = [float(o) for o in re.findall(r'(\d+\.\d)', odds_html)
+                         if 1.0 <= float(o) <= 999.0]
+        except:
+            odds_list = []
 
         # モーター勝率
         motor_rates = [float(m)/100 for m in re.findall(r'(\d{2}\.\d{2})', html)
                        if 0 <= float(m)/100 <= 1.0][:6]
         field_avg_motor = sum(motor_rates)/len(motor_rates) if motor_rates else 0.33
 
-        # コース別勝率（1号艇~6号艇の過去成績）
+        # コース別勝率
         course_rates = re.findall(r'(\d+\.\d+)%', html)
         valid_cr     = [float(r)/100 for r in course_rates if 0 < float(r) <= 100][:6]
 
-        # 展示タイム取得
-        exh_times    = fetch_exhibition_times(base, jcd, rno)
-        field_avg_exh= sum(exh_times)/len(exh_times) if exh_times else 0
+        # 展示タイム
+        try:
+            exh_times = fetch_exhibition_times(base, jcd, rno)
+        except:
+            exh_times = []
+        field_avg_exh = sum(exh_times)/len(exh_times) if exh_times else 0
 
-        F       = max(len(names), 6)
-        riders  = []
-        for i, name in enumerate(names[:6]):
-            odds        = odds_list[i]  if i < len(odds_list)  else 10.0
-            motor_rate  = motor_rates[i]if i < len(motor_rates)else 0.33
-            course_rate = valid_cr[i]   if i < len(valid_cr)   else 0.33
-            exh_time    = exh_times[i]  if i < len(exh_times)  else 0
+        F      = 6
+        riders = []
+        for i in range(6):
+            name        = names[i].strip() if i < len(names) else f"{i+1}号艇"
+            odds        = odds_list[i]   if i < len(odds_list)   else float(10 + i * 2)
+            motor_rate  = motor_rates[i] if i < len(motor_rates) else 0.33
+            course_rate = valid_cr[i]    if i < len(valid_cr)    else 0.33
+            exh_time    = exh_times[i]   if i < len(exh_times)   else 0
 
-            # 近走安定度（形式補正）
             form_matches = re.findall(r'(\d)着', html[:2000])
             recent5      = [int(r) for r in form_matches[:5]]
             avg_rank     = sum(recent5)/len(recent5) if recent5 else 3.5
             form_adj     = round(clamp(1.0 + (3.5 - avg_rank) * 0.05, 0.90, 1.10), 3)
 
             riders.append({
-                "name":                 name.strip(),
+                "name":                 name,
                 "frame_num":            float(i + 1),
-                "C":                    30,    # 近似値
+                "C":                    30,
                 "E":                    float(i + 1),
                 "F":                    F,
                 "odds":                 odds,
-                "win_rate":             0.33 / (i + 1) * 2,  # 艇番別近似
+                "win_rate":             round(0.42 / (i + 1), 3),
                 "motor_win_rate":       motor_rate,
                 "field_avg_motor":      field_avg_motor,
                 "exhibition_time":      exh_time,
@@ -925,9 +940,17 @@ def fetch_boat_riders(base, jcd, rno):
                 "form_adj":             form_adj,
             })
 
+        print(f"  [boat/{jcd}/{rno}] 選手: {[r['name'] for r in riders]}")
         return riders
 
     except Exception as e:
+        print(f"  [boat_riders/{jcd}/{rno}] エラー: {e}")
+        # フォールバック：艇番のみで計算
+        return [{"name":f"{i+1}号艇","frame_num":float(i+1),"C":30,"E":float(i+1),
+                 "F":6,"odds":float(10+i*2),"win_rate":round(0.42/(i+1),3),
+                 "motor_win_rate":0.33,"field_avg_motor":0.33,
+                 "exhibition_time":0,"field_avg_exhibition":None,
+                 "course_win_rate":0.33,"form_adj":1.0} for i in range(6)]
         print(f"  [boat_riders/{jcd}/{rno}] エラー: {e}")
         return []
 
