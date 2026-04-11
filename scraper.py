@@ -1,7 +1,3 @@
-#!/usr/bin/env python3
-# scraper.py 改善版 - べーやん専用
-# 競馬全レース取得・403完全解消版
-
 """
 予想の鉄則 - 完全自動化スクリプト（精度向上版）
 
@@ -1666,6 +1662,38 @@ def generate_prediction_text(races):
 # FTPアップロード
 # ══════════════════════════════════════════════════
 def upload_ftp():
+    host = os.environ.get("FTP_HOST")
+    user = os.environ.get("FTP_USER") 
+    password = os.environ.get("FTP_PASS")
+    remote = os.environ.get("FTP_REMOTE", "homec9048134/public_html/oyatojikka.online/races.json")
+
+    if not all([host, user, password]):
+        print("FTP環境変数未設定 → スキップ")
+        return
+
+    try:
+        with ftplib.FTP(host, timeout=30) as ftp:
+            ftp.login(user, password)
+            ftp.set_pasv(True)
+
+            # ディレクトリ作成
+            path = "/".join(remote.split("/")[:-1])
+            dirs = path.split("/")
+            current = ""
+            for d in dirs:
+                if d:
+                    current += "/" + d
+                    try:
+                        ftp.cwd(current)
+                    except ftplib.error_perm:
+                        ftp.mkd(current)
+
+            # races.jsonアップロード
+            with open("races.json", "rb") as f:
+                ftp.storbinary(f"STOR {remote}", f)
+        print(f"✅ FTP成功: {remote}")
+    except Exception as e:
+        print(f"⚠️ FTPスキップ: {e}")
     host     = os.environ.get("FTP_HOST")
     user     = os.environ.get("FTP_USER")
     password = os.environ.get("FTP_PASS")
@@ -1727,8 +1755,3 @@ if __name__ == "__main__":
     upload_ftp()
 
     print(f"\n✅ 全処理完了（{len(all_races)}件）")
-
-
-if __name__ == "__main__":
-    print("=== 予想の鉄則 完全版起動 ===")
-    main()
