@@ -974,10 +974,10 @@ def fetch_boat_all():
         year     = today.year
         api_base = "https://boatraceopenapi.github.io"
 
-        # ① Boatrace Open APIから出走表を取得
+        # ① Boatrace Open APIから出走表を取得（v2）
         programs = []
         try:
-            prog_url = f"{api_base}/programs/v1/{year}/{today_ymd}.json"
+            prog_url = f"{api_base}/programs/v2/{year}/{today_ymd}.json"
             prog_html= fetch(prog_url)
             prog_json= json.loads(prog_html)
             programs = prog_json.get("programs", [])
@@ -985,10 +985,10 @@ def fetch_boat_all():
         except Exception as e:
             print(f"  [boat] Open API エラー: {e}")
 
-        # ② 直前情報（展示タイム）を取得
+        # ② 直前情報（展示タイム）を取得（v2・本日）
         previews = {}
         try:
-            prev_url  = f"{api_base}/previews/v1/{year}/{today_ymd}.json"
+            prev_url  = f"{api_base}/previews/v2/today.json"
             prev_html = fetch(prev_url)
             prev_json = json.loads(prev_html)
             for p in prev_json.get("previews", []):
@@ -1015,22 +1015,21 @@ def fetch_boat_all():
                 # メインレース（最終R）を選択
                 main_prog = sorted(progs, key=lambda x: x.get("race_number",0))[-1]
                 venue     = CODE_TO_NAME.get(sid, f"場{sid}")
-                grade     = main_prog.get("grade", "")
+                grade_num = main_prog.get("race_grade_number", 0)
+                grade     = {1:"SG",2:"G1",3:"G2",4:"G3"}.get(grade_num, "")
                 rno       = main_prog.get("race_number", 12)
 
-                # 発走時刻
+                # 発走時刻（race_closed_atから推定）
                 t = "--:--"
                 try:
-                    scheduled = main_prog.get("scheduled_time_of_day","")
-                    if scheduled:
-                        t = scheduled[:5]
+                    closed = main_prog.get("race_closed_at","")
+                    if closed and "T" in closed:
+                        t = closed.split("T")[1][:5]
                 except:
                     pass
 
-                # 選手データ取得
-                riders_data = main_prog.get("race_entries", [])
-                if not riders_data:
-                    riders_data = main_prog.get("entries", [])
+                # 選手データ取得（正確なフィールド名）
+                riders_data = main_prog.get("boats", [])
 
                 # 直前情報（展示タイム）
                 prev_key     = f"{int(sid)}-{rno}"
@@ -1041,13 +1040,19 @@ def fetch_boat_all():
 
                 riders = []
                 for entry in riders_data[:6]:
-                    bn         = entry.get("boat_number", len(riders)+1)
+                    bn         = entry.get("racer_boat_number", len(riders)+1)
                     name       = entry.get("racer_name", f"{bn}号艇")
-                    win_rate   = float(entry.get("global_win_rate",   0.33) or 0.33) / 100 \
-                                 if entry.get("global_win_rate","") != "" else 0.33
-                    motor_rate = float(entry.get("motor_win_rate",    0.33) or 0.33) / 100 \
-                                 if entry.get("motor_win_rate","") != "" else 0.33
+                    # 全国勝率（%で入っているので/100不要）
+                    win_rate   = float(entry.get("racer_national_top_1_percent", 7.0) or 7.0) / 100
+                    # モーター2連対率
+                    motor_rate = float(entry.get("racer_assigned_motor_top_2_percent", 33.0) or 33.0) / 100
+                    # 展示タイム
                     exh_time   = float(exh_map.get(bn, 0) or 0)
+                    # 全国2連対率（コース適性近似）
+                    course_rate= float(entry.get("racer_national_top_2_percent", 33.0) or 33.0) / 100
+                    # 近走安定度（地元勝率/全国勝率）
+                    local_rate = float(entry.get("racer_local_top_1_percent", 7.0) or 7.0) / 100
+                    form_adj   = round(clamp(local_rate / win_rate if win_rate > 0 else 1.0, 0.85, 1.15), 3)
 
                     riders.append({
                         "name":                 name,
@@ -1055,14 +1060,14 @@ def fetch_boat_all():
                         "C":                    30,
                         "E":                    float(bn),
                         "F":                    6,
-                        "odds":                 float(10 / bn),  # オッズは別途取得
+                        "odds":                 float(10 / bn),
                         "win_rate":             win_rate,
                         "motor_win_rate":       motor_rate,
                         "field_avg_motor":      0.33,
                         "exhibition_time":      exh_time,
                         "field_avg_exhibition": field_avg_exh if field_avg_exh > 0 else None,
-                        "course_win_rate":      win_rate,
-                        "form_adj":             1.0,
+                        "course_win_rate":      course_rate,
+                        "form_adj":             form_adj,
                     })
 
                 # オッズを別途取得
