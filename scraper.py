@@ -940,6 +940,83 @@ def fetch_boat_riders(base, jcd, rno):
         print(f"  [boat_riders/{jcd}/{rno}] エラー: {e}")
         return []
 
+# ══════════════════════════════════════════════════
+# 競艇 EV計算関数
+# ══════════════════════════════════════════════════
+def calc_boat_frame_adj(frame_num, total=6):
+    if total <= 0: return 1.0
+    inner = (total - frame_num) / total
+    return round(clamp(1.0 + inner * 0.08, 0.92, 1.10), 3)
+
+def calc_boat_motor_adj(motor_win_rate, field_avg_motor=0.33):
+    if motor_win_rate <= 0: return 1.0
+    diff = motor_win_rate - field_avg_motor
+    return round(clamp(1.0 + diff * 1.5, 0.88, 1.15), 3)
+
+def calc_boat_exhibition_adj(exh_time, field_avg=None):
+    try:
+        ex = float(exh_time)
+        if ex <= 0: return 1.0
+        avg  = float(field_avg) if field_avg else ex
+        diff = avg - ex
+        return round(clamp(1.0 + diff * 0.35, 0.88, 1.12), 3)
+    except:
+        return 1.0
+
+def calc_boat_course_adj(course_num, course_win_rate, field_avg=0.33):
+    if course_win_rate <= 0: return 1.0
+    diff = course_win_rate - field_avg
+    return round(clamp(1.0 + diff * 1.2, 0.88, 1.15), 3)
+
+def calc_boat_rider_score(rider):
+    C  = float(rider.get("C", 0) or 0)
+    E  = float(rider.get("E", 0) or 0)
+    F  = float(rider.get("F", 6) or 6)
+    if C <= 0 or E <= 0 or F <= 0: return 0.0
+    base        = float(rider.get("win_rate", 0.15) or 0.15)
+    stability   = C / (C + 3)
+    market_edge = (F - E + 1) / F
+    frame_adj   = calc_boat_frame_adj(float(rider.get("frame_num", 1)), F)
+    motor_adj   = calc_boat_motor_adj(
+                      float(rider.get("motor_win_rate",  0.33) or 0.33),
+                      float(rider.get("field_avg_motor", 0.33) or 0.33))
+    exh_adj     = calc_boat_exhibition_adj(
+                      rider.get("exhibition_time",      0),
+                      rider.get("field_avg_exhibition", None))
+    course_adj  = calc_boat_course_adj(
+                      float(rider.get("frame_num",       1)),
+                      float(rider.get("course_win_rate", 0.33) or 0.33))
+    form_adj    = float(rider.get("form_adj", 1.0) or 1.0)
+    return base * stability * market_edge * frame_adj * motor_adj * exh_adj * course_adj * form_adj
+
+def calc_boat_race_ev(riders):
+    scored = [{"data": r, "score": calc_boat_rider_score(r)} for r in riders]
+    total  = sum(s["score"] for s in scored)
+    result = []
+    for s in scored:
+        odds  = float(s["data"].get("odds", 0) or 0)
+        prob  = s["score"] / total if total > 0 else 0
+        ev    = odds * prob if odds > 0 else 0
+        judge = "強買い" if ev > 1.25 else "買い" if ev > 1.0 else "見送り"
+        result.append({
+            **s["data"],
+            "score": round(s["score"], 6),
+            "prob":  round(prob, 4),
+            "ev":    round(ev,   4),
+            "judge": judge
+        })
+    return sorted(result, key=lambda x: x["ev"], reverse=True)
+
+def fetch_exhibition_times(base, jcd, rno):
+    try:
+        url  = f"{base}/owpc/pc/race/beforeinfo?hd={today_ymd}&jcd={jcd}&rno={rno}"
+        html = fetch(url)
+        time.sleep(1)
+        times = re.findall(r'(\d\.\d{2})', html)
+        return [float(t) for t in times if 6.0 <= float(t) <= 8.0][:6]
+    except:
+        return []
+
 # ── 競艇場コード ──────────────────────────────────
 BOAT_CODES = {
     "桐生":"01","戸田":"02","江戸川":"03","平和島":"04","多摩川":"05",
@@ -1772,7 +1849,7 @@ if __name__ == "__main__":
     print("\n--- ③ races.json生成 ---")
     output = {"date": today_str, "races": all_races, "line_message": line_message}
     with open("races.json","w",encoding="utf-8") as f:
-        json.dump(output, f, ensure_ascii=False, indent=2)
+        json.dump(output, f, ensure_ascii=True, indent=2)
     print(f"races.json生成完了（{len(all_races)}件）")
 
     if line_message:
