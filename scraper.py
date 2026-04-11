@@ -37,9 +37,18 @@ def check_robots(base, path):
         return True
 
 def fetch(url, timeout=15):
-    req = urllib.request.Request(url, headers=HEADERS)
+    # 日本語URLをASCIIエンコード
+    url_encoded = url.encode('ascii', errors='ignore').decode('ascii')
+    req = urllib.request.Request(url_encoded, headers=HEADERS)
     with urllib.request.urlopen(req, timeout=timeout) as r:
-        return r.read().decode("utf-8", errors="replace")
+        # 文字コードを自動検出
+        raw = r.read()
+        for enc in ['utf-8', 'shift_jis', 'euc-jp', 'latin-1']:
+            try:
+                return raw.decode(enc)
+            except:
+                continue
+        return raw.decode('utf-8', errors='replace')
 
 
 # ══════════════════════════════════════════════════
@@ -400,7 +409,7 @@ def generate_prediction_text(races):
 
     try:
         data = json.dumps({
-            "model": "claude-opus-4-5",
+            "model": "claude-haiku-4-5-20251001",
             "max_tokens": 1000,
             "messages": [{"role":"user","content":prompt}]
         }).encode("utf-8")
