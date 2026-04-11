@@ -1,0 +1,42 @@
+name: 毎朝レース情報自動更新
+
+on:
+  schedule:
+    - cron: '30 23 * * *'   # JST 08:30
+  workflow_dispatch:
+
+jobs:
+  update-races:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: スクレイピング＋EV計算＋races.json生成
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python scraper.py
+
+      - name: races.jsonの内容確認
+        run: cat races.json
+
+      - name: LINE配信テキスト確認
+        run: cat line_message.txt 2>/dev/null || echo "LINE配信テキストなし"
+
+      - name: LINE配信テキストをアーティファクトとして保存
+        uses: actions/upload-artifact@v4
+        with:
+          name: line-message
+          path: line_message.txt
+          if-no-files-found: ignore
+
+      - name: ConoHa FTPアップロード
+        env:
+          FTP_HOST:   ${{ secrets.FTP_HOST }}
+          FTP_USER:   ${{ secrets.FTP_USER }}
+          FTP_PASS:   ${{ secrets.FTP_PASS }}
+          FTP_REMOTE: ${{ secrets.FTP_REMOTE }}
+        run: python upload.py
