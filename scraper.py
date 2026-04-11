@@ -1139,31 +1139,177 @@ def fetch_cycle_all():
     races   = []
     history = load_history()
     try:
-        base  = "https://www.keirin.jp"
-        paths = ["/pc/racetop.do", "/pc/top/racetop.do", "/"]
-        html  = ""
-        for path in paths:
-            try:
-                html = fetch(base + path)
-                if html: break
-            except:
-                continue
+        # Kドリームスから本日の開催情報を取得
+        base     = "https://keirin.kdreams.jp"
+        date_url = f"{base}/racecard/{today.year}/{str(today.month).zfill(2)}/{str(today.day).zfill(2)}/"
+        html     = fetch(date_url)
         time.sleep(2)
+
         if not html:
             return [fallback("cycle")]
 
-        grades = re.findall(r'(GP|G[123I]|FI|FII)', html)
-        times  = re.findall(r'(\d{1,2}:\d{2})', html)
+        # 開催場のURLを抽出（例: /seibu/racecard/...）
+        venue_urls = re.findall(r'href="(/[a-z]+/racecard/[^"]+)"', html)
+        # 重複除去・場名抽出
+        seen_venues = set()
+        venue_list  = []
+        for u in venue_urls:
+            venue_slug = u.split("/")[1]
+            if venue_slug not in seen_venues and venue_slug not in ["racecard","kaisai","gamboo"]:
+                seen_venues.add(venue_slug)
+                venue_list.append((venue_slug, u))
 
-        # 既知の競輪場名リストで正確に抽出
-        ALL_CYCLE_VENUES = [
-            "前橋","取手","松戸","千葉","川崎","西武園","京王閣","立川",
-            "静岡","名古屋","岐阜","大垣","豊橋","富山","福井","松山",
-            "高知","小倉","久留米","別府","佐世保","熊本","武雄","玉野",
-            "広島","防府","山口","向日町","和歌山","岸和田","奈良","大津",
-        ]
-        venues = [v + "競輪場" for v in ALL_CYCLE_VENUES if v in html]
-        seen   = set()
+        # 場スラッグ→日本語名マップ
+        SLUG_TO_NAME = {
+            "maebashi":"前橋","toride":"取手","matsudo":"松戸","chiba":"千葉",
+            "kawasaki":"川崎","seibu":"西武園","keio":"京王閣","tachikawa":"立川",
+            "shizuoka":"静岡","nagoya":"名古屋","gifu":"岐阜","ogaki":"大垣",
+            "toyohashi":"豊橋","toyama":"富山","fukui":"福井","matsuyama":"松山",
+            "kochi":"高知","kokura":"小倉","kurume":"久留米","beppu":"別府",
+            "sasebo":"佐世保","kumamoto":"熊本","takeo":"武雄","tamano":"玉野",
+            "hiroshima":"広島","hofu":"防府","yamaguchi":"山口","mukomachi":"向日町",
+            "wakayama":"和歌山","岸和田":"岸和田","nara":"奈良","otsu":"大津",
+            "utsunomiya":"宇都宮","takasaki":"高崎","omiya":"大宮","sendai":"仙台",
+            "aomori":"青森","hakodate":"函館","obihiro":"帯広",
+        }
+
+        grades_map = {"GP":"GP","G1":"G1","G2":"G2","G3":"G3","FI":"FI","FII":"FII"}
+
+        for slug, venue_url in venue_list[:15]:
+            venue_name = SLUG_TO_NAME.get(slug, slug) + "競輪場"
+            try:
+                # 開催ページから最終レース情報を取得
+                v_html = fetch(base + venue_url)
+                time.sleep(1)
+
+                # グレード取得
+                grade_m = re.search(r'(GP|G[123I]|FI|FII)', v_html)
+                grade   = grade_m.group(1) if grade_m else ""
+
+                # 発走時刻取得
+                times_m = re.findall(r'(\d{2}:\d{2})', v_html)
+                t       = times_m[-1] if times_m else "--:--"
+
+                # レース詳細URLを取得（選手データ用）
+                detail_urls = re.findall(r'href="(/[a-z]+/racedetail/[^"]+)"', v_html)
+
+                riders = []
+                if detail_urls:
+                    # 最終レースのURLで選手データ取得
+                    detail_url = base + detail_urls[-1]
+                    riders     = fetch_cycle_riders_kdreams(detail_url, venue_name)
+
+                ev_results = calc_race_ev_cycle(riders, history) if riders else []
+                best       = next((r for r in ev_results if r["judge"] in ["強買い","買い"]),
+                                  ev_results[0] if ev_results else None)
+
+                race = {"sport":"cycle","name":f"{venue_name} 注目レース","venue":venue_name,
+                        "time":t,"grade":grade,"url":"keirin.html"}
+                if best:
+                    race.update({
+                        "honmei": best.get("name",""),
+                        "ev":     f"+{int((best['ev']-1)*100)}%" if best['ev']>1 else "",
+                        "judge":  best["judge"],
+                        "reason": f"推定勝率{int(best['prob']*100)}%・EV{best['ev']:.2f}倍"
+                    })
+                races.append(race)
+
+            except Exception as e:
+                print(f"  [cycle/{slug}] エラー: {e}")
+                races.append({"sport":"cycle","name":f"{venue_name} 注目レース",
+                              "venue":venue_name,"time":"--:--","grade":"","url":"keirin.html"})
+
+        if not races:
+            races.append(fallback("cycle"))
+
+    except Exception as e:
+        print(f"[cycle] エラー: {e}")
+        races.append(fallback("cycle"))
+
+    print(f"  競輪: {len(races)}件取得")
+    return races
+
+
+def fetch_cycle_riders_kdreams(detail_url, venue_name):
+    """Kドリームスのレース詳細ページから選手データを取得"""
+    try:
+        html     = fetch(detail_url)
+        time.sleep(1)
+        bank_type = get_bank_type(venue_name.replace("競輪場",""))
+
+        # 選手名を抽出（Kドリームスの出走表テーブル）
+        # 形式: 車番・選手名・都道府県/年齢/期別・級班・脚質...
+        names   = re.findall(r'<td[^>]*>([^\s<]{2,5}　[^\s<]{1,5})</td>', html)
+        if not names:
+            names = re.findall(r'(\S{2,4}\s+\S{1,4})(?:\s+[^\s]+\s+S[12]|A[123])', html)
+        if not names:
+            # 着度数パターンで選手名取得
+            names = re.findall(r'([^\d\s<>]{2,5})\s*\d+-\d+-\d+-\d+', html)
+
+        # 着度数（1着-2着-3着-着外）
+        chakudo_list = re.findall(r'(\d+)-(\d+)-(\d+)-(\d+)', html)
+
+        # オッズ
+        odds_list = [float(o) for o in re.findall(r'(\d+\.\d)', html)
+                     if 1.5 <= float(o) <= 99.9][:9]
+
+        # 脚質
+        styles = re.findall(r'(逃げ|捲り|差し|追込|自在|マーク)', html)
+
+        # ライン情報
+        line_groups = extract_line_groups(html)
+        roles       = determine_roles(names, line_groups)
+
+        F       = max(len(names), 7) if names else 9
+        riders  = []
+        for i in range(min(len(names), 9)):
+            name  = names[i].strip() if i < len(names) else f"{i+1}番"
+            odds  = odds_list[i] if i < len(odds_list) else float(5 + i)
+            style = styles[i]    if i < len(styles)    else "差し"
+            role  = roles.get(i, "単騎")
+
+            # 着度数からEV計算パラメータを算出
+            if i < len(chakudo_list):
+                w = int(chakudo_list[i][0])
+                s = int(chakudo_list[i][1])
+                t = int(chakudo_list[i][2])
+                o = int(chakudo_list[i][3])
+            else:
+                w, s, t, o = 3, 4, 4, 9
+
+            starts     = w + s + t + o or 20
+            win_rate   = w / starts
+            avg_pop    = max(1.0, float(i + 1))
+            line_rate  = calc_line_rate(name, i, line_groups, names)
+
+            riders.append({
+                "name":            name,
+                "B":               w, "C": starts,
+                "wins_total":      w, "starts_total": starts,
+                "wins_recent":     round(w * 0.4), "starts_recent": round(starts * 0.4),
+                "role":            role,
+                "wins_lead":       round(w * 0.6) if role=="先頭" else 0,
+                "starts_lead":     round(starts * 0.5) if role=="先頭" else 0,
+                "seconds_second":  round(s * 0.6) if role=="番手" else 0,
+                "starts_second":   round(starts * 0.3) if role=="番手" else 0,
+                "E":               avg_pop, "F": F,
+                "odds":            odds,
+                "line_rate":       line_rate,
+                "bank_rate":       1.0,
+                "recent_form":     round(min(1.2, max(0.8, win_rate / 0.15)), 3),
+                "frame_num":       float(i + 1),
+                "running_style":   style,
+                "bank_type":       bank_type,
+                "wins_chakudo":    float(w), "seconds_chakudo": float(s),
+                "thirds_chakudo":  float(t), "others_chakudo":  float(o),
+            })
+
+        print(f"  [cycle/{venue_name}] 選手: {[r['name'] for r in riders[:3]]}...")
+        return riders
+
+    except Exception as e:
+        print(f"  [cycle_kdreams] エラー: {e}")
+        return []
 
         for i, venue in enumerate(venues):
             venue = venue.strip()
