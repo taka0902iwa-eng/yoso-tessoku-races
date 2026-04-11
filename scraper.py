@@ -1363,56 +1363,46 @@ def fallback(sport):
 # Claude API: 予想文生成
 # ══════════════════════════════════════════════════
 def generate_prediction_text(races):
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        print("[Gemini API] APIキー未設定。スキップします。")
-        return races, ""
-
-    races_text = ""
-    for r in races:
-        ev_info = ""
-        if r.get("ev_detail"):
-            top3    = r["ev_detail"][:3]
-            ev_info = " EV上位: " + "、".join(
-                [f'{h["name"]}(EV:{h["ev"]:.2f}/{h["judge"]})' for h in top3])
-        races_text += f"- {r['sport']}: {r['name']} ({r['venue']} {r['time']} {r.get('grade','')}){ev_info}\n"
-
-    prompt = f"""You are a Japanese horse/boat/cycle racing prediction expert named taka.
-Today is {today_str}. Generate a LINE message in Japanese for these races:
-{races_text}
-Return JSON only:
-{{"line_message": "LINE message in Japanese, 300 chars, include EV values, include self-responsibility disclaimer"}}
-Rules: No absolute claims. Include self-responsibility note."""
-
+    """テンプレートベースの予想文生成（API不要）"""
     try:
-        data = json.dumps({
-            "contents": [{"parts": [{"text": prompt}]}],
-            "generationConfig": {"maxOutputTokens": 1000}
-        }).encode("utf-8")
+        today_jp = f"{today.month}月{today.day}日"
+        lines    = [f"🎯【{today_jp}の予想】予想の鉄則"]
 
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}"
-        req = urllib.request.Request(
-            url, data=data,
-            headers={"Content-Type": "application/json"},
-            method="POST"
-        )
-        with urllib.request.urlopen(req, timeout=30) as res:
-            result = json.loads(res.read().decode("utf-8"))
+        # グレードレース優先
+        priority = sorted(races, key=lambda r: (
+            0 if r.get("grade") in ["G1","SG","GP"] else
+            1 if r.get("grade") in ["G2","G3"]      else 2
+        ))[:5]
 
-        content = result["candidates"][0]["content"]["parts"][0]["text"].strip()
-        content = re.sub(r'^```json\s*', '', content)
-        content = re.sub(r'\s*```$',     '', content)
-        parsed  = json.loads(content)
-        print("[Gemini API] 予想文生成完了")
-        return races, parsed.get("line_message", "")
+        sport_icon = {"horse":"🐴","boat":"🚤","cycle":"🚴"}
+        sport_name = {"horse":"競馬","boat":"競艇","cycle":"競輪"}
+
+        for r in priority:
+            icon  = sport_icon.get(r["sport"], "🏁")
+            sname = sport_name.get(r["sport"], r["sport"])
+            grade = f"【{r['grade']}】" if r.get("grade") else ""
+            honmei= r.get("honmei", "")
+            ev    = r.get("ev", "")
+            judge = r.get("judge", "")
+
+            line = f"\n{icon}{sname} {grade}{r['venue']} {r['time']}"
+            if honmei:
+                line += f"\n◎ {honmei}"
+            if ev:
+                line += f" EV{ev}"
+            if judge in ["強買い","買い"]:
+                line += f"（{judge}）"
+            lines.append(line)
+
+        lines.append("\n※参考程度に。投票は自己責任でお願いします🙏")
+        lines.append("詳細→ oyatojikka.online")
+
+        line_message = "\n".join(lines)
+        print(f"[テンプレート] 予想文生成完了（{len(priority)}件）")
+        return races, line_message
 
     except Exception as e:
-        try:
-            if hasattr(e, 'read'):
-                print(f"[Gemini API] エラー本文: {e.read().decode('utf-8')}")
-        except:
-            pass
-        print(f"[Gemini API] エラー: {e}")
+        print(f"[テンプレート] エラー: {e}")
         return races, ""
 
 
