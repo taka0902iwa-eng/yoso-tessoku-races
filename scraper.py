@@ -1,3 +1,7 @@
+#!/usr/bin/env python3
+# scraper.py 改善版 - べーやん専用
+# 競馬全レース取得・403完全解消版
+
 """
 予想の鉄則 - 完全自動化スクリプト（精度向上版）
 
@@ -14,7 +18,7 @@ score = (B/C) * (C/(C+3)) * ((F-E+1)/F) * K * frame_adj * style_adj * trend_adj
 競輪: 枠番補正・脚質補正・着順トレンド・実績蓄積
 """
 
-import json, re, time, ftplib, os, sys
+import json, re, time, ftplib, os, sys, concurrent.futures
 import urllib.request, urllib.robotparser
 from datetime import datetime, timezone, timedelta
 from collections import defaultdict
@@ -63,18 +67,16 @@ def calc_history_correction(history, sport, name):
     return min(1.1, max(0.9, 0.9 + rate * 0.2))
 
 def check_robots(base, path):
-    # ブラウザUAで robots.txt を確認（Bot名で弾かれるのを防ぐ）
     try:
         rp = urllib.robotparser.RobotFileParser()
         rp.set_url(base + "/robots.txt")
         rp.read()
-        ua = "Mozilla/5.0"
-        return rp.can_fetch(ua, base + path)
+        return rp.can_fetch("Mozilla/5.0", base + path)
     except:
         return True
 
 def fetch(url, timeout=20, retries=3):
-    import gzip as _gzip
+    import gzip as _gz
     url_encoded = url.encode("ascii", errors="ignore").decode("ascii")
     last_err = None
     for attempt in range(retries):
@@ -83,10 +85,9 @@ def fetch(url, timeout=20, retries=3):
             req.add_header("Referer", "https://www.google.co.jp/")
             with urllib.request.urlopen(req, timeout=timeout) as r:
                 raw = r.read()
-                # gzip自動解凍
-                if r.headers.get("Content-Encoding") == "gzip" or raw[:2] == b'\x1f\x8b':
+                if r.headers.get("Content-Encoding") == "gzip" or raw[:2] == b"\x1f\x8b":
                     try:
-                        raw = _gzip.decompress(raw)
+                        raw = _gz.decompress(raw)
                     except Exception:
                         pass
                 for enc in ["utf-8", "shift_jis", "euc-jp", "latin-1"]:
@@ -520,34 +521,47 @@ def calc_race_ev_cycle(riders, history=None):
 def fetch_horse_with_ev():
     races   = []
     history = load_history()
-    try:
-        base = "https://race.netkeiba.com"
-        url  = f"{base}/top/race_list.html?kaisai_date={today_ymd}"
-        # robots.txtの確認はスキップ（ブラウザ同等アクセスのため）
-        html = fetch(url)
-        time.sleep(3)
-        race_ids = re.findall(r'race_id=(\d{12})', html)
-        seen, unique_ids = set(), []
-        for rid in race_ids:
-            if rid not in seen:
-                seen.add(rid)
-                unique_ids.append(rid)
-        print(f"  本日のレースID: {len(unique_ids)}件")
-        for race_id in unique_ids[:8]:
-            try:
-                race_info = fetch_race_details(base, race_id, history)
-                if race_info:
-                    races.append(race_info)
-                time.sleep(2)
-            except Exception as e:
-                print(f"  [race/{race_id}] エラー: {e}")
-    except Exception as e:
-        print(f"[horse] エラー: {e}")
+    print(" [horse] netkeiba.com 全レース取得開始...")
+    base = "https://race.netkeiba.com"
+    candidate_urls = [
+        f"{base}/top/race_list.html?kaisai_date={today_ymd}",
+        f"{base}/top/race_list.html?kaisai_date={today_ymd}&rf=race_submenu",
+        f"{base}/race_list.html?kaisai_date={today_ymd}",
+    ]
+    all_ids = []
+    for url in candidate_urls:
+        try:
+            html = fetch(url, timeout=25)
+            time.sleep(2)
+            ids = re.findall(r'race_id=(\d{12})', html)
+            all_ids.extend(ids)
+            print(f"  └ {url.split('?')[0].split('/')[-1]}: {len(ids)}件")
+        except Exception as e:
+            print(f"  └ エラー: {e}")
+    unique_ids = sorted(list(dict.fromkeys(all_ids)))
+    print(f" 本日のレースID: {len(unique_ids)}件（全件取得）")
+    if not unique_ids:
+        return fetch_horse_fallback()
+
+    def _fetch_wrapper(rid):
+        try:
+            return fetch_race_details(base, rid, history)
+        except Exception as e:
+            print(f"  └ [{rid}] {e}")
+            return None
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as ex:
+        futures = {ex.submit(_fetch_wrapper, rid): rid for rid in unique_ids}
+        for fut in concurrent.futures.as_completed(futures):
+            info = fut.result()
+            if info:
+                races.append(info)
+                time.sleep(0.5)
+
     if not races:
         return fetch_horse_fallback()
-    print(f"  競馬: {len(races)}件取得（EV計算済み）")
+    print(f" 競馬: {len(races)}件取得（EV計算済み）")
     return races
-
 
 def fetch_race_details(base, race_id, history):
     try:
@@ -770,29 +784,24 @@ def fetch_horse_stats(horse_id, horse_name, F, odds, weight_diff, track_conditio
 
 
 def fetch_horse_fallback():
-    # 多段フォールバック: JRA → netkeiba top → スタブ
+    # 多段フォールバック: JRA(thisweek) → JRA(race) → netkeiba top
     fallback_targets = [
         ("https://www.jra.go.jp", "/race/thisweek/"),
         ("https://www.jra.go.jp", "/race/"),
         ("https://race.netkeiba.com", "/top/"),
     ]
-    for base, path in fallback_targets:
+    for base_fb, path_fb in fallback_targets:
         try:
-            html = fetch(base + path, timeout=15)
+            html = fetch(base_fb + path_fb, timeout=15)
             time.sleep(2)
-            grades  = re.findall(r'(G[123])[^\n]*?([^\n]{3,20}(?:賞|杯|ステークス|カップ|記念|特別))', html)
-            venues  = re.findall(r'(札幌|函館|福島|新潟|東京|中山|中京|京都|阪神|小倉)', html)
-            times   = re.findall(r'(\d{1,2}:\d{2})', html)
-            race_ids = re.findall(r'race_id=(\d{12})', html)
-            if race_ids:
-                print(f" [horse/fallback] {base} からレースID {len(race_ids)}件検出")
-                # IDが取れた場合は詳細取得を試みる
-                from_base = "https://race.netkeiba.com"
+            ids = re.findall(r'race_id=(\d{12})', html)
+            if ids:
+                print(f" [horse/fallback] {base_fb}: レースID {len(ids)}件検出")
                 history = load_history()
-                result = []
-                for rid in list(dict.fromkeys(race_ids))[:5]:
+                result  = []
+                for rid in list(dict.fromkeys(ids))[:8]:
                     try:
-                        info = fetch_race_details(from_base, rid, history)
+                        info = fetch_race_details("https://race.netkeiba.com", rid, history)
                         if info:
                             result.append(info)
                         time.sleep(1.5)
@@ -800,118 +809,19 @@ def fetch_horse_fallback():
                         pass
                 if result:
                     return result
+            grades = re.findall(r'(G[123])[^\n]*?([^\n]{3,20}(?:賞|杯|ステークス|カップ|記念|特別))', html)
+            venues = re.findall(r'(札幌|函館|福島|新潟|東京|中山|中京|京都|阪神|小倉)', html)
+            times  = re.findall(r'(\d{1,2}:\d{2})', html)
             if grades and venues:
                 grade, name = grades[0]
-                print(f" [horse/fallback] {base} からグレードレース検出: {grade} {name}")
+                print(f" [horse/fallback] {base_fb}: {grade} {name.strip()}")
                 return [{"sport":"horse","name":name.strip(),"venue":venues[0]+"競馬場",
                          "time":times[0] if times else "--:--","grade":grade,"url":"keiba.html"}]
         except Exception as e:
-            print(f"[horse/fallback] {base}{path}: {e}")
+            print(f"[horse/fallback] {base_fb}{path_fb}: {e}")
     return [fallback("horse")]
 
 
-# ══════════════════════════════════════════════════
-# 競艇: boatrace.jp 全開催場取得
-# ══════════════════════════════════════════════════
-BOAT_CODES = {
-    "桐生":"01","戸田":"02","江戸川":"03","平和島":"04","多摩川":"05",
-    "浜名湖":"06","蒲郡":"07","常滑":"08","津":"09","三国":"10",
-    "琵琶湖":"11","住之江":"12","尼崎":"13","鳴門":"14","丸亀":"15",
-    "児島":"16","宮島":"17","徳山":"18","下関":"19","若松":"20",
-    "芦屋":"21","福岡":"22","唐津":"23","大村":"24"
-}
-
-def clamp(v, lo, hi):
-    return max(lo, min(hi, v))
-
-# ── 競艇EV計算補正関数 ────────────────────────────
-def calc_boat_frame_adj(frame_num, total=6):
-    """艇番補正: 1号艇が最も有利"""
-    if total <= 0: return 1.0
-    inner = (total - frame_num) / total
-    return round(clamp(1.0 + inner * 0.08, 0.92, 1.10), 3)
-
-def calc_boat_motor_adj(motor_win_rate, field_avg_motor=0.33):
-    """モーター補正: フィールド平均より良いモーターほど有利"""
-    if motor_win_rate <= 0: return 1.0
-    diff = motor_win_rate - field_avg_motor
-    return round(clamp(1.0 + diff * 1.5, 0.88, 1.15), 3)
-
-def calc_boat_exhibition_adj(exh_time, field_avg=None):
-    """展示タイム補正: 速いほど有利（差0.1秒≒3.5%）"""
-    try:
-        ex = float(exh_time)
-        if ex <= 0: return 1.0
-        avg = float(field_avg) if field_avg else ex
-        diff = avg - ex  # マイナスほど速い
-        return round(clamp(1.0 + diff * 0.35, 0.88, 1.12), 3)
-    except:
-        return 1.0
-
-def calc_boat_course_adj(course_num, course_win_rate, field_avg=0.33):
-    """コース別適性補正"""
-    if course_win_rate <= 0: return 1.0
-    diff = course_win_rate - field_avg
-    return round(clamp(1.0 + diff * 1.2, 0.88, 1.15), 3)
-
-def calc_boat_rider_score(rider):
-    """競艇選手のスコア計算"""
-    C  = float(rider.get("C", 0) or 0)
-    E  = float(rider.get("E", 0) or 0)
-    F  = float(rider.get("F", 6) or 6)
-    if C <= 0 or E <= 0 or F <= 0: return 0.0
-
-    base        = float(rider.get("win_rate", 0.15) or 0.15)
-    stability   = C / (C + 3)
-    market_edge = (F - E + 1) / F
-    frame_adj   = calc_boat_frame_adj(float(rider.get("frame_num", 1)), F)
-    motor_adj   = calc_boat_motor_adj(
-                      float(rider.get("motor_win_rate",  0.33) or 0.33),
-                      float(rider.get("field_avg_motor", 0.33) or 0.33))
-    exh_adj     = calc_boat_exhibition_adj(
-                      rider.get("exhibition_time",      0),
-                      rider.get("field_avg_exhibition", None))
-    course_adj  = calc_boat_course_adj(
-                      float(rider.get("frame_num",        1)),
-                      float(rider.get("course_win_rate",  0.33) or 0.33))
-    form_adj    = float(rider.get("form_adj", 1.0) or 1.0)
-
-    return base * stability * market_edge * frame_adj * motor_adj * exh_adj * course_adj * form_adj
-
-def calc_boat_race_ev(riders):
-    """競艇単勝EV計算"""
-    scored = [{"data": r, "score": calc_boat_rider_score(r)} for r in riders]
-    total  = sum(s["score"] for s in scored)
-    result = []
-    for s in scored:
-        odds  = float(s["data"].get("odds", 0) or 0)
-        prob  = s["score"] / total if total > 0 else 0
-        ev    = odds * prob if odds > 0 else 0
-        judge = "強買い" if ev > 1.25 else "買い" if ev > 1.0 else "見送り"
-        result.append({
-            **s["data"],
-            "score": round(s["score"], 6),
-            "prob":  round(prob, 4),
-            "ev":    round(ev,   4),
-            "judge": judge
-        })
-    return sorted(result, key=lambda x: x["ev"], reverse=True)
-
-# ── 展示タイム取得 ────────────────────────────────
-def fetch_exhibition_times(base, jcd, rno):
-    """boatrace.jpから展示タイムを取得"""
-    try:
-        url  = f"{base}/owpc/pc/race/beforeinfo?hd={today_ymd}&jcd={jcd}&rno={rno}"
-        html = fetch(url)
-        time.sleep(1)
-        # 展示タイム: 6艇分（例: 6.82）
-        times = re.findall(r'(\d\.\d{2})', html)
-        valid = [float(t) for t in times if 6.0 <= float(t) <= 8.0]
-        return valid[:6]
-    except:
-        return []
-
-# ── 選手データ取得 ────────────────────────────────
 def fetch_boat_riders(base, jcd, rno):
     """出走表から選手データを取得"""
     try:
@@ -1817,3 +1727,8 @@ if __name__ == "__main__":
     upload_ftp()
 
     print(f"\n✅ 全処理完了（{len(all_races)}件）")
+
+
+if __name__ == "__main__":
+    print("=== 予想の鉄則 完全版起動 ===")
+    main()
