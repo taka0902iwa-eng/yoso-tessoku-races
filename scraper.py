@@ -1769,61 +1769,54 @@ def generate_prediction_text(races):
 # FTPアップロード
 # ══════════════════════════════════════════════════
 def upload_ftp():
-    host = os.environ.get("FTP_HOST")
-    user = os.environ.get("FTP_USER") 
-    password = os.environ.get("FTP_PASS")
-    remote = os.environ.get("FTP_REMOTE", "homec9048134/public_html/oyatojikka.online/races.json")
+    host     = (os.environ.get("FTP_HOST","") or "").strip()
+    user     = (os.environ.get("FTP_USER","") or "").strip()
+    password = (os.environ.get("FTP_PASS","") or "").strip()
+    remote   = (os.environ.get("FTP_REMOTE",
+               "/home/c9048134/public_html/oyatojikka.online/races.json") or "").strip()
 
-    if not all([host, user, password]):
-        print("FTP環境変数未設定 → スキップ")
-        return
+    # 改行・空白を完全除去
+    host     = host.replace("\n","").replace("\r","").replace(" ","")
+    user     = user.replace("\n","").replace("\r","").replace(" ","")
+    password = password.replace("\n","").replace("\r","")
+    remote   = remote.replace("\n","").replace("\r","").replace(" ","")
 
-    try:
-        with ftplib.FTP(host, timeout=30) as ftp:
-            ftp.login(user, password)
-            ftp.set_pasv(True)
+    print(f"  FTP接続先: {host}, ユーザー: {user}, パス: {remote}")
 
-            # ディレクトリ作成
-            path = "/".join(remote.split("/")[:-1])
-            dirs = path.split("/")
-            current = ""
-            for d in dirs:
-                if d:
-                    current += "/" + d
-                    try:
-                        ftp.cwd(current)
-                    except ftplib.error_perm:
-                        ftp.mkd(current)
-
-            # races.jsonアップロード
-            with open("races.json", "rb") as f:
-                ftp.storbinary(f"STOR {remote}", f)
-        print(f"✅ FTP成功: {remote}")
-    except Exception as e:
-        print(f"⚠️ FTPスキップ: {e}")
-    host     = os.environ.get("FTP_HOST")
-    user     = os.environ.get("FTP_USER")
-    password = os.environ.get("FTP_PASS")
-    remote   = os.environ.get("FTP_REMOTE",
-               "/home/c9048134/public_html/oyatojikka.online/races.json")
     if not all([host, user, password]):
         print("FTP環境変数が未設定。スキップします。")
         return
+
     try:
-        with ftplib.FTP(host, timeout=30) as ftp:
+        with ftplib.FTP(timeout=30) as ftp:
+            ftp.connect(host, 21)
             ftp.login(user, password)
             ftp.set_pasv(True)
-            path = ""
-            for d in "/".join(remote.split("/")[:-1]).split("/"):
-                if not d: continue
-                path += "/" + d
-                try: ftp.mkd(path)
-                except ftplib.error_perm: pass
-            with open("races.json","rb") as f:
-                ftp.storbinary(f"STOR {remote}", f)
-            print(f"FTPアップロード完了: {remote}")
-    except ftplib.all_errors as e:
+
+            # ディレクトリを移動しながら作成
+            dirs = remote.split("/")
+            filename = dirs[-1]
+            dirpath  = "/".join(dirs[:-1])
+
+            try:
+                ftp.cwd(dirpath)
+            except:
+                path = ""
+                for d in dirs[:-1]:
+                    if not d: continue
+                    path += "/" + d
+                    try: ftp.mkd(path)
+                    except: pass
+                ftp.cwd(dirpath)
+
+            with open("races.json", "rb") as f:
+                ftp.storbinary(f"STOR {filename}", f)
+            print(f"✅ FTPアップロード完了: {remote}")
+
+    except Exception as e:
         print(f"FTPエラー: {e}")
+        import traceback
+        traceback.print_exc()
         sys.exit(1)
 
 
