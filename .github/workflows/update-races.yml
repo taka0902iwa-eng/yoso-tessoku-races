@@ -13,12 +13,18 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: スクレイピング実行
+      - name: スクレイピング＋EV計算＋races.json生成
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: python scraper.py
+      - name: races.jsonの内容確認
+        run: cat races.json
+      - name: LINE配信テキスト確認
+        run: cat line_message.txt 2>/dev/null || echo "LINE配信テキストなし"
       - name: ConoHa FTPアップロード
         env:
-          FTP_HOST: ${{ secrets.FTP_HOST }}
-          FTP_USER: ${{ secrets.FTP_USER }}
-          FTP_PASS: ${{ secrets.FTP_PASS }}
+          FTP_HOST:   ${{ secrets.FTP_HOST }}
+          FTP_USER:   ${{ secrets.FTP_USER }}
+          FTP_PASS:   ${{ secrets.FTP_PASS }}
           FTP_REMOTE: ${{ secrets.FTP_REMOTE }}
         run: python upload.py
