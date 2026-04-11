@@ -409,7 +409,7 @@ def generate_prediction_text(races):
 
     try:
         data = json.dumps({
-            "model": "claude-haiku-4-5-20251001",
+            "model": "claude-haiku-4-5",
             "max_tokens": 1000,
             "messages": [{"role":"user","content":prompt}]
         }).encode("utf-8")
