@@ -28,6 +28,20 @@ def upload():
             ftp.set_pasv(True)
             print(f"ログイン成功: {ftp.getwelcome()}")
 
+            # ディレクトリを再帰的に作成
+            remote_dir = "/".join(remote.split("/")[:-1])
+            dirs = remote_dir.split("/")
+            path = ""
+            for d in dirs:
+                if not d:
+                    continue
+                path += "/" + d
+                try:
+                    ftp.mkd(path)
+                    print(f"ディレクトリ作成: {path}")
+                except ftplib.error_perm:
+                    pass  # すでに存在する場合はスキップ
+
             with open("races.json", "rb") as f:
                 ftp.storbinary(f"STOR {remote}", f)
 
