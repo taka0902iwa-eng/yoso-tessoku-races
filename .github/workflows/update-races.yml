@@ -15,11 +15,11 @@ jobs:
           python-version: '3.11'
       - name: スクレイピング＋EV計算＋FTPアップロード
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          FTP_HOST:   ${{ secrets.FTP_HOST }}
-          FTP_USER:   ${{ secrets.FTP_USER }}
-          FTP_PASS:   ${{ secrets.FTP_PASS }}
-          FTP_REMOTE: ${{ secrets.FTP_REMOTE }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          FTP_HOST:       ${{ secrets.FTP_HOST }}
+          FTP_USER:       ${{ secrets.FTP_USER }}
+          FTP_PASS:       ${{ secrets.FTP_PASS }}
+          FTP_REMOTE:     ${{ secrets.FTP_REMOTE }}
         run: python scraper.py
       - name: races.jsonの内容確認
         run: cat races.json
