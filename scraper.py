@@ -867,25 +867,42 @@ def fetch_exhibition_times(base, jcd, rno):
 def fetch_boat_riders(base, jcd, rno):
     """出走表から選手データを取得"""
     try:
+        # boatrace.jpの出走表URL
         url  = f"{base}/owpc/pc/race/racelist?hd={today_ymd}&jcd={jcd}&rno={rno}"
         html = fetch(url)
         time.sleep(1)
 
-        # 選手名（複数パターンで取得）
-        names = re.findall(r'class="is-fs18[^"]*"[^>]*>\s*([^\s<]{2,6})\s*</span>', html)
-        if not names:
-            names = re.findall(r'<td[^>]*class="[^"]*name[^"]*"[^>]*>\s*([^<\s]{2,6})\s*</td>', html)
-        if not names:
-            names = re.findall(r'(?:選手名|name)[^>]*>\s*([^\s<]{2,6})\s*<', html)
-        if not names:
-            # boatrace.jpの出走表から選手名を直接抽出
-            names = re.findall(r'<span[^>]*>\s*([^\s<]{2,5})\s*</span>', html)
-            names = [n for n in names if 2 <= len(n) <= 5 and not n.isdigit() and 'class' not in n][:6]
-        if not names:
-            # フォールバック：艇番1〜6で仮名
+        # boatrace.jpの選手名は「is-fs18」クラスのspanタグ内にある
+        # 例: <span class="is-fs18">山田太郎</span>
+        names = re.findall(r'class="is-fs18[^"]*">\s*([^\s<]{2,5})\s*<', html)
+
+        # フォールバック: tbody内のテキストから日本人名っぽいものを抽出
+        if not names or names[0] in ['ライブ','リプレイ','マイページ']:
+            # tbody内のデータに絞り込み
+            tbody = re.search(r'<tbody>(.*?)</tbody>', html, re.DOTALL)
+            if tbody:
+                tbody_html = tbody.group(1)
+                names = re.findall(r'([^\s<]{2,5})', tbody_html)
+                # 日本語名のみ抽出（ひらがな・カタカナ・漢字）
+                names = [n for n in names if re.search(r'[\u3040-\u9fff]', n) and len(n) >= 2][:6]
+
+        # まだダメなら選手一覧ページから取得
+        if not names or len(names) < 3:
+            try:
+                # 選手一覧の別URL
+                list_url  = f"{base}/owpc/pc/race/beforeinfo?hd={today_ymd}&jcd={jcd}&rno={rno}"
+                list_html = fetch(list_url)
+                time.sleep(1)
+                names = re.findall(r'([^\s<]{2,5})', list_html)
+                names = [n for n in names if re.search(r'[\u3040-\u9fff]', n) and len(n) >= 2][:6]
+            except:
+                pass
+
+        # 最終フォールバック
+        if not names or len(names) < 3:
             names = [f"{i+1}号艇" for i in range(6)]
 
-        # オッズ
+        # オッズ取得
         try:
             odds_html = fetch(f"{base}/owpc/pc/race/odds2tf?hd={today_ymd}&jcd={jcd}&rno={rno}")
             time.sleep(1)
@@ -896,7 +913,7 @@ def fetch_boat_riders(base, jcd, rno):
 
         # モーター勝率
         motor_rates = [float(m)/100 for m in re.findall(r'(\d{2}\.\d{2})', html)
-                       if 0 <= float(m)/100 <= 1.0][:6]
+                       if 0.0 < float(m)/100 <= 1.0][:6]
         field_avg_motor = sum(motor_rates)/len(motor_rates) if motor_rates else 0.33
 
         # コース別勝率
@@ -910,7 +927,6 @@ def fetch_boat_riders(base, jcd, rno):
             exh_times = []
         field_avg_exh = sum(exh_times)/len(exh_times) if exh_times else 0
 
-        F      = 6
         riders = []
         for i in range(6):
             name        = names[i].strip() if i < len(names) else f"{i+1}号艇"
@@ -918,18 +934,14 @@ def fetch_boat_riders(base, jcd, rno):
             motor_rate  = motor_rates[i] if i < len(motor_rates) else 0.33
             course_rate = valid_cr[i]    if i < len(valid_cr)    else 0.33
             exh_time    = exh_times[i]   if i < len(exh_times)   else 0
-
-            form_matches = re.findall(r'(\d)着', html[:2000])
-            recent5      = [int(r) for r in form_matches[:5]]
-            avg_rank     = sum(recent5)/len(recent5) if recent5 else 3.5
-            form_adj     = round(clamp(1.0 + (3.5 - avg_rank) * 0.05, 0.90, 1.10), 3)
+            form_adj    = round(clamp(1.0 + (3.5 - 3.5) * 0.05, 0.90, 1.10), 3)
 
             riders.append({
                 "name":                 name,
                 "frame_num":            float(i + 1),
                 "C":                    30,
                 "E":                    float(i + 1),
-                "F":                    F,
+                "F":                    6,
                 "odds":                 odds,
                 "win_rate":             round(0.42 / (i + 1), 3),
                 "motor_win_rate":       motor_rate,
@@ -945,7 +957,6 @@ def fetch_boat_riders(base, jcd, rno):
 
     except Exception as e:
         print(f"  [boat_riders/{jcd}/{rno}] エラー: {e}")
-        # フォールバック：艇番のみで計算
         return [{"name":f"{i+1}号艇","frame_num":float(i+1),"C":30,"E":float(i+1),
                  "F":6,"odds":float(10+i*2),"win_rate":round(0.42/(i+1),3),
                  "motor_win_rate":0.33,"field_avg_motor":0.33,
@@ -959,54 +970,159 @@ def fetch_boat_all():
     races   = []
     history = load_history()
     try:
-        base = "https://www.boatrace.jp"
-        html = fetch(base + f"/owpc/pc/race/index?hd={today_ymd}")
-        time.sleep(2)
+        base     = "https://www.boatrace.jp"
+        year     = today.year
+        api_base = "https://boatraceopenapi.github.io"
 
-        sg_matches   = re.findall(r'(SG|G1|G2|G3)', html)
-        found_venues = [v for v in BOAT_CODES if v in html]
+        # ① Boatrace Open APIから出走表を取得
+        programs = []
+        try:
+            prog_url = f"{api_base}/programs/v1/{year}/{today_ymd}.json"
+            prog_html= fetch(prog_url)
+            prog_json= json.loads(prog_html)
+            programs = prog_json.get("programs", [])
+            print(f"  [boat] Open API 出走表: {len(programs)}レース取得")
+        except Exception as e:
+            print(f"  [boat] Open API エラー: {e}")
 
-        for i, venue in enumerate(found_venues):
-            grade = sg_matches[i] if i < len(sg_matches) else ""
-            code  = BOAT_CODES.get(venue, "")
-            t     = "--:--"
-            main_rno = "6"  # メインレース（最終R）
+        # ② 直前情報（展示タイム）を取得
+        previews = {}
+        try:
+            prev_url  = f"{api_base}/previews/v1/{year}/{today_ymd}.json"
+            prev_html = fetch(prev_url)
+            prev_json = json.loads(prev_html)
+            for p in prev_json.get("previews", []):
+                key = f"{p.get('race_stadium_number','')}-{p.get('race_number','')}"
+                previews[key] = p
+            print(f"  [boat] Open API 直前情報: {len(previews)}レース取得")
+        except Exception as e:
+            print(f"  [boat] 直前情報エラー: {e}")
 
-            try:
-                rhtml = fetch(base + f"/owpc/pc/race/raceindex?hd={today_ymd}&jcd={code}")
-                time.sleep(1)
-                ts   = re.findall(r'(\d{2}:\d{2})', rhtml)
-                rnos = re.findall(r'rno=(\d+)', rhtml)
-                if ts:   t        = ts[-1]
-                if rnos: main_rno = rnos[-1]
-            except:
-                pass
+        # ③ 開催場ごとにメインレースを選んでEV計算
+        if programs:
+            # 場コード→グレード・レース情報をまとめる
+            stadium_map = {}
+            for prog in programs:
+                sid = str(prog.get("race_stadium_number","")).zfill(2)
+                if sid not in stadium_map:
+                    stadium_map[sid] = []
+                stadium_map[sid].append(prog)
 
-            # 選手データ取得 + EV計算
-            riders     = fetch_boat_riders(base, code, main_rno)
-            ev_results = calc_boat_race_ev(riders) if riders else []
-            best       = next((r for r in ev_results if r["judge"] in ["強買い","買い"]),
-                              ev_results[0] if ev_results else None)
+            # 場コード→名前マップ
+            CODE_TO_NAME = {v:k for k,v in BOAT_CODES.items()}
 
-            race = {
-                "sport": "boat",
-                "name":  f"{venue} {main_rno}R",
-                "venue": venue,
-                "time":  t,
-                "grade": grade,
-                "url":   "kyotei.html"
-            }
-            if best:
-                race.update({
-                    "honmei": best.get("name", ""),
-                    "ev":     f"+{int((best['ev']-1)*100)}%" if best['ev'] > 1 else "",
-                    "judge":  best["judge"],
-                    "reason": f"推定勝率{int(best['prob']*100)}%・EV{best['ev']:.2f}倍・{best.get('frame_num',1)}号艇"
-                })
-            races.append(race)
+            for sid, progs in stadium_map.items():
+                # メインレース（最終R）を選択
+                main_prog = sorted(progs, key=lambda x: x.get("race_number",0))[-1]
+                venue     = CODE_TO_NAME.get(sid, f"場{sid}")
+                grade     = main_prog.get("grade", "")
+                rno       = main_prog.get("race_number", 12)
+
+                # 発走時刻
+                t = "--:--"
+                try:
+                    scheduled = main_prog.get("scheduled_time_of_day","")
+                    if scheduled:
+                        t = scheduled[:5]
+                except:
+                    pass
+
+                # 選手データ取得
+                riders_data = main_prog.get("race_entries", [])
+                if not riders_data:
+                    riders_data = main_prog.get("entries", [])
+
+                # 直前情報（展示タイム）
+                prev_key     = f"{int(sid)}-{rno}"
+                prev_data    = previews.get(prev_key, {})
+                exh_entries  = prev_data.get("exhibition_time_entries", [])
+                exh_map      = {e.get("boat_number"):e.get("exhibition_time",0) for e in exh_entries}
+                field_avg_exh= sum(exh_map.values())/len(exh_map) if exh_map else 0
+
+                riders = []
+                for entry in riders_data[:6]:
+                    bn         = entry.get("boat_number", len(riders)+1)
+                    name       = entry.get("racer_name", f"{bn}号艇")
+                    win_rate   = float(entry.get("global_win_rate",   0.33) or 0.33) / 100 \
+                                 if entry.get("global_win_rate","") != "" else 0.33
+                    motor_rate = float(entry.get("motor_win_rate",    0.33) or 0.33) / 100 \
+                                 if entry.get("motor_win_rate","") != "" else 0.33
+                    exh_time   = float(exh_map.get(bn, 0) or 0)
+
+                    riders.append({
+                        "name":                 name,
+                        "frame_num":            float(bn),
+                        "C":                    30,
+                        "E":                    float(bn),
+                        "F":                    6,
+                        "odds":                 float(10 / bn),  # オッズは別途取得
+                        "win_rate":             win_rate,
+                        "motor_win_rate":       motor_rate,
+                        "field_avg_motor":      0.33,
+                        "exhibition_time":      exh_time,
+                        "field_avg_exhibition": field_avg_exh if field_avg_exh > 0 else None,
+                        "course_win_rate":      win_rate,
+                        "form_adj":             1.0,
+                    })
+
+                # オッズを別途取得
+                try:
+                    odds_html = fetch(f"{base}/owpc/pc/race/odds2tf?hd={today_ymd}&jcd={sid}&rno={rno}")
+                    time.sleep(0.5)
+                    odds_list = [float(o) for o in re.findall(r'(\d+\.\d)', odds_html)
+                                 if 1.0 <= float(o) <= 999.0][:6]
+                    for i, r in enumerate(riders):
+                        if i < len(odds_list):
+                            r["odds"] = odds_list[i]
+                except:
+                    pass
+
+                ev_results = calc_boat_race_ev(riders) if riders else []
+                best       = next((r for r in ev_results if r["judge"] in ["強買い","買い"]),
+                                  ev_results[0] if ev_results else None)
+
+                race = {
+                    "sport": "boat",
+                    "name":  f"{venue} {rno}R",
+                    "venue": venue,
+                    "time":  t,
+                    "grade": grade,
+                    "url":   "kyotei.html"
+                }
+                if best:
+                    race.update({
+                        "honmei":    best.get("name",""),
+                        "ev":        f"+{int((best['ev']-1)*100)}%" if best['ev']>1 else "",
+                        "judge":     best["judge"],
+                        "reason":    f"推定勝率{int(best['prob']*100)}%・EV{best['ev']:.2f}倍・{int(best.get('frame_num',1))}号艇",
+                        "ev_detail": ev_results[:6]
+                    })
+                races.append(race)
+
+        # Open APIが使えない場合はboatrace.jpから直接取得
+        if not races:
+            print("  [boat] Open API未取得 → boatrace.jpから取得")
+            html = fetch(base + f"/owpc/pc/race/index?hd={today_ymd}")
+            time.sleep(2)
+            sg_matches   = re.findall(r'(SG|G1|G2|G3)', html)
+            found_venues = [v for v in BOAT_CODES if v in html]
+            for i, venue in enumerate(found_venues):
+                grade = sg_matches[i] if i < len(sg_matches) else ""
+                code  = BOAT_CODES.get(venue, "")
+                t     = "--:--"
+                try:
+                    rhtml = fetch(base + f"/owpc/pc/race/raceindex?hd={today_ymd}&jcd={code}")
+                    time.sleep(1)
+                    ts = re.findall(r'(\d{2}:\d{2})', rhtml)
+                    if ts: t = ts[-1]
+                except:
+                    pass
+                races.append({"sport":"boat","name":f"{venue} 注目レース","venue":venue,
+                              "time":t,"grade":grade,"url":"kyotei.html"})
 
     except Exception as e:
         print(f"[boat] エラー: {e}")
+
     print(f"  競艇: {len(races)}件取得（EV計算済み）")
     return races
 
