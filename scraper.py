@@ -395,17 +395,18 @@ def generate_prediction_text(races):
             ev_info = "　EV上位: " + "、".join([f'{h["name"]}(EV:{h["ev"]:.2f}/{h["judge"]})' for h in top3])
         races_text += f"・{r['sport']}：{r['name']}（{r['venue']} {r['time']} {r.get('grade','')}）{ev_info}\n"
 
-    prompt = f"""あなたは競馬・競艇・競輪の予想専門家「たか」です。
-今日（{today_str}）の以下のレース情報（EV計算済み）を元に、LINE配信用の予想テキストを生成してください。
+    prompt = f"""You are a Japanese horse/boat/cycle racing prediction expert named "taka".
+Generate predictions based on EV (Expected Value) analysis for today ({today_str}).
 
+Races:
 {races_text}
 
-以下の形式でJSONのみ返してください：
+Return JSON only (no explanation, no code blocks):
 {{
-  "line_message": "LINE配信用テキスト（300文字程度・競馬はEV値を含める・自己責任の表現を入れる）"
+  "line_message": "LINE message text in Japanese, about 300 chars, include EV values, include disclaimer about self-responsibility"
 }}
 
-ルール：断定表現禁止・「参考程度に」「自己責任で」を含める"""
+Rules: Never use absolute expressions. Always include self-responsibility disclaimer."""
 
     try:
         data = json.dumps({
