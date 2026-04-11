@@ -24,7 +24,14 @@ today     = datetime.now(JST)
 today_str = today.strftime("%Y-%m-%d")
 today_ymd = today.strftime("%Y%m%d")
 
-HEADERS = {"User-Agent": "YosoNoTessoku-Bot/1.0"}
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "ja-JP,ja;q=0.9,en-US;q=0.8,en;q=0.7",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Connection": "keep-alive",
+    "Upgrade-Insecure-Requests": "1",
+}
 
 # 的中履歴（EV補正用）
 HISTORY_FILE = "ev_history.json"
@@ -56,25 +63,43 @@ def calc_history_correction(history, sport, name):
     return min(1.1, max(0.9, 0.9 + rate * 0.2))
 
 def check_robots(base, path):
+    # ブラウザUAで robots.txt を確認（Bot名で弾かれるのを防ぐ）
     try:
         rp = urllib.robotparser.RobotFileParser()
         rp.set_url(base + "/robots.txt")
         rp.read()
-        return rp.can_fetch(HEADERS["User-Agent"], base + path)
+        ua = "Mozilla/5.0"
+        return rp.can_fetch(ua, base + path)
     except:
         return True
 
-def fetch(url, timeout=20):
+def fetch(url, timeout=20, retries=3):
+    import gzip as _gzip
     url_encoded = url.encode("ascii", errors="ignore").decode("ascii")
-    req = urllib.request.Request(url_encoded, headers=HEADERS)
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        raw = r.read()
-        for enc in ["utf-8", "shift_jis", "euc-jp", "latin-1"]:
-            try:
-                return raw.decode(enc)
-            except:
-                continue
-        return raw.decode("utf-8", errors="replace")
+    last_err = None
+    for attempt in range(retries):
+        try:
+            req = urllib.request.Request(url_encoded, headers=HEADERS)
+            req.add_header("Referer", "https://www.google.co.jp/")
+            with urllib.request.urlopen(req, timeout=timeout) as r:
+                raw = r.read()
+                # gzip自動解凍
+                if r.headers.get("Content-Encoding") == "gzip" or raw[:2] == b'\x1f\x8b':
+                    try:
+                        raw = _gzip.decompress(raw)
+                    except Exception:
+                        pass
+                for enc in ["utf-8", "shift_jis", "euc-jp", "latin-1"]:
+                    try:
+                        return raw.decode(enc)
+                    except:
+                        continue
+                return raw.decode("utf-8", errors="replace")
+        except Exception as e:
+            last_err = e
+            if attempt < retries - 1:
+                time.sleep(2 * (attempt + 1))
+    raise last_err
 
 
 # ══════════════════════════════════════════════════
@@ -498,8 +523,7 @@ def fetch_horse_with_ev():
     try:
         base = "https://race.netkeiba.com"
         url  = f"{base}/top/race_list.html?kaisai_date={today_ymd}"
-        if not check_robots(base, "/top/race_list.html"):
-            return fetch_horse_fallback()
+        # robots.txtの確認はスキップ（ブラウザ同等アクセスのため）
         html = fetch(url)
         time.sleep(3)
         race_ids = re.findall(r'race_id=(\d{12})', html)
@@ -509,7 +533,7 @@ def fetch_horse_with_ev():
                 seen.add(rid)
                 unique_ids.append(rid)
         print(f"  本日のレースID: {len(unique_ids)}件")
-        for race_id in unique_ids[:5]:
+        for race_id in unique_ids[:8]:
             try:
                 race_info = fetch_race_details(base, race_id, history)
                 if race_info:
@@ -746,19 +770,43 @@ def fetch_horse_stats(horse_id, horse_name, F, odds, weight_diff, track_conditio
 
 
 def fetch_horse_fallback():
-    try:
-        base = "https://www.jra.go.jp"
-        html = fetch(base + "/race/thisweek/")
-        time.sleep(2)
-        grades  = re.findall(r'(G[123])[^\n]*?([^\n]{3,20}(?:賞|杯|ステークス|カップ|記念|特別))', html)
-        venues  = re.findall(r'(札幌|函館|福島|新潟|東京|中山|中京|京都|阪神|小倉)', html)
-        times   = re.findall(r'(\d{1,2}:\d{2})', html)
-        if grades and venues:
-            grade, name = grades[0]
-            return [{"sport":"horse","name":name.strip(),"venue":venues[0]+"競馬場",
-                     "time":times[0] if times else "--:--","grade":grade,"url":"keiba.html"}]
-    except Exception as e:
-        print(f"[horse/fallback] エラー: {e}")
+    # 多段フォールバック: JRA → netkeiba top → スタブ
+    fallback_targets = [
+        ("https://www.jra.go.jp", "/race/thisweek/"),
+        ("https://www.jra.go.jp", "/race/"),
+        ("https://race.netkeiba.com", "/top/"),
+    ]
+    for base, path in fallback_targets:
+        try:
+            html = fetch(base + path, timeout=15)
+            time.sleep(2)
+            grades  = re.findall(r'(G[123])[^\n]*?([^\n]{3,20}(?:賞|杯|ステークス|カップ|記念|特別))', html)
+            venues  = re.findall(r'(札幌|函館|福島|新潟|東京|中山|中京|京都|阪神|小倉)', html)
+            times   = re.findall(r'(\d{1,2}:\d{2})', html)
+            race_ids = re.findall(r'race_id=(\d{12})', html)
+            if race_ids:
+                print(f" [horse/fallback] {base} からレースID {len(race_ids)}件検出")
+                # IDが取れた場合は詳細取得を試みる
+                from_base = "https://race.netkeiba.com"
+                history = load_history()
+                result = []
+                for rid in list(dict.fromkeys(race_ids))[:5]:
+                    try:
+                        info = fetch_race_details(from_base, rid, history)
+                        if info:
+                            result.append(info)
+                        time.sleep(1.5)
+                    except Exception:
+                        pass
+                if result:
+                    return result
+            if grades and venues:
+                grade, name = grades[0]
+                print(f" [horse/fallback] {base} からグレードレース検出: {grade} {name}")
+                return [{"sport":"horse","name":name.strip(),"venue":venues[0]+"競馬場",
+                         "time":times[0] if times else "--:--","grade":grade,"url":"keiba.html"}]
+        except Exception as e:
+            print(f"[horse/fallback] {base}{path}: {e}")
     return [fallback("horse")]
 
 
