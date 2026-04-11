@@ -1153,8 +1153,16 @@ def fetch_cycle_all():
             return [fallback("cycle")]
 
         grades = re.findall(r'(GP|G[123I]|FI|FII)', html)
-        venues = re.findall(r'([^\n<]{2,5}競輪場)', html)
         times  = re.findall(r'(\d{1,2}:\d{2})', html)
+
+        # 既知の競輪場名リストで正確に抽出
+        ALL_CYCLE_VENUES = [
+            "前橋","取手","松戸","千葉","川崎","西武園","京王閣","立川",
+            "静岡","名古屋","岐阜","大垣","豊橋","富山","福井","松山",
+            "高知","小倉","久留米","別府","佐世保","熊本","武雄","玉野",
+            "広島","防府","山口","向日町","和歌山","岸和田","奈良","大津",
+        ]
+        venues = [v + "競輪場" for v in ALL_CYCLE_VENUES if v in html]
         seen   = set()
 
         for i, venue in enumerate(venues):
