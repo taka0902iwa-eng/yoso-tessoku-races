@@ -62,6 +62,9 @@ def calc_history_correction(history, sport, name):
     # 的中率が高い選手/馬はEVを最大10%上乗せ
     return min(1.1, max(0.9, 0.9 + rate * 0.2))
 
+def clamp(v, lo, hi):
+    return max(lo, min(hi, v))
+
 def check_robots(base, path):
     try:
         rp = urllib.robotparser.RobotFileParser()
@@ -565,19 +568,37 @@ def fetch_race_details(base, race_id, history):
         html         = fetch(shutsuba_url)
         time.sleep(1)
 
-        name_match  = re.search(r'<title>([^<]+)</title>', html)
-        venue_match = re.search(r'(札幌|函館|福島|新潟|東京|中山|中京|京都|阪神|小倉)', html)
-        time_match  = re.search(r'(\d{2}:\d{2})', html)
-        grade_match = re.search(r'(G[123]|重賞)', html)
-        cond_match  = re.search(r'馬場\s*(良|稍重|重|不良)', html)
-        type_match  = re.search(r'(芝|ダート)', html)
+        # race_idから競馬場コードを取得（YYYYMMDDCCRRXX形式）
+        COURSE_MAP = {
+            "01":"札幌","02":"函館","03":"福島","04":"新潟","05":"東京",
+            "06":"中山","07":"中京","08":"京都","09":"阪神","10":"小倉"
+        }
+        course_code = race_id[8:10] if len(race_id) >= 10 else "05"
+        venue       = COURSE_MAP.get(course_code, "競馬場") + "競馬場"
+        race_no     = int(race_id[10:12]) if len(race_id) >= 12 else 1
 
-        race_name      = name_match.group(1).strip()  if name_match  else f"レース{race_id}"
-        venue          = (venue_match.group(1) + "競馬場") if venue_match else "競馬場"
-        race_time      = time_match.group(1)  if time_match  else "--:--"
-        grade          = grade_match.group(1) if grade_match else ""
-        track_condition= cond_match.group(1)  if cond_match  else "良"
-        track_type     = type_match.group(1)  if type_match  else "芝"
+        # レース名・グレードはtitleタグから取得
+        name_match  = re.search(r'<title>([^|<]+)', html)
+        race_name   = name_match.group(1).strip() if name_match else f"レース{race_id}"
+
+        # グレードはレース名から判定（HTMLにG1文字が多く誤検知しやすい）
+        grade = ""
+        for g in ["G1","G2","G3","重賞"]:
+            if g in race_name:
+                grade = g
+                break
+
+        # 発走時刻
+        time_match = re.search(r'(\d{2}:\d{2})', html)
+        race_time  = time_match.group(1) if time_match else f"{10 + race_no // 2:02d}:{(race_no * 30) % 60:02d}"
+
+        # 馬場・コース種別
+        cond_match  = re.search(r'馬場\s*(良|稍重|重|不良)', html)
+        type_match  = re.search(r'class="[^"]*race_type[^"]*"[^>]*>(芝|ダート|障害)', html)
+        if not type_match:
+            type_match = re.search(r'>(芝|ダート)<', html)
+        track_condition = cond_match.group(1)  if cond_match  else "良"
+        track_type      = type_match.group(1)  if type_match  else "芝"
 
         horse_pattern  = r'horse_id=(\d+)[^>]*>([^<]{2,20})</a>'
         horse_matches  = re.findall(horse_pattern, html)
