@@ -95,30 +95,30 @@ def calc_race_ev(horses):
 def fetch_horse_with_ev():
     races = []
     try:
+        # netkeibaの出馬表一覧（URLを修正）
         base = "https://race.netkeiba.com"
+        url  = f"{base}/top/race_list.html?kaisai_date={today_ymd}"
+
         if not check_robots(base, "/top/race_list.html"):
             print("[horse] robots.txt禁止 → JRAフォールバック")
             return fetch_horse_fallback()
 
-        # ① 本日の重賞レース一覧を取得
-        html = fetch(base + "/top/race_list.html")
+        html = fetch(url)
         time.sleep(3)
 
-        # レースIDを抽出（形式: 2026XXXXXXXXXX）
+        # レースIDを抽出
         race_ids = re.findall(r'race_id=(\d{12})', html)
-        # 本日のレースのみ絞り込み
-        today_ids = [rid for rid in race_ids if rid.startswith(today_ymd[:8])]
-        # 重複除去
         seen = set()
         unique_ids = []
-        for rid in today_ids:
+        for rid in race_ids:
             if rid not in seen:
                 seen.add(rid)
                 unique_ids.append(rid)
 
         print(f"  本日のレースID: {len(unique_ids)}件")
 
-        for race_id in unique_ids[:5]:  # 最大5レース
+        # 重賞レースのみに絞り込み（G1/G2/G3）
+        for race_id in unique_ids[:5]:
             try:
                 race_info = fetch_race_details(base, race_id)
                 if race_info:
@@ -326,8 +326,21 @@ def fetch_cycle_all():
     races = []
     try:
         base = "https://www.keirin.jp"
-        html = fetch(base + "/pc/racetop.do")
+        # URLを修正
+        paths = ["/pc/racetop.do", "/pc/top/racetop.do", "/"]
+        html  = ""
+        for path in paths:
+            try:
+                html = fetch(base + path)
+                if html:
+                    break
+            except:
+                continue
         time.sleep(2)
+        if not html:
+            print("[cycle] 全URLでエラー")
+            return [fallback("cycle")]
+
         grades = re.findall(r'(GP|G[123I]|FI|FII)', html)
         venues = re.findall(r'([^\n<]{2,5}競輪場)', html)
         times  = re.findall(r'(\d{1,2}:\d{2})', html)
@@ -339,8 +352,11 @@ def fetch_cycle_all():
             races.append({"sport":"cycle","name":f"{venue} 注目レース","venue":venue,
                           "time":times[i] if i<len(times) else "--:--",
                           "grade":grades[i] if i<len(grades) else "","url":"keirin.html"})
+        if not races:
+            races.append(fallback("cycle"))
     except Exception as e:
         print(f"[cycle] エラー: {e}")
+        races.append(fallback("cycle"))
     print(f"  競輪: {len(races)}件取得")
     return races
 
