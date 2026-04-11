@@ -430,7 +430,14 @@ Rules: Never use absolute expressions. Always include self-responsibility discla
         print("[Claude API] 予想文生成完了")
         return races, parsed.get("line_message","")
     except Exception as e:
-        print(f"[Claude API] エラー: {e}")
+        print(f"[Claude API] エラー詳細: {type(e).__name__}: {e}")
+        try:
+            # エラーレスポンスの内容を表示
+            if hasattr(e, 'read'):
+                err_body = e.read().decode('utf-8')
+                print(f"[Claude API] エラー本文: {err_body}")
+        except:
+            pass
         return races, ""
 
 
