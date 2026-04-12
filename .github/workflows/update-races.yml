@@ -1,0 +1,31 @@
+name: 毎朝レース情報自動更新
+
+on:
+  schedule:
+    - cron: '30 23 * * *'
+  workflow_dispatch:
+
+jobs:
+  update-races:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: スクレイピング＋EV計算＋FTPアップロード
+        env:
+          FTP_HOST:   ${{ secrets.FTP_HOST }}
+          FTP_USER:   ${{ secrets.FTP_USER }}
+          FTP_PASS:   ${{ secrets.FTP_PASS }}
+          FTP_REMOTE: ${{ secrets.FTP_REMOTE }}
+        run: python scraper.py
+      - name: races.jsonの内容確認
+        run: head -30 races.json || echo "races.json なし"
+      - name: races.json を保存
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: races-json-${{ github.run_id }}
+          path: races.json
+          retention-days: 7
