@@ -1149,17 +1149,10 @@ def fetch_boat_all():
                         "form_adj":             form_adj,
                     })
 
-                # オッズを別途取得
-                try:
-                    odds_html = fetch(f"{base}/owpc/pc/race/odds2tf?hd={today_ymd}&jcd={sid}&rno={rno}")
-                    time.sleep(0.5)
-                    odds_list = [float(o) for o in re.findall(r'(\d+\.\d)', odds_html)
-                                 if 1.0 <= float(o) <= 999.0][:6]
-                    for i, r in enumerate(riders):
-                        if i < len(odds_list):
-                            r["odds"] = odds_list[i]
-                except:
-                    pass
+                # オッズ取得（無効化中・デフォルト値を使用）
+                # boatrace.jpのオッズページは取得が不安定なためスキップ
+                # TODO: 安定したオッズ取得方法が確立したら有効化
+                pass
 
                 ev_results = calc_boat_race_ev(riders) if riders else []
                 best       = next((r for r in ev_results if r["judge"] in ["強買い","買い"]),
@@ -1218,17 +1211,37 @@ def fetch_cycle_all():
     races   = []
     history = load_history()
     try:
-        # Kドリームスから本日の開催情報を取得
+        # Kドリームスの開催一覧ページ（複数URLを試す）
         base     = "https://keirin.kdreams.jp"
-        date_url = f"{base}/racecard/{today.year}/{str(today.month).zfill(2)}/{str(today.day).zfill(2)}/"
-        html     = fetch(date_url)
+        html     = ""
+        for url_path in [
+            f"/racecard/{today.year}/{str(today.month).zfill(2)}/{str(today.day).zfill(2)}/",
+            f"/kaisai/{today.year}/{str(today.month).zfill(2)}/{str(today.day).zfill(2)}/",
+            "/racecard/",
+        ]:
+            try:
+                html = fetch(base + url_path)
+                if html and len(html) > 1000:
+                    print(f"  [cycle] URL取得成功: {url_path}")
+                    break
+            except Exception as e:
+                print(f"  [cycle] URL失敗: {url_path} {e}")
         time.sleep(2)
 
         if not html:
             return [fallback("cycle")]
 
-        # 開催場のURLを抽出（形式: /aomori/racecard/12202604120100/）
+        # 開催場のURLを複数パターンで抽出
         venue_urls = re.findall(r'href="(/([a-z]+)/racecard/\d+/)"', html)
+        if not venue_urls:
+            # パターン2: JavaScriptのデータから抽出
+            venue_urls = [(f"/{s}/racecard/{today.year}/{str(today.month).zfill(2)}/{str(today.day).zfill(2)}/", s)
+                          for s in re.findall(r'"venue_code":"([a-z]+)"', html)]
+        if not venue_urls:
+            # パターン3: 場名から直接URL構築
+            found_slugs = re.findall(r'/([a-z]+)/racecard/', html)
+            venue_urls  = [(f"/{s}/racecard/{today.year}/{str(today.month).zfill(2)}/{str(today.day).zfill(2)}/", s)
+                           for s in dict.fromkeys(found_slugs)]
 
         # 重複除去・場名抽出
         seen_venues = set()
