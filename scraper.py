@@ -952,79 +952,165 @@ def fetch_boat_riders(base, jcd, rno):
         return []
 
 # ══════════════════════════════════════════════════
-# 競艇 EV計算関数
+# 競艇 EV計算関数（改善版v2）
 # ══════════════════════════════════════════════════
-def calc_boat_frame_adj(frame_num, total=6):
-    if total <= 0: return 1.0
-    inner = (total - frame_num) / total
-    return round(clamp(1.0 + inner * 0.08, 0.92, 1.10), 3)
 
-def calc_boat_motor_adj(motor_win_rate, field_avg_motor=0.33):
-    if motor_win_rate <= 0: return 1.0
-    diff = motor_win_rate - field_avg_motor
-    return round(clamp(1.0 + diff * 1.5, 0.88, 1.15), 3)
+# コース別1着率（全国平均・公式長期統計）
+COURSE_STATS = {
+    1: {"win": 0.542, "q2": 0.733, "q3": 0.852},
+    2: {"win": 0.194, "q2": 0.379, "q3": 0.567},
+    3: {"win": 0.120, "q2": 0.260, "q3": 0.432},
+    4: {"win": 0.079, "q2": 0.185, "q3": 0.341},
+    5: {"win": 0.042, "q2": 0.115, "q3": 0.230},
+    6: {"win": 0.023, "q2": 0.070, "q3": 0.162},
+}
 
-def calc_boat_exhibition_adj(exh_time, field_avg=None):
+# 競艇場別1コース勝率（場の特性）
+VENUE_1ST_RATE = {
+    "桐生":0.467,"戸田":0.395,"江戸川":0.398,"平和島":0.443,"多摩川":0.517,
+    "浜名湖":0.529,"蒲郡":0.558,"常滑":0.572,"津":0.559,"三国":0.533,
+    "琵琶湖":0.536,"住之江":0.556,"尼崎":0.548,"鳴門":0.562,"丸亀":0.590,
+    "児島":0.579,"宮島":0.560,"徳山":0.558,"下関":0.548,"若松":0.521,
+    "芦屋":0.582,"福岡":0.558,"唐津":0.563,"大村":0.605,
+}
+
+# デフォルトオッズ（艇番別統計的平均値）
+DEFAULT_ODDS_MAP = {1:3.5, 2:5.0, 3:7.0, 4:10.0, 5:14.0, 6:18.0}
+
+def get_venue_course_adj(venue_name, course_num):
+    """場別コース補正：場の1コース有利度から各コースを調整"""
+    base_1st     = VENUE_1ST_RATE.get(venue_name, 0.542)
+    national_1st = 0.542
+    ratio        = base_1st / national_1st
+    if course_num == 1:
+        return ratio
+    else:
+        # 1コースが強い場ほど他コースは相対的に不利
+        return max(0.7, 2.0 - ratio)
+
+def calc_boat_base_prob(course_num, win_rate_national, venue_name=""):
+    """
+    コース別期待勝率を算出
+    コース統計 × 選手の実力補正 × 場別補正
+    win_rate_national: 全国勝率（小数 0.0〜1.0）
+    """
+    cn          = clamp(int(course_num), 1, 6)
+    course_base = COURSE_STATS[cn]["win"]
+    venue_adj   = get_venue_course_adj(venue_name, cn)
+    # 選手実力補正（全国平均勝率≈16.7%を基準）
+    strength    = clamp(win_rate_national / 0.167, 0.4, 2.5)
+    prob        = course_base * venue_adj * strength
+    return round(clamp(prob, 0.005, 0.90), 4)
+
+def calc_motor_adj_v2(motor_2ren_rate, field_avg_motor):
+    """
+    モーター補正（改善版）
+    motor_2ren_rate: モーター2連率（%形式: 0〜100、標準33%前後）
+    """
+    if motor_2ren_rate <= 0: return 1.0
+    avg  = field_avg_motor if field_avg_motor > 0 else 33.0
+    diff = (motor_2ren_rate - avg) / avg  # 相対差
+    adj  = 1.0 + diff * 0.4  # ±40%差で±16%補正
+    return round(clamp(adj, 0.85, 1.15), 3)
+
+def calc_exhibition_adj_v2(exh_time, field_avg):
+    """
+    展示タイム補正（改善版）
+    exh_time: 秒（6.5〜7.5が標準域、小さいほど速い＝有利）
+    """
     try:
-        ex = float(exh_time)
-        if ex <= 0: return 1.0
-        avg  = float(field_avg) if field_avg else ex
-        diff = avg - ex
-        return round(clamp(1.0 + diff * 0.35, 0.88, 1.12), 3)
+        ex  = float(exh_time)
+        avg = float(field_avg) if field_avg and float(field_avg) > 0 else ex
+        if ex <= 0 or avg <= 0: return 1.0
+        diff = avg - ex   # プラスなら速い（有利）
+        adj  = 1.0 + diff * 0.6  # 0.1秒速い=6%有利
+        return round(clamp(adj, 0.85, 1.15), 3)
     except:
         return 1.0
 
-def calc_boat_course_adj(course_num, course_win_rate, field_avg=0.33):
-    if course_win_rate <= 0: return 1.0
-    diff = course_win_rate - field_avg
-    return round(clamp(1.0 + diff * 1.2, 0.88, 1.15), 3)
+def calc_boat_rider_score_v2(rider, venue_name=""):
+    """競艇選手スコア計算（改善版v2）"""
+    course_num    = int(float(rider.get("frame_num", 1) or 1))
+    win_rate      = float(rider.get("win_rate", 0.07) or 0.07)
+    motor_rate    = float(rider.get("motor_win_rate", 33.0) or 33.0)
+    field_avg_m   = float(rider.get("field_avg_motor", 33.0) or 33.0)
+    exh_time      = float(rider.get("exhibition_time", 0) or 0)
+    field_avg_exh = rider.get("field_avg_exhibition", None)
+    form_adj      = float(rider.get("form_adj", 1.0) or 1.0)
 
-def calc_boat_rider_score(rider):
-    """競艇選手スコア計算（競艇専用）"""
-    frame_num   = float(rider.get("frame_num", 1) or 1)
-    win_rate    = float(rider.get("win_rate",  0.07) or 0.07)
-    motor_rate  = float(rider.get("motor_win_rate",  0.33) or 0.33)
-    course_rate = float(rider.get("course_win_rate", 0.33) or 0.33)
-    form_adj    = float(rider.get("form_adj", 1.0) or 1.0)
-    exh_time    = rider.get("exhibition_time", 0)
-    field_avg   = rider.get("field_avg_exhibition", None)
+    # ① コース別期待勝率（最重要・場の特性込み）
+    base_prob = calc_boat_base_prob(course_num, win_rate, venue_name)
 
-    # 枠番補正（1号艇が最も有利）
-    frame_adj   = calc_boat_frame_adj(frame_num, 6)
+    # ② モーター補正（2連率ベース）
+    motor_adj = calc_motor_adj_v2(motor_rate, field_avg_m)
 
-    # モーター補正
-    field_avg_motor = float(rider.get("field_avg_motor", 0.33) or 0.33)
-    motor_adj   = calc_boat_motor_adj(motor_rate, field_avg_motor)
+    # ③ 展示タイム補正（取得できた場合のみ）
+    if field_avg_exh and float(field_avg_exh) > 0 and exh_time > 0:
+        exh_adj = calc_exhibition_adj_v2(exh_time, field_avg_exh)
+    else:
+        exh_adj = 1.0
 
-    # 展示タイム補正
-    exh_adj     = calc_boat_exhibition_adj(exh_time, field_avg)
+    # ④ 近況補正
+    form_adj = clamp(form_adj, 0.90, 1.10)
 
-    # コース適性補正
-    course_adj  = calc_boat_course_adj(frame_num, course_rate)
+    score = base_prob * motor_adj * exh_adj * form_adj
+    return round(max(0.001, score), 6)
 
-    # 基本スコア = 全国勝率 × 各補正値
-    # win_rateは0〜1の小数（例：0.07 = 7%）
-    score = win_rate * frame_adj * motor_adj * exh_adj * course_adj * form_adj
+def is_default_odds(odds, frame_num):
+    """デフォルトオッズ（実際のオッズ未取得）かどうか判定"""
+    default = DEFAULT_ODDS_MAP.get(int(frame_num), 10.0)
+    return abs(odds - default) < 0.01
 
-    return max(0.0, score)
-
-def calc_boat_race_ev(riders):
-    scored = [{"data": r, "score": calc_boat_rider_score(r)} for r in riders]
+def calc_boat_race_ev_v2(riders, venue_name=""):
+    """
+    競艇EV計算（改善版v2）
+    実際のオッズ取得済みかどうかで判定方法を切り替え
+    """
+    scored = [{"data": r, "score": calc_boat_rider_score_v2(r, venue_name)} for r in riders]
     total  = sum(s["score"] for s in scored)
+    if total <= 0: return []
+
     result = []
     for s in scored:
-        odds  = float(s["data"].get("odds", 0) or 0)
-        prob  = s["score"] / total if total > 0 else 0
-        ev    = odds * prob if odds > 0 else 0
-        judge = "強買い" if ev > 1.25 else "買い" if ev > 1.0 else "見送り"
+        odds       = float(s["data"].get("odds", 0) or 0)
+        prob       = s["score"] / total
+        course_n   = int(float(s["data"].get("frame_num", 1)))
+        real_odds  = odds > 0 and not is_default_odds(odds, course_n)
+
+        if odds > 0:
+            ev = round(odds * prob, 4)
+        else:
+            ev = 0.0
+
+        if real_odds:
+            # 実オッズあり：EV基準で判定
+            judge = "強買い" if ev > 1.30 else "買い" if ev > 1.05 else "見送り"
+        else:
+            # オッズ未取得：コース勝率と選手実力の乖離で簡易判定
+            course_exp = COURSE_STATS.get(course_n, {}).get("win", 0.1)
+            uplift     = prob / (course_exp + 0.001)
+            judge      = "買い" if uplift > 1.20 else "見送り"
+
         result.append({
             **s["data"],
-            "score": round(s["score"], 6),
-            "prob":  round(prob, 4),
-            "ev":    round(ev,   4),
-            "judge": judge
+            "score":      round(s["score"], 6),
+            "prob":       round(prob, 4),
+            "ev":         ev,
+            "judge":      judge,
+            "real_odds":  real_odds,
+            "course_exp": round(COURSE_STATS.get(course_n, {}).get("win", 0.1), 3),
         })
-    return sorted(result, key=lambda x: x["ev"], reverse=True)
+
+    return sorted(result, key=lambda x: x["ev"] if x.get("real_odds") else x["prob"], reverse=True)
+
+# 後方互換（旧関数名でも動くように）
+def calc_boat_frame_adj(frame_num, total=6):
+    inner = (total - frame_num) / total
+    return round(clamp(1.0 + inner * 0.08, 0.92, 1.10), 3)
+def calc_boat_rider_score(rider):
+    return calc_boat_rider_score_v2(rider, "")
+def calc_boat_race_ev(riders):
+    return calc_boat_race_ev_v2(riders, "")
 
 def fetch_exhibition_times(base, jcd, rno):
     try:
@@ -1127,7 +1213,7 @@ def fetch_boat_all():
                     bn         = entry.get("racer_boat_number", len(riders)+1)
                     name       = entry.get("racer_name", f"{bn}号艇")
                     win_rate   = float(entry.get("racer_national_top_1_percent", 7.0) or 7.0) / 100
-                    motor_rate = float(entry.get("racer_assigned_motor_top_2_percent", 33.0) or 33.0) / 100
+                    motor_rate = float(entry.get("racer_assigned_motor_top_2_percent", 33.0) or 33.0)  # %形式のまま渡す
                     exh_time   = float(exh_map.get(bn, 0) or 0)
                     course_rate= float(entry.get("racer_national_top_2_percent", 33.0) or 33.0) / 100
                     local_rate = float(entry.get("racer_local_top_1_percent", 7.0) or 7.0) / 100
@@ -1142,19 +1228,36 @@ def fetch_boat_all():
                         "odds":                 DEFAULT_ODDS.get(bn, 10.0),
                         "win_rate":             win_rate,
                         "motor_win_rate":       motor_rate,
-                        "field_avg_motor":      0.33,
+                        "field_avg_motor":      33.0,  # %形式
                         "exhibition_time":      exh_time,
                         "field_avg_exhibition": field_avg_exh if field_avg_exh > 0 else None,
                         "course_win_rate":      course_rate,
                         "form_adj":             form_adj,
                     })
 
-                # オッズ取得（無効化中・デフォルト値を使用）
-                # boatrace.jpのオッズページは取得が不安定なためスキップ
-                # TODO: 安定したオッズ取得方法が確立したら有効化
-                pass
+                # ── 単勝オッズ取得（boatrace.jp公式） ────────────
+                try:
+                    odds_url  = f"{base}/owpc/pc/race/odds2tf?rno={rno}&jcd={sid}&hd={today_ymd}"
+                    odds_html = fetch(odds_url, timeout=15)
+                    time.sleep(0.5)
+                    # 単勝オッズのパターン: <td class="oddsPoint">3.5</td>
+                    raw_odds = re.findall(r'class="oddsPoint">([\d.]+)<', odds_html)
+                    if not raw_odds:
+                        # 別パターン: 数値のみ抽出（1.0〜99.9の範囲）
+                        raw_odds = re.findall(r'>(\d{1,2}\.\d)<', odds_html)
+                    real_odds_list = [float(o) for o in raw_odds if 1.0 <= float(o) <= 999.0][:6]
+                    if len(real_odds_list) >= 3:
+                        print(f"  [boat/{venue}] 実オッズ取得: {real_odds_list}")
+                        # ridersのオッズを実オッズに更新
+                        for idx_r, rider in enumerate(riders):
+                            if idx_r < len(real_odds_list):
+                                rider["odds"] = real_odds_list[idx_r]
+                    else:
+                        print(f"  [boat/{venue}] オッズ取得失敗（パターン不一致）→デフォルト使用")
+                except Exception as e_odds:
+                    print(f"  [boat/{venue}] オッズ取得エラー: {e_odds}")
 
-                ev_results = calc_boat_race_ev(riders) if riders else []
+                ev_results = calc_boat_race_ev_v2(riders, venue) if riders else []
                 best       = next((r for r in ev_results if r["judge"] in ["強買い","買い"]),
                                   ev_results[0] if ev_results else None)
 
@@ -1169,7 +1272,7 @@ def fetch_boat_all():
                 if best:
                     race.update({
                         "honmei":    best.get("name",""),
-                        "ev":        f"+{int((best['ev']-1)*100)}%" if best['ev']>1 else "",
+                        "ev":        (f"+{int((best['ev']-1)*100)}%" if best.get("real_odds") else "参考") if best and best['ev']>1 else "",
                         "judge":     best["judge"],
                         "reason":    f"推定勝率{int(best['prob']*100)}%・EV{best['ev']:.2f}倍・{int(best.get('frame_num',1))}号艇",
                         "ev_detail": ev_results[:6]
