@@ -1760,17 +1760,63 @@ def fallback(sport):
 # Claude API: 予想文生成
 # ══════════════════════════════════════════════════
 def generate_prediction_text(races):
-    """テンプレートベースの予想文生成（API不要）"""
+    """EV値フィルタリング付きテンプレート予想文生成"""
     try:
-        today_jp = f"{today.month}月{today.day}日"
-        lines    = [f"🎯【{today_jp}の予想】予想の鉄則"]
+        today_jp  = f"{today.month}月{today.day}日"
+        weekday   = today.weekday()  # 0=月, 5=土, 6=日
+        is_weekday= weekday < 5
 
-        # グレードレース優先
-        priority = sorted(races, key=lambda r: (
+        # 平日は高EVのみ・土日はやや緩める
+        ev_threshold = 1.3 if is_weekday else 1.15
+
+        lines = [f"🎯【{today_jp}の予想】予想の鉄則"]
+        if is_weekday:
+            lines[0] += "（平日厳選）"
+
+        # EV値でフィルタリング
+        def get_ev_num(r):
+            ev_str = r.get("ev","")
+            try:
+                return float(ev_str.replace("%","").replace("+","")) / 100 + 1
+            except:
+                return 0.0
+
+        # 「強買い」かつEV閾値以上のレースを抽出
+        high_ev = [r for r in races
+                   if r.get("judge") == "強買い"
+                   and get_ev_num(r) >= ev_threshold
+                   and r.get("honmei","")]
+
+        # EV値の高い順にソート
+        high_ev_sorted = sorted(high_ev, key=get_ev_num, reverse=True)
+
+        # グレード優先で上位5件
+        priority_grade = sorted(high_ev_sorted, key=lambda r: (
             0 if r.get("grade") in ["G1","SG","GP"] else
             1 if r.get("grade") in ["G2","G3"]      else 2
         ))[:5]
 
+        # 高EVが少ない場合は「買い」も含める
+        if len(priority_grade) < 3:
+            buy_races = [r for r in races
+                         if r.get("judge") in ["強買い","買い"]
+                         and r.get("honmei","")
+                         and r not in priority_grade]
+            buy_sorted = sorted(buy_races, key=get_ev_num, reverse=True)
+            priority_grade += buy_sorted[:5 - len(priority_grade)]
+
+        # それでも少ない場合はグレードレースで補完
+        if len(priority_grade) < 3:
+            fallback_races = sorted(
+                [r for r in races if r.get("honmei","") and r not in priority_grade],
+                key=lambda r: (
+                    0 if r.get("grade") in ["G1","SG","GP"] else
+                    1 if r.get("grade") in ["G2","G3"] else 2
+                )
+            )[:5 - len(priority_grade)]
+            priority_grade += fallback_races
+
+        priority   = priority_grade[:5]
         sport_icon = {"horse":"🐴","boat":"🚤","cycle":"🚴"}
         sport_name = {"horse":"競馬","boat":"競艇","cycle":"競輪"}
 
@@ -1778,9 +1824,9 @@ def generate_prediction_text(races):
             icon  = sport_icon.get(r["sport"], "🏁")
             sname = sport_name.get(r["sport"], r["sport"])
             grade = f"【{r['grade']}】" if r.get("grade") else ""
-            honmei= r.get("honmei", "")
-            ev    = r.get("ev", "")
-            judge = r.get("judge", "")
+            honmei= r.get("honmei","")
+            ev    = r.get("ev","")
+            judge = r.get("judge","")
 
             line = f"\n{icon}{sname} {grade}{r['venue']} {r['time']}"
             if honmei:
@@ -1791,11 +1837,13 @@ def generate_prediction_text(races):
                 line += f"（{judge}）"
             lines.append(line)
 
-        lines.append("\n※参考程度に。投票は自己責任でお願いします🙏")
+        ev_count = len([r for r in races if r.get("judge") == "強買い"])
+        lines.append(f"\n本日の強買い候補: {ev_count}件（EV閾値{int(ev_threshold*100-100)}%以上）")
+        lines.append("※参考程度に。投票は自己責任でお願いします🙏")
         lines.append("詳細→ oyatojikka.online")
 
         line_message = "\n".join(lines)
-        print(f"[テンプレート] 予想文生成完了（{len(priority)}件）")
+        print(f"[テンプレート] 予想文生成完了（高EV:{len(high_ev)}件→表示:{len(priority)}件）")
         return races, line_message
 
     except Exception as e:
