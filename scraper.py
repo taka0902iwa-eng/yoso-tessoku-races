@@ -980,25 +980,33 @@ def calc_boat_course_adj(course_num, course_win_rate, field_avg=0.33):
     return round(clamp(1.0 + diff * 1.2, 0.88, 1.15), 3)
 
 def calc_boat_rider_score(rider):
-    C  = float(rider.get("C", 0) or 0)
-    E  = float(rider.get("E", 0) or 0)
-    F  = float(rider.get("F", 6) or 6)
-    if C <= 0 or E <= 0 or F <= 0: return 0.0
-    base        = float(rider.get("win_rate", 0.15) or 0.15)
-    stability   = C / (C + 3)
-    market_edge = (F - E + 1) / F
-    frame_adj   = calc_boat_frame_adj(float(rider.get("frame_num", 1)), F)
-    motor_adj   = calc_boat_motor_adj(
-                      float(rider.get("motor_win_rate",  0.33) or 0.33),
-                      float(rider.get("field_avg_motor", 0.33) or 0.33))
-    exh_adj     = calc_boat_exhibition_adj(
-                      rider.get("exhibition_time",      0),
-                      rider.get("field_avg_exhibition", None))
-    course_adj  = calc_boat_course_adj(
-                      float(rider.get("frame_num",       1)),
-                      float(rider.get("course_win_rate", 0.33) or 0.33))
+    """競艇選手スコア計算（競艇専用）"""
+    frame_num   = float(rider.get("frame_num", 1) or 1)
+    win_rate    = float(rider.get("win_rate",  0.07) or 0.07)
+    motor_rate  = float(rider.get("motor_win_rate",  0.33) or 0.33)
+    course_rate = float(rider.get("course_win_rate", 0.33) or 0.33)
     form_adj    = float(rider.get("form_adj", 1.0) or 1.0)
-    return base * stability * market_edge * frame_adj * motor_adj * exh_adj * course_adj * form_adj
+    exh_time    = rider.get("exhibition_time", 0)
+    field_avg   = rider.get("field_avg_exhibition", None)
+
+    # 枠番補正（1号艇が最も有利）
+    frame_adj   = calc_boat_frame_adj(frame_num, 6)
+
+    # モーター補正
+    field_avg_motor = float(rider.get("field_avg_motor", 0.33) or 0.33)
+    motor_adj   = calc_boat_motor_adj(motor_rate, field_avg_motor)
+
+    # 展示タイム補正
+    exh_adj     = calc_boat_exhibition_adj(exh_time, field_avg)
+
+    # コース適性補正
+    course_adj  = calc_boat_course_adj(frame_num, course_rate)
+
+    # 基本スコア = 全国勝率 × 各補正値
+    # win_rateは0〜1の小数（例：0.07 = 7%）
+    score = win_rate * frame_adj * motor_adj * exh_adj * course_adj * form_adj
+
+    return max(0.0, score)
 
 def calc_boat_race_ev(riders):
     scored = [{"data": r, "score": calc_boat_rider_score(r)} for r in riders]
@@ -1111,20 +1119,6 @@ def fetch_boat_all():
                 field_avg_exh= sum(exh_map.values())/len(exh_map) if exh_map else 0
 
                 riders = []
-                for entry in riders_data[:6]:
-                    bn         = entry.get("racer_boat_number", len(riders)+1)
-                    name       = entry.get("racer_name", f"{bn}号艇")
-                    # 全国勝率（%で入っているので/100不要）
-                    win_rate   = float(entry.get("racer_national_top_1_percent", 7.0) or 7.0) / 100
-                    # モーター2連対率
-                    motor_rate = float(entry.get("racer_assigned_motor_top_2_percent", 33.0) or 33.0) / 100
-                    # 展示タイム
-                    exh_time   = float(exh_map.get(bn, 0) or 0)
-                    # 全国2連対率（コース適性近似）
-                    course_rate= float(entry.get("racer_national_top_2_percent", 33.0) or 33.0) / 100
-                    # 近走安定度（地元勝率/全国勝率）
-                    local_rate = float(entry.get("racer_local_top_1_percent", 7.0) or 7.0) / 100
-                    form_adj   = round(clamp(local_rate / win_rate if win_rate > 0 else 1.0, 0.85, 1.15), 3)
 
                 # デフォルトオッズ（艇番別の統計的平均値）
                 DEFAULT_ODDS = {1: 3.5, 2: 5.0, 3: 7.0, 4: 10.0, 5: 14.0, 6: 18.0}
@@ -1233,24 +1227,16 @@ def fetch_cycle_all():
         if not html:
             return [fallback("cycle")]
 
-        # 開催場のURLを複数パターンで抽出
-        venue_urls = re.findall(r'href="(/[a-z]+/racecard/[^"]+)"', html)
-        if not venue_urls:
-            venue_urls = re.findall(r'href="(/[a-z]+/[^"]*\d{8}[^"]*)"', html)
-        if not venue_urls:
-            # 場スラッグを直接HTMLから抽出
-            slugs = re.findall(r'href="/([a-z]+)/racecard/', html)
-            venue_urls = [f"/{s}/racecard/{today.year}/{str(today.month).zfill(2)}/{str(today.day).zfill(2)}/" for s in slugs]
+        # 開催場のURLを抽出（形式: /aomori/racecard/12202604120100/）
+        venue_urls = re.findall(r'href="(/([a-z]+)/racecard/\d+/)"', html)
 
         # 重複除去・場名抽出
         seen_venues = set()
         venue_list  = []
-        for u in venue_urls:
-            parts = u.strip("/").split("/")
-            venue_slug = parts[0] if parts else ""
-            if venue_slug and venue_slug not in seen_venues and venue_slug not in ["racecard","kaisai","gamboo","keirin"]:
-                seen_venues.add(venue_slug)
-                venue_list.append((venue_slug, u))
+        for full_url, slug in venue_urls:
+            if slug not in seen_venues and slug not in ["racecard","kaisai","gamboo","keirin"]:
+                seen_venues.add(slug)
+                venue_list.append((slug, full_url))
 
         print(f"  [cycle] 開催場候補: {len(venue_list)}件 {[s for s,_ in venue_list[:5]]}")
 
@@ -1281,18 +1267,23 @@ def fetch_cycle_all():
                 grade_m = re.search(r'(GP|G[123I]|FI|FII)', v_html)
                 grade   = grade_m.group(1) if grade_m else ""
 
-                # 発走時刻取得
-                times_m = re.findall(r'(\d{2}:\d{2})', v_html)
-                t       = times_m[-1] if times_m else "--:--"
+                # 発走時刻取得（10:00〜21:00の範囲）
+                times_m  = re.findall(r'(\d{1,2}:\d{2})', v_html)
+                valid_ts = [t for t in times_m if 8 <= int(t.split(":")[0]) <= 21]
+                t        = valid_ts[-1] if valid_ts else "--:--"
 
-                # レース詳細URLを取得（選手データ用）
-                detail_urls = re.findall(r'href="(/[a-z]+/racedetail/[^"]+)"', v_html)
+                # レース詳細URLを取得
+                # 形式1: /aomori/racedetail/1220260412XXXX/
+                detail_urls = re.findall(r'href="(/[a-z]+/racedetail/\d+/)"', v_html)
+                # 形式2: /gamboo/keirin-kaisai/race-card/result/XXXX/
+                if not detail_urls:
+                    detail_urls = re.findall(r'href="(/gamboo/keirin-kaisai/race-card/[^"]+)"', v_html)
 
                 riders = []
                 if detail_urls:
-                    # 最終レースのURLで選手データ取得
                     detail_url = base + detail_urls[-1]
                     riders     = fetch_cycle_riders_kdreams(detail_url, venue_name)
+                    print(f"  [cycle/{slug}] {len(riders)}選手取得")
 
                 ev_results = calc_race_ev_cycle(riders, history) if riders else []
                 best       = next((r for r in ev_results if r["judge"] in ["強買い","買い"]),
