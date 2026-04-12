@@ -588,9 +588,20 @@ def fetch_race_details(base, race_id, history):
                 grade = g
                 break
 
-        # 発走時刻
-        time_match = re.search(r'(\d{2}:\d{2})', html)
-        race_time  = time_match.group(1) if time_match else f"{10 + race_no // 2:02d}:{(race_no * 30) % 60:02d}"
+        # 発走時刻（netkeibaの出馬表から正確に取得）
+        # パターン1: 発走時刻のクラス
+        time_match = re.search(r'class="[^"]*RaceData[^"]*"[^>]*>.*?(\d{1,2}:\d{2})', html, re.DOTALL)
+        if not time_match:
+            # パターン2: 「発走」の直後
+            time_match = re.search(r'発走.*?(\d{1,2}:\d{2})', html, re.DOTALL)
+        if not time_match:
+            # パターン3: HTMLの後半部分から時刻を取得（前半はメタ情報が多い）
+            times_all = re.findall(r'(\d{2}:\d{2})', html[2000:])
+            # 10:00〜18:00の範囲の時刻を選ぶ
+            valid_times = [t for t in times_all if 10 <= int(t[:2]) <= 18]
+            race_time = valid_times[0] if valid_times else "--:--"
+        else:
+            race_time = time_match.group(1)
 
         # 馬場・コース種別
         cond_match  = re.search(r'馬場\s*(良|稍重|重|不良)', html)
@@ -1115,13 +1126,26 @@ def fetch_boat_all():
                     local_rate = float(entry.get("racer_local_top_1_percent", 7.0) or 7.0) / 100
                     form_adj   = round(clamp(local_rate / win_rate if win_rate > 0 else 1.0, 0.85, 1.15), 3)
 
+                # デフォルトオッズ（艇番別の統計的平均値）
+                DEFAULT_ODDS = {1: 3.5, 2: 5.0, 3: 7.0, 4: 10.0, 5: 14.0, 6: 18.0}
+
+                for entry in riders_data[:6]:
+                    bn         = entry.get("racer_boat_number", len(riders)+1)
+                    name       = entry.get("racer_name", f"{bn}号艇")
+                    win_rate   = float(entry.get("racer_national_top_1_percent", 7.0) or 7.0) / 100
+                    motor_rate = float(entry.get("racer_assigned_motor_top_2_percent", 33.0) or 33.0) / 100
+                    exh_time   = float(exh_map.get(bn, 0) or 0)
+                    course_rate= float(entry.get("racer_national_top_2_percent", 33.0) or 33.0) / 100
+                    local_rate = float(entry.get("racer_local_top_1_percent", 7.0) or 7.0) / 100
+                    form_adj   = round(clamp(local_rate / win_rate if win_rate > 0 else 1.0, 0.85, 1.15), 3)
+
                     riders.append({
                         "name":                 name,
                         "frame_num":            float(bn),
                         "C":                    30,
                         "E":                    float(bn),
                         "F":                    6,
-                        "odds":                 float(10 / bn),
+                        "odds":                 DEFAULT_ODDS.get(bn, 10.0),
                         "win_rate":             win_rate,
                         "motor_win_rate":       motor_rate,
                         "field_avg_motor":      0.33,
@@ -1209,16 +1233,26 @@ def fetch_cycle_all():
         if not html:
             return [fallback("cycle")]
 
-        # 開催場のURLを抽出（例: /seibu/racecard/...）
+        # 開催場のURLを複数パターンで抽出
         venue_urls = re.findall(r'href="(/[a-z]+/racecard/[^"]+)"', html)
+        if not venue_urls:
+            venue_urls = re.findall(r'href="(/[a-z]+/[^"]*\d{8}[^"]*)"', html)
+        if not venue_urls:
+            # 場スラッグを直接HTMLから抽出
+            slugs = re.findall(r'href="/([a-z]+)/racecard/', html)
+            venue_urls = [f"/{s}/racecard/{today.year}/{str(today.month).zfill(2)}/{str(today.day).zfill(2)}/" for s in slugs]
+
         # 重複除去・場名抽出
         seen_venues = set()
         venue_list  = []
         for u in venue_urls:
-            venue_slug = u.split("/")[1]
-            if venue_slug not in seen_venues and venue_slug not in ["racecard","kaisai","gamboo"]:
+            parts = u.strip("/").split("/")
+            venue_slug = parts[0] if parts else ""
+            if venue_slug and venue_slug not in seen_venues and venue_slug not in ["racecard","kaisai","gamboo","keirin"]:
                 seen_venues.add(venue_slug)
                 venue_list.append((venue_slug, u))
+
+        print(f"  [cycle] 開催場候補: {len(venue_list)}件 {[s for s,_ in venue_list[:5]]}")
 
         # 場スラッグ→日本語名マップ
         SLUG_TO_NAME = {
