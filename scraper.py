@@ -1366,8 +1366,8 @@ def fetch_cycle_all():
                         "time":t,"grade":grade,"url":"keirin.html"}
                 if best:
                     race.update({
-                        "honmei": best.get("name",""),
-                        "ev":     f"+{int((best['ev']-1)*100)}%" if best['ev']>1 else "",
+                        "honmei": best.get("name","予想公開中"),
+                        "ev":     f"+{int((best['ev']-1)*100)}%" if best.get('ev',0)>1 else "",
                         "judge":  best["judge"],
                         "reason": f"推定勝率{int(best['prob']*100)}%・EV{best['ev']:.2f}倍"
                     })
@@ -2055,7 +2055,9 @@ if __name__ == "__main__":
     if os.path.exists("index.html"):
         remote_base = os.environ.get("FTP_REMOTE",
             "/home/c9048134/public_html/oyatojikka.online/races.json")
-        remote_dir = "/".join(remote_base.split("/")[:-1])
+        # パスを確実に構築（先頭の/が消えないよう修正）
+        parts = [p for p in remote_base.split("/") if p]
+        remote_dir = "/" + "/".join(parts[:-1])
         remote_index = remote_dir + "/index.html"
         print("\n--- ⑤ index.html FTPアップロード ---")
         upload_ftp_file("index.html", remote_index)
