@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+  <meta name="description" content="競馬・競艇・競輪の本命予想を期待値（EV）重視で毎日公開。データに基づいた根拠ある予想で長期収支プラスを目指します。無料でLINE配信も受け取れます。">
+  <meta name="robots" content="index,follow">
+  <meta property="og:type"        content="website">
+  <meta property="og:title"       content="予想の鉄則 | 競馬・競艇・競輪 本命予想">
+  <meta property="og:description" content="競馬・競艇・競輪の本命予想を期待値（EV）重視で毎日公開。データに基づいた根拠ある予想で長期収支プラスを目指します。">
+  <meta property="og:url"         content="https://oyatojikka.online/">
+  <meta property="og:site_name"   content="予想の鉄則">
+  <meta property="og:image"       content="https://oyatojikka.online/avatar.png">
+  <meta property="og:locale"      content="ja_JP">
+  <meta name="twitter:card"        content="summary">
+  <meta name="twitter:title"       content="予想の鉄則 | 競馬・競艇・競輪 本命予想">
+  <meta name="twitter:description" content="競馬・競艇・競輪の本命予想を期待値（EV）重視で毎日公開。">
+  <meta name="twitter:image"       content="https://oyatojikka.online/avatar.png">
+  <meta name="description" content="競馬・競艇・競輪の本命予想を期待値（EV）重視で毎日公開。データに基づいた根拠ある予想で長期収支プラスを目指します。無料でLINE配信も受け取れます。">
+  <meta name="robots" content="index,follow">
+  <!-- OGP -->
+  <meta property="og:type"        content="website">
+  <meta property="og:title"       content="予想の鉄則 | 競馬・競艇・競輪 本命予想">
+  <meta property="og:description" content="競馬・競艇・競輪の本命予想を期待値（EV）重視で毎日公開。データに基づいた根拠ある予想で長期収支プラスを目指します。無料でLINE配信も受け取れます。">
+  <meta property="og:url"         content="https://oyatojikka.online/">
+  <meta property="og:site_name"   content="予想の鉄則">
+  <meta property="og:image"       content="https://oyatojikka.online/avatar.png">
+  <meta property="og:locale"      content="ja_JP">
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary">
+  <meta name="twitter:title"       content="予想の鉄則 | 競馬・競艇・競輪 本命予想">
+  <meta name="twitter:description" content="競馬・競艇・競輪の本命予想を期待値（EV）重視で毎日公開。データに基づいた根拠ある予想で長期収支プラスを目指します。無料でLINE配信も受け取れます。">
+  <meta name="twitter:image"       content="https://oyatojikka.online/avatar.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>予想の鉄則 | 競馬・競艇・競輪 本命予想</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@700;900&family=Bebas+Neue&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #080c14;
+  --bg-card:   #0c1525;
+  --bg-card2:  #0f1e36;
+  --navy:      #0a1628;
+  --gold:      #c9a84c;
+  --gold-l:    #f0d080;
+  --gold-dim:  rgba(201,168,76,0.15);
+  --border:    rgba(201,168,76,0.18);
+  --horse:     #c9a84c;   /* 金 */
+  --boat:      #00b4d8;   /* 青 */
+  --cycle:     #e8313a;   /* 赤 */
+  --text:      #eef0f5;
+  --text-dim:  #a8b0c4;
+  --text-mute: #5a6278;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+a{color:inherit;text-decoration:none}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-serif;font-weight:300;min-height:100vh}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px}
+
+/* ══ HEADER ══ */
+header{
+position:sticky;top:0;z-index:200;
+background:rgba(8,12,20,0.96);
+border-bottom:1px solid var(–border);
+backdrop-filter:blur(12px);
+padding:0 20px;height:56px;
+display:flex;align-items:center;justify-content:space-between;
+}
+.logo{display:flex;align-items:baseline;gap:10px;text-decoration:none}
+.logo-ja{font-family:‘Noto Serif JP’,serif;font-weight:900;font-size:1.2rem;color:var(–gold-l);letter-spacing:.06em;text-shadow:0 0 20px rgba(201,168,76,.3)}
+.logo-en{font-family:‘Bebas Neue’,sans-serif;font-size:.72rem;color:var(–text-mute);letter-spacing:.22em}
+nav a{color:var(–text-dim);text-decoration:none;font-size:.75rem;padding:6px 12px;transition:color .2s}
+nav a:hover{color:var(–gold-l)}
+
+/* ══ HERO ══ */
+.hero{
+position:relative;
+background:linear-gradient(160deg,#0d1a2e 0%,#080c14 55%,#0a0c10 100%);
+padding:60px 20px 0;
+overflow:hidden;
+}
+.hero::before{
+content:’’;position:absolute;inset:0;
+background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(201,168,76,.06) 0%,transparent 70%);
+pointer-events:none;
+}
+.hero-text{
+position:relative;z-index:2;
+text-align:center;max-width:700px;margin:0 auto;
+padding-bottom:40px;
+}
+.hero-badge{
+display:inline-flex;align-items:center;gap:8px;
+padding:4px 16px;margin-bottom:24px;
+border:1px solid rgba(201,168,76,.35);border-radius:1px;
+font-size:.68rem;letter-spacing:.2em;color:var(–gold);
+background:rgba(201,168,76,.05);
+}
+.hero-badge::before{content:’’;width:5px;height:5px;background:var(–cycle);border-radius:50%;box-shadow:0 0 8px var(–cycle);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.hero-title{
+font-family:‘Noto Serif JP’,serif;font-weight:900;
+font-size:clamp(2.2rem,7vw,4rem);
+line-height:1.15;letter-spacing:.04em;color:#fff;
+text-shadow:0 0 40px rgba(201,168,76,.15);
+margin-bottom:12px;
+}
+.hero-title em{color:var(–gold-l);font-style:normal}
+.hero-sub{
+font-family:‘Bebas Neue’,sans-serif;
+font-size:clamp(.8rem,2vw,1rem);
+letter-spacing:.35em;color:var(–text-mute);
+}
+
+/* ヒーローカード群 */
+.hero-cards{
+position:relative;z-index:2;
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:0;
+margin:0 -20px;
+border-top:1px solid var(–border);
+}
+.hero-card{
+padding:18px 20px 20px;
+border-right:1px solid var(–border);
+background:rgba(8,12,20,.85);
+text-decoration:none;
+display:block;
+transition:background .25s;
+position:relative;
+overflow:hidden;
+}
+.hero-card:last-child{border-right:none}
+.hero-card::before{
+content:’’;
+position:absolute;left:0;top:0;bottom:0;
+width:3px;
+}
+.hero-card.horse::before{background:var(–horse)}
+.hero-card.boat::before {background:var(–boat)}
+.hero-card.cycle::before{background:var(–cycle)}
+.hero-card:hover{background:rgba(201,168,76,.04)}
+.hcard-sport{
+display:flex;align-items:center;gap:6px;
+margin-bottom:8px;
+}
+.hcard-icon{font-size:.95rem}
+.hcard-label{
+font-size:.65rem;letter-spacing:.1em;
+font-weight:700;
+}
+.hero-card.horse .hcard-label{color:var(–horse)}
+.hero-card.boat  .hcard-label{color:var(–boat)}
+.hero-card.cycle .hcard-label{color:var(–cycle)}
+.hcard-grade{
+font-family:‘Bebas Neue’,sans-serif;
+font-size:.72rem;padding:1px 7px;border-radius:2px;
+margin-left:auto;letter-spacing:.05em;
+}
+.hero-card.horse .hcard-grade{background:rgba(201,168,76,.2);color:var(–gold-l)}
+.hero-card.boat  .hcard-grade{background:rgba(0,180,216,.2);color:var(–boat)}
+.hero-card.cycle .hcard-grade{background:rgba(232,49,58,.2);color:var(–cycle)}
+.hcard-venue{font-size:.72rem;color:var(–text-dim);margin-bottom:4px}
+.hcard-name{
+font-family:‘Noto Serif JP’,serif;font-weight:700;
+font-size:.92rem;color:var(–text);
+line-height:1.3;margin-bottom:10px;
+}
+.hcard-time{
+font-family:‘Bebas Neue’,sans-serif;
+font-size:1.4rem;letter-spacing:.05em;color:var(–gold-l);
+line-height:1;
+}
+.hcard-time-label{font-size:.6rem;color:var(–text-mute)}
+
+/* ══ MAIN ══ */
+.main{max-width:900px;margin:0 auto;padding:0 0 80px}
+
+/* セクション共通 */
+.sec{padding:24px 20px 0}
+.sec-head{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.sec-line{width:3px;height:15px;background:var(–gold);border-radius:2px;flex-shrink:0}
+.sec-title{font-size:.76rem;letter-spacing:.12em;color:var(–gold);font-weight:700}
+
+/* ══ WEEK CALENDAR ══ */
+.week-tabs{
+display:flex;border:1px solid var(–border);border-radius:3px;overflow:hidden;
+}
+.week-tab{
+flex:1;padding:10px 2px;text-align:center;
+cursor:pointer;border-right:1px solid var(–border);
+background:var(–navy);transition:background .2s;user-select:none;
+}
+.week-tab:last-child{border-right:none}
+.week-tab .wd{font-size:.62rem;color:var(–text-mute);display:block;margin-bottom:2px}
+.week-tab .dd{font-family:‘Bebas Neue’,sans-serif;font-size:1.2rem;color:var(–text);line-height:1;display:block}
+.week-tab .cnt{font-size:.55rem;color:var(–text-mute);margin-top:2px;display:block}
+.week-tab.active{background:var(–gold)}
+.week-tab.active .wd,.week-tab.active .dd,.week-tab.active .cnt{color:#080c14}
+.week-tab.today .dd{color:var(–gold-l)}
+.week-tab.today.active .dd{color:#080c14}
+.week-tab.sat .wd{color:var(–boat)}
+.week-tab.sun .wd{color:var(–cycle)}
+.week-tab.active.sat .wd,.week-tab.active.sun .wd{color:#080c14}
+.week-tab:hover:not(.active){background:rgba(201,168,76,.05)}
+
+/* ══ 注目レース ══ */
+.focus-list{display:flex;flex-direction:column;gap:1px}
+.focus-item{
+display:flex;align-items:center;
+padding:11px 14px;gap:10px;
+background:var(–bg-card);
+border-left:3px solid transparent;
+text-decoration:none;transition:all .2s;
+}
+.focus-item.horse{border-left-color:var(–horse)}
+.focus-item.boat {border-left-color:var(–boat)}
+.focus-item.cycle{border-left-color:var(–cycle)}
+.focus-item:hover{background:var(–bg-card2)}
+.fi-date{font-size:.68rem;color:var(–text-dim);white-space:nowrap;width:72px;flex-shrink:0}
+.fi-venue{font-size:.72rem;color:var(–text-dim);white-space:nowrap;width:56px;flex-shrink:0}
+.fi-name{font-family:‘Noto Serif JP’,serif;font-weight:700;font-size:.88rem;color:var(–text);flex:1}
+.fi-grade{
+font-family:‘Bebas Neue’,sans-serif;font-size:.76rem;
+padding:2px 8px;border-radius:2px;letter-spacing:.05em;flex-shrink:0;
+}
+.fg-g1{background:var(–gold);color:#080c14}
+.fg-g2{background:#6a6a8a;color:#fff}
+.fg-g3{background:#3a6a3a;color:#fff}
+.fg-sg{background:var(–cycle);color:#fff}
+.fg-gp{background:linear-gradient(135deg,var(–gold),var(–cycle));color:#fff}
+.fi-arr{color:var(–text-mute);font-size:.78rem;flex-shrink:0}
+
+/* ══ 開催地 ══ */
+.venues-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.venue-block{background:var(–bg-card);border-bottom:1px solid var(–border)}
+.vb-head{
+padding:8px 12px;display:flex;align-items:center;gap:6px;
+border-bottom:1px solid rgba(255,255,255,.05);
+}
+.vb-head.horse{border-top:2px solid var(–horse)}
+.vb-head.boat {border-top:2px solid var(–boat)}
+.vb-head.cycle{border-top:2px solid var(–cycle)}
+.vb-icon{font-size:.9rem}
+.vb-name{
+font-size:.7rem;font-weight:700;letter-spacing:.06em;
+}
+.vb-head.horse .vb-name{color:var(–horse)}
+.vb-head.boat  .vb-name{color:var(–boat)}
+.vb-head.cycle .vb-name{color:var(–cycle)}
+.venue-list{list-style:none;padding:4px 0}
+.venue-list li{
+padding:5px 12px;font-size:.75rem;color:var(–text);
+display:flex;align-items:center;justify-content:space-between;
+border-bottom:1px solid rgba(255,255,255,.03);
+cursor:pointer;transition:background .15s;
+}
+.venue-list li:last-child{border-bottom:none}
+.venue-list li:hover{background:rgba(255,255,255,.03)}
+.vtag{font-size:.58rem;padding:1px 5px;border-radius:2px}
+.vtag-gold{background:rgba(201,168,76,.18);color:var(–gold)}
+.vtag-red {background:rgba(232,49,58,.18);color:var(–cycle)}
+
+/* ══ PICKS ══ */
+.picks-list{display:flex;flex-direction:column;gap:8px}
+.pick-card{
+background:var(–bg-card);
+border-left:4px solid transparent;
+display:flex;align-items:stretch;
+text-decoration:none;transition:background .2s;
+}
+.pick-card.horse{border-left-color:var(–horse)}
+.pick-card.boat {border-left-color:var(–boat)}
+.pick-card.cycle{border-left-color:var(–cycle)}
+.pick-card:hover{background:var(–bg-card2)}
+.pc-left{padding:14px 16px;flex:1}
+.pc-meta{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.pc-sport{font-size:.63rem;padding:2px 8px;border-radius:2px;font-weight:700;letter-spacing:.05em}
+.pc-sport.horse{background:rgba(201,168,76,.15);color:var(–gold-l)}
+.pc-sport.boat {background:rgba(0,180,216,.15);color:var(–boat)}
+.pc-sport.cycle{background:rgba(232,49,58,.15);color:var(–cycle)}
+.pc-race{font-size:.68rem;color:var(–text-dim)}
+.pc-name{font-family:‘Noto Serif JP’,serif;font-weight:700;font-size:.95rem;color:var(–text);margin-bottom:6px}
+.pc-bottom{display:flex;align-items:center;gap:10px}
+.pc-venue{font-size:.7rem;color:var(–text-dim)}
+.pc-time{font-family:‘Bebas Neue’,sans-serif;font-size:1.15rem;color:var(–gold-l);letter-spacing:.04em}
+.pc-right{
+display:flex;flex-direction:column;align-items:center;justify-content:center;
+padding:14px 18px;border-left:1px solid rgba(255,255,255,.05);gap:6px;min-width:76px;
+}
+.pc-arr{font-size:1.3rem;color:var(–text-mute)}
+.pc-link{font-size:.68rem;color:var(–gold);white-space:nowrap}
+
+.empty{text-align:center;padding:36px;color:var(–text-mute);font-size:.82rem}
+
+/* ══ FOOTER ══ */
+footer{
+background:#050810;border-top:1px solid rgba(201,168,76,.08);
+padding:28px 20px;text-align:center;
+}
+.ft-logo{font-family:‘Noto Serif JP’,serif;font-weight:900;font-size:1rem;color:var(–gold-l);margin-bottom:8px}
+.ft-disc{font-size:.66rem;color:rgba(168,180,200,.45);line-height:1.7;max-width:460px;margin:0 auto 12px}
+.ft-links{display:flex;justify-content:center;gap:16px;flex-wrap:wrap}
+.ft-links a{font-size:.7rem;color:var(–text-mute);text-decoration:none}
+.ft-links a:hover{color:var(–gold-l)}
+
+/* ══ SHARE ══ */
+.share-block{background:var(–bg-card);border:1px solid var(–border);padding:14px 20px;margin:16px 20px 0}
+.share-title{font-size:.68rem;color:var(–text-mute);margin-bottom:10px;letter-spacing:.05em}
+.share-buttons{display:flex;gap:8px;flex-wrap:wrap}
+.share-btn{display:flex;align-items:center;gap:6px;padding:9px 16px;border-radius:2px;font-size:.78rem;font-weight:700;text-decoration:none;border:none;cursor:pointer;font-family:‘Noto Sans JP’,sans-serif;transition:filter .2s;white-space:nowrap}
+.share-btn:hover{filter:brightness(1.15)}
+.share-x{background:#000;color:#fff;border:1px solid #333}
+.share-line{background:#06C755;color:#fff}
+.share-ig{background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff}
+.share-copy{background:var(–bg-card2);color:var(–text-dim);border:1px solid var(–border)}
+.share-copied{color:var(–gold-l)!important;border-color:var(–gold)!important}
+
+/* ══ RESPONSIVE ══ */
+@media(max-width:600px){
+.venues-grid{grid-template-columns:1fr}
+.hero-cards{grid-template-columns:1fr}
+.hero-card{border-right:none;border-bottom:1px solid var(–border)}
+.hero-card:last-child{border-bottom:none}
+nav{display:none}
+.fi-venue{display:none}
+.share-buttons{gap:6px}
+.share-btn{font-size:.72rem;padding:8px 12px}
+}
+@media(max-width:380px){
+.hero-title{font-size:2rem}
+}
+</style>
+
+</head>
+<body>
+
+<!-- HEADER -->
+
+<header>
+  <a class="logo" href="#">
+    <span class="logo-ja">予想の鉄則</span>
+    <span class="logo-en">YOSO NO TESSOKU</span>
+  </a>
+  <nav>
+    <a href="keiba.html">🐴 競馬</a><a href="kyotei.html">🚤 競艇</a><a href="keirin.html">🚴 競輪</a>
+    <a href="results.html">📊 実績</a>
+    <a href="premium.html" style="color:#06C755;border:1px solid rgba(6,199,85,.3);border-radius:2px;padding:4px 10px">👑 有料プラン</a>
+  </nav>
+</header>
+
+<!-- HERO -->
+
+<div class="hero">
+  <div class="hero-text">
+    <div class="hero-badge" id="update-badge">EV PREDICTION · 期待値で勝つ</div>
+    <h1 class="hero-title">感覚を捨てて<br><em>データで勝て</em></h1>
+    <p class="hero-sub">HORSE · BOAT · CYCLE · EV ANALYSIS</p>
+    <!-- LINE CTA -->
+    <div style="margin-top:28px;display:flex;flex-direction:column;align-items:center;gap:10px">
+      <a href="https://line.me/R/ti/p/@414irikx" target="_blank" rel="noopener"
+        style="display:inline-flex;align-items:center;gap:10px;padding:16px 32px;background:#06C755;color:#fff;font-family:'Noto Sans JP',sans-serif;font-weight:700;font-size:1rem;text-decoration:none;border-radius:4px;letter-spacing:.04em;box-shadow:0 4px 24px rgba(6,199,85,.35);transition:filter .25s">
+        💬 無料LINE登録で今日の厳選EVレースを受け取る
+      </a>
+      <p style="font-size:.68rem;color:var(--text-mute)">登録無料 · いつでも解約OK · 毎朝配信</p>
+    </div>
+  </div>
+  <div class="hero-cards" id="hero-cards">
+    <!-- JS描画 -->
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- カレンダー -->
+
+  <div class="sec" style="padding-bottom:24px">
+    <div class="sec-head"><div class="sec-line"></div><span class="sec-title" id="picks-title">本日の予想</span></div>
+    <div class="picks-list" id="picks-list"><div class="empty">読み込み中...</div></div>
+  </div>
+
+  <!-- EV実績バナー -->
+
+  <div style="margin:0 20px">
+  <div style="background:var(--bg-card);border:1px solid var(--border);display:grid;grid-template-columns:repeat(3,1fr);gap:0;text-align:center;border-bottom:none">
+    <div style="border-right:1px solid var(--border);padding:10px 8px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:var(--gold-l)" id="idx-recovery">--%</div>
+      <div style="font-size:.58rem;color:var(--text-mute);margin-top:1px">累計回収率</div>
+    </div>
+    <div style="border-right:1px solid var(--border);padding:10px 8px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:#fff" id="idx-hitrate">--%</div>
+      <div style="font-size:.58rem;color:var(--text-mute);margin-top:1px">的中率</div>
+    </div>
+    <div style="padding:10px 8px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.8rem;color:#fff" id="idx-total">0</div>
+      <div style="font-size:.58rem;color:var(--text-mute);margin-top:1px">累計予想数</div>
+    </div>
+  </div>
+  <div style="background:var(--bg-card);border:1px solid var(--border);display:grid;grid-template-columns:repeat(3,1fr);gap:0;text-align:center">
+    <div style="border-right:1px solid var(--border);padding:10px 8px">
+      <div style="font-size:.62rem;color:var(--horse);font-weight:700;margin-bottom:4px">🐴 競馬</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:#fff" id="stat-horse-hit">--%</div>
+      <div style="font-size:.55rem;color:var(--text-mute)">的中率</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--gold-l);margin-top:2px" id="stat-horse-rec">--%</div>
+      <div style="font-size:.55rem;color:var(--text-mute)">回収率</div>
+    </div>
+    <div style="border-right:1px solid var(--border);padding:10px 8px">
+      <div style="font-size:.62rem;color:var(--boat);font-weight:700;margin-bottom:4px">🚤 競艇</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:#fff" id="stat-boat-hit">--%</div>
+      <div style="font-size:.55rem;color:var(--text-mute)">的中率</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--gold-l);margin-top:2px" id="stat-boat-rec">--%</div>
+      <div style="font-size:.55rem;color:var(--text-mute)">回収率</div>
+    </div>
+    <div style="padding:10px 8px">
+      <div style="font-size:.62rem;color:var(--cycle);font-weight:700;margin-bottom:4px">🚴 競輪</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:#fff" id="stat-cycle-hit">--%</div>
+      <div style="font-size:.55rem;color:var(--text-mute)">的中率</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:var(--gold-l);margin-top:2px" id="stat-cycle-rec">--%</div>
+      <div style="font-size:.55rem;color:var(--text-mute)">回収率</div>
+    </div>
+  </div>
+</div>
+  <div style="text-align:center;margin:6px 20px 0">
+    <a href="results.html" style="font-size:.7rem;color:var(--gold);text-decoration:none">全予想履歴を見る →</a>
+  </div>
+
+  <!-- 無料予想 -->
+
+  <div class="sec" style="padding-bottom:0">
+    <div class="sec-head"><div class="sec-line"></div><span class="sec-title">本日の無料予想（EV計算済み）</span></div>
+    <div id="free-predictions" style="display:flex;flex-direction:column;gap:8px;margin-bottom:0">
+      <div class="empty">読み込み中...</div>
+    </div>
+  </div>
+
+  <!-- LINE登録バナー（メイン） -->
+
+  <div style="background:linear-gradient(135deg,#042a0a,#061808);border:1px solid rgba(6,199,85,.25);padding:20px;margin:16px 20px 0;text-align:center">
+    <p style="font-size:.65rem;color:#06C755;font-weight:700;letter-spacing:.12em;margin-bottom:8px">📩 LINE無料登録</p>
+    <p style="font-family:'Noto Serif JP',serif;font-weight:700;font-size:1rem;color:#fff;margin-bottom:6px">今日の厳選EVレースを無料で受け取る</p>
+    <p style="font-size:.75rem;color:#a8b0c4;margin-bottom:16px;line-height:1.7">感覚ではなくデータで選んだ期待値プラスのレースのみを毎朝配信。<br>登録無料・いつでも解約OK。</p>
+    <a href="https://line.me/R/ti/p/@414irikx" target="_blank" rel="noopener"
+      style="display:inline-flex;align-items:center;gap:8px;padding:14px 28px;background:#06C755;color:#fff;font-weight:700;font-size:.9rem;text-decoration:none;border-radius:4px;letter-spacing:.04em">
+      💬 友だち追加（無料）
+    </a>
+    <p style="font-size:.65rem;color:#5a6278;margin-top:10px">プレミアムプランは <a href="premium.html" style="color:#06C755;text-decoration:none">こちら</a></p>
+  </div>
+
+</div>
+
+<footer>
+  <p class="ft-logo">予想の鉄則</p>
+  <p class="ft-disc">本サイトの予想は情報提供を目的としています。公営競技の投票は自己責任でお願いします。18歳未満の方の投票は法律で禁じられています。</p>
+  <div class="ft-links">
+    <a href="index.html">トップ</a>
+    <a href="results.html">実績</a>
+    <a href="premium.html">プレミアム</a>
+    <a href="tokushoho.html">特定商取引法に基づく表記</a>
+    <a href="privacy.html">プライバシーポリシー</a>
+  </div>
+</footer>
+
+<script>
+// ── ダミーデータ ──────────────────────────────────────────
+const DB = {
+  0:{focus:[],venues:{horse:[],boat:[],cycle:[]},picks:[]},
+  1:{focus:[],venues:{horse:[],boat:[],cycle:[]},picks:[]},
+  2:{focus:[],venues:{horse:[],boat:[],cycle:[]},picks:[]},
+  3:{focus:[],venues:{horse:[],boat:[],cycle:[]},picks:[]},
+  4:{focus:[],venues:{horse:[],boat:[],cycle:[]},picks:[]},
+  5:{focus:[],venues:{horse:[],boat:[],cycle:[]},picks:[]},
+  6:{focus:[],venues:{horse:[],boat:[],cycle:[]},picks:[]},
+};
+
+const DAYS = ["日","月","火","水","木","金","土"];
+const GRADE_CLS = {G1:"fg-g1",G2:"fg-g2",G3:"fg-g3",SG:"fg-sg",GP:"fg-gp"};
+const SPORT_META = {
+  horse:{icon:"🐴",label:"競馬"},
+  boat: {icon:"🚤",label:"競艇"},
+  cycle:{icon:"🚴",label:"競輪"},
+};
+
+const today = new Date(); today.setHours(0,0,0,0);
+let sel = 0;
+
+function label(i){return i===0?'本日':i===1?'明日':(()=>{const d=new Date(today);d.setDate(today.getDate()+i);return `${d.getMonth()+1}/${d.getDate()}`;})()}
+
+function render(i){
+  const d=DB[i]||null;
+  renderHero(DB[0]);
+  renderPicks(d);
+}
+
+// ヒーローカード
+function renderHero(d){
+  const el=document.getElementById('hero-cards');
+  if(!d||!d.picks.length){el.innerHTML='';return}
+  el.innerHTML=d.picks.map(p=>{
+    const m=SPORT_META[p.sport];
+    const gc=GRADE_CLS[p.race.match(/G\d|SG|GP/)?.[0]]||'fg-g2';
+    const grade=p.race.match(/G\d|SG|GP/)?.[0]||'';
+    return `<a class="hero-card ${p.sport}" href="${p.url}">
+      <div class="hcard-sport">
+        <span class="hcard-icon">${m.icon}</span>
+        <span class="hcard-label">${m.label}</span>
+        ${grade?`<span class="hcard-grade">${grade}</span>`:''}
+      </div>
+      <div class="hcard-venue">${p.venue}</div>
+      <div class="hcard-name">${p.name}</div>
+      <div class="hcard-time">${p.time}<br><span class="hcard-time-label">発走時刻</span></div>
+    </a>`;
+  }).join('');
+}
+
+function renderPicks(d){
+  const el=document.getElementById('picks-list');
+  if(!d||!d.picks.length){
+    el.innerHTML='<div class="empty" style="padding:32px;text-align:center;color:var(--text-mute);font-size:.82rem">本日の予想を読み込み中です。<br>しばらくお待ちください。</div>';
+    return;
+  }
+  el.innerHTML=d.picks.map(p=>{
+    const m=SPORT_META[p.sport];
+    return `<a class="pick-card ${p.sport}" href="${p.url}">
+      <div class="pc-left">
+        <div class="pc-meta">
+          <span class="pc-sport ${p.sport}">${m.icon} ${m.label}</span>
+          <span class="pc-race">${p.race}</span>
+        </div>
+        <div class="pc-name">${p.name}</div>
+        <div class="pc-bottom">
+          <span class="pc-venue">${p.venue}</span>
+          <span class="pc-time">${p.time}</span>
+        </div>
+      </div>
+      <div class="pc-right">
+        <span class="pc-arr">›</span>
+        <span class="pc-link">予想を見る</span>
+      </div>
+    </a>`;
+  }).join('');
+}
+
+// 初期化
+render(0);
+
+// races.json → DB自動構築
+fetch('races.json?v='+Date.now())
+  .then(r=>r.ok?r.json():null)
+  .then(json=>{
+    if(!json||!json.races||!json.races.length) return;
+    const GP={GP:0,SG:0,G1:1,G2:2,G3:3,FI:4,FII:4};
+    const SU={horse:'keiba.html',boat:'kyotei.html',cycle:'keirin.html'};
+    const VT={GP:'vtag-gold',SG:'vtag-red',G1:'vtag-gold',G2:'vtag-gold',G3:'vtag-green'};
+    function gs(r){return GP[r.grade]??5}
+    function en(r){return parseFloat((r.ev||'').replace('%','').replace('+',''))||0}
+    const sf=(a,b)=>gs(a)-gs(b)||en(b)-en(a);
+    const all=json.races;
+    let sB=all.filter(r=>r.judge==='強買い');
+    let bu=all.filter(r=>r.judge==='買い');
+    let ep=all.filter(r=>!r.judge&&en(r)>0);
+    [sB,bu,ep].forEach(a=>a.sort(sf));
+    let pk=[];
+    for(const sp of ['horse','boat','cycle']){
+      for(const pl of [sB,bu,ep,all]){
+        const f=pl.find(r=>r.sport===sp&&!pk.includes(r));
+        if(f){pk.push(f);break;}
+      }
+    }
+    for(const pl of [sB,bu,ep,all]){
+      for(const r of pl){if(pk.length>=6)break;if(!pk.includes(r))pk.push(r);}
+      if(pk.length>=6)break;
+    }
+    DB[0].picks=pk.map(r=>({
+      sport:r.sport,race:`${r.venue}／${r.grade||''}`.trim(),
+      name:r.name,venue:r.venue,time:r.time,
+      url:SU[r.sport]||'#',ev:r.ev||'',judge:r.judge||''
+    }));
+    if(sel===0)render(0);else renderHero(DB[0]);
+    const badge=document.getElementById('update-badge');
+    if(badge&&json.date){
+      const d=new Date(json.date);
+      const td=new Date();td.setHours(0,0,0,0);
+      const isT=d.toDateString()===td.toDateString();
+      badge.innerHTML=isT
+        ?'<span style="display:inline-block;width:7px;height:7px;background:#2ecc71;border-radius:50%;margin-right:6px;animation:blink 2s infinite"></span>本日更新済み · EV予想'
+        :`<span style="display:inline-block;width:7px;height:7px;background:var(--text-mute);border-radius:50%;margin-right:6px"></span>${d.getMonth()+1}/${d.getDate()} 更新 · EV予想`;
+    }
+  }).catch(()=>{});
+
+// 無料予想読み込み
+async function loadFreePredictions() {
+  const el = document.getElementById('free-predictions');
+  try {
+    const res = await fetch('public_predictions.json?v=' + Date.now());
+    if (!res.ok) throw new Error('not found');
+    const json = await res.json();
+    const preds = json.predictions || [];
+    const today = new Date().toISOString().split('T')[0];
+
+    if (!preds.length || json.date !== today) {
+      el.innerHTML = '<div class="empty" style="padding:24px;color:var(--text-mute);font-size:.82rem;text-align:center">本日の無料予想は準備中です</div>';
+      return;
+    }
+
+    const SPORT_META = {
+      horse:{icon:'🐴',label:'競馬',cls:'horse'},
+      boat: {icon:'🚤',label:'競艇',cls:'boat'},
+      cycle:{icon:'🚴',label:'競輪',cls:'cycle'}
+    };
+
+    el.innerHTML = preds.map(p => {
+      const m = SPORT_META[p.sport] || {icon:'🏁',label:p.sport,cls:'horse'};
+      const evNum = parseFloat((p.ev||'0').replace(/[^0-9.-]/g,''));
+      const evColor = evNum >= 0 ? '#2ecc71' : 'var(--cycle)';
+      return `<a class="pick-card ${p.sport}" href="${p.url||'#'}" style="text-decoration:none">
+        <div class="pick-inner">
+          <div class="pick-left">
+            <div class="pc-meta">
+              <span class="pc-sport ${m.cls}">${m.icon} ${m.label}</span>
+              <span class="pc-race">${p.venue||''}</span>
+            </div>
+            <div class="pc-name">${p.name||''}</div>
+            <div style="font-size:.78rem;color:var(--text-dim);margin-bottom:4px">◎ ${p.honmei||'—'}</div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-family:'Bebas Neue',sans-serif;font-size:1.2rem;color:${evColor}">${p.ev||'—'}</span>
+              <span style="font-size:.68rem;color:var(--text-mute)">期待値</span>
+            </div>
+            ${p.reason ? `<div style="font-size:.72rem;color:var(--text-mute);margin-top:4px;line-height:1.6">${p.reason}</div>` : ''}
+          </div>
+          <div class="pc-right">
+            <span class="pc-arr">›</span>
+            <span class="pc-link">詳細を見る</span>
+          </div>
+        </div>
+      </a>`;
+    }).join('');
+
+    // LINE誘導
+    el.innerHTML += `<div style="background:rgba(6,199,85,.05);border:1px solid rgba(6,199,85,.15);padding:12px 16px;font-size:.75rem;color:var(--text-mute);line-height:1.7">
+      💬 全レースの詳細な買い目・EV計算根拠は<a href="https://line.me/R/ti/p/@414irikx" style="color:#06C755;text-decoration:none;font-weight:700">LINE公式</a>で配信中
+    </div>`;
+
+  } catch {
+    el.innerHTML = '<div class="empty" style="padding:24px;color:var(--text-mute);font-size:.82rem;text-align:center">本日の無料予想は準備中です</div>';
+  }
+}
+loadFreePredictions();
+
+// 実績データ読み込み
+async function loadStats() {
+  try {
+    const res = await fetch('results.json?v=' + Date.now());
+    if (res.ok) {
+      const json = await res.json();
+      const s = json.summary;
+      if (s) {
+        const rEl = document.getElementById('idx-recovery');
+        rEl.textContent = s.recovery_rate + '%';
+        rEl.style.color = parseFloat(s.recovery_rate) >= 100 ? '#2ecc71' : 'var(--gold-l)';
+        document.getElementById('idx-hitrate').textContent = s.hit_rate + '%';
+        document.getElementById('idx-total').textContent   = s.total;
+      }
+      const bs = json.by_sport;
+      if (bs) {
+        for (const sp of ['horse','boat','cycle']) {
+          const d = bs[sp]; if (!d) continue;
+          const hEl=document.getElementById(`stat-${sp}-hit`);
+          const rEl=document.getElementById(`stat-${sp}-rec`);
+          if(hEl){hEl.textContent=d.hit_rate+'%';hEl.style.color=parseFloat(d.hit_rate)>=50?'#2ecc71':'#fff';}
+          if(rEl){rEl.textContent=d.recovery_rate+'%';rEl.style.color=parseFloat(d.recovery_rate)>=100?'#2ecc71':'var(--gold-l)';}
+        }
+      }
+    }
+  } catch {
+    try {
+      const r = await window.storage.get('yoso-results');
+      if (r) {
+        const records = JSON.parse(r.value);
+        const total = records.length;
+        const hit   = records.filter(r => r.result === 'hit').length;
+        const bet   = records.reduce((s,r) => s + (r.bet_amount||0), 0);
+        const ret   = records.reduce((s,r) => s + (r.return_amount||0), 0);
+        document.getElementById('idx-recovery').textContent = bet ? (ret/bet*100).toFixed(1)+'%' : '--%';
+        document.getElementById('idx-hitrate').textContent  = total ? (hit/total*100).toFixed(1)+'%' : '--%';
+        document.getElementById('idx-total').textContent    = total;
+      }
+    } catch {}
+  }
+}
+loadStats();
+
+// SNS共有
+const PAGE_URL = encodeURIComponent(location.href);
+const X_TEXT = encodeURIComponent('【予想の鉄則】本日の競馬・競艇・競輪注目レース予想を公開中！EV計算で根拠ある予想をチェック👇 #競馬予想 #競艇予想 #競輪予想 #予想の鉄則');
+document.getElementById('share-x').href = `https://twitter.com/intent/tweet?text=${X_TEXT}&url=${PAGE_URL}`;
+document.getElementById('share-line').href = `https://social-plugins.line.me/lineit/share?url=${PAGE_URL}`;
+function copyURL() {
+  navigator.clipboard.writeText(location.href).then(() => {
+    const btn = document.getElementById('share-copy');
+    btn.textContent = '✅ コピーしました';
+    btn.classList.add('share-copied');
+    setTimeout(() => { btn.textContent = '🔗 URLコピー'; btn.classList.remove('share-copied'); }, 2000);
+  });
+}
+</script>
+
+<!-- SHARE -->
+
+<div class="share-block">
+  <div class="share-title">📣 今日の予想をシェアする</div>
+  <div class="share-buttons">
+    <a class="share-btn share-x" id="share-x" href="#" target="_blank" rel="noopener">𝕏 Xで投稿</a>
+    <a class="share-btn share-line" id="share-line" href="#" target="_blank" rel="noopener">LINE で送る</a>
+    <a class="share-btn share-ig" href="https://www.instagram.com/" target="_blank" rel="noopener">📷 Instagramへ</a>
+    <button class="share-btn share-copy" id="share-copy" onclick="copyURL()">🔗 URLコピー</button>
+  </div>
+</div>
+
+</body>
+</html>
