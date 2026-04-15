@@ -1159,11 +1159,14 @@ def fetch_boat_all():
                 grade     = {1:"SG",2:"G1",3:"G2",4:"G3"}.get(grade_num, "")
                 rno       = main_prog.get("race_number", 12)
 
-                # 発走時刻（race_closed_atから推定）
+                # 発走時刻（race_closed_atから取得）
+                # フォーマット例: "2026-04-15 20:45:00" (スペース区切り)
                 t = "--:--"
                 try:
                     closed = main_prog.get("race_closed_at","")
-                    if closed and "T" in closed:
+                    if closed and " " in closed:
+                        t = closed.split(" ")[1][:5]
+                    elif closed and "T" in closed:
                         t = closed.split("T")[1][:5]
                 except:
                     pass
@@ -1291,72 +1294,92 @@ def fetch_cycle_all():
         if not html:
             return [fallback("cycle")]
 
-        # 開催場のURLを複数パターンで抽出
-        venue_urls = re.findall(r'href="(/([a-z]+)/racecard/\d+/)"', html)
-        if not venue_urls:
-            # パターン2: JavaScriptのデータから抽出
-            venue_urls = [(f"/{s}/racecard/{today.year}/{str(today.month).zfill(2)}/{str(today.day).zfill(2)}/", s)
-                          for s in re.findall(r'"venue_code":"([a-z]+)"', html)]
-        if not venue_urls:
-            # パターン3: 場名から直接URL構築
-            found_slugs = re.findall(r'/([a-z]+)/racecard/', html)
-            venue_urls  = [(f"/{s}/racecard/{today.year}/{str(today.month).zfill(2)}/{str(today.day).zfill(2)}/", s)
-                           for s in dict.fromkeys(found_slugs)]
+        # 開催場情報を抽出（場名・グレード・一覧URL・最終レースURL）
+        # パターン: <p class="stadium">函館競輪</p> ... icon_grade gr2 ... href="https://keirin.kdreams.jp/hakodate/racecard/11202604150100/"
+        venues_info = re.findall(
+            r'<p class="stadium">([^<]+)</p>.*?icon_grade\s+(\w+).*?'
+            r'href="(https://keirin\.kdreams\.jp/([a-z]+)/racecard/(\d+)/)',
+            html, re.DOTALL
+        )
 
         # 重複除去・場名抽出
         seen_venues = set()
-        venue_list  = []
-        for full_url, slug in venue_urls:
+        venue_list  = []  # (slug, venue_name_jp, grade, list_url, race_id)
+        for name_jp, grade_cls, list_url, slug, race_id in venues_info:
             if slug not in seen_venues and slug not in ["racecard","kaisai","gamboo","keirin"]:
                 seen_venues.add(slug)
-                venue_list.append((slug, full_url))
+                grade_map_cls = {"gr1":"G1","gr2":"G2","gr3":"G3","grgp":"GP","grfi":"FI","grfii":"FII"}
+                grade = grade_map_cls.get(grade_cls, "")
+                venue_list.append((slug, name_jp.replace("競輪",""), grade, list_url, race_id))
 
-        print(f"  [cycle] 開催場候補: {len(venue_list)}件 {[s for s,_ in venue_list[:5]]}")
+        # パターンマッチ失敗時のフォールバック（旧パターン）
+        if not venue_list:
+            old_urls = re.findall(r'href="(/([a-z]+)/racecard/\d+/)"', html)
+            for full_url, slug in old_urls:
+                if slug not in seen_venues and slug not in ["racecard","kaisai","gamboo","keirin"]:
+                    seen_venues.add(slug)
+                    venue_list.append((slug, slug, "", base + full_url, ""))
 
-        # 場スラッグ→日本語名マップ
+        print(f"  [cycle] 開催場候補: {len(venue_list)}件 {[s for s,_,_,_,_ in venue_list[:5]]}")
+
+        # 場スラッグ→日本語名マップ（Kdrスラッグ完全対応）
         SLUG_TO_NAME = {
-            "maebashi":"前橋","toride":"取手","matsudo":"松戸","chiba":"千葉",
-            "kawasaki":"川崎","seibu":"西武園","keio":"京王閣","tachikawa":"立川",
-            "shizuoka":"静岡","nagoya":"名古屋","gifu":"岐阜","ogaki":"大垣",
-            "toyohashi":"豊橋","toyama":"富山","fukui":"福井","matsuyama":"松山",
-            "kochi":"高知","kokura":"小倉","kurume":"久留米","beppu":"別府",
-            "sasebo":"佐世保","kumamoto":"熊本","takeo":"武雄","tamano":"玉野",
-            "hiroshima":"広島","hofu":"防府","yamaguchi":"山口","mukomachi":"向日町",
-            "wakayama":"和歌山","岸和田":"岸和田","nara":"奈良","otsu":"大津",
-            "utsunomiya":"宇都宮","takasaki":"高崎","omiya":"大宮","sendai":"仙台",
-            "aomori":"青森","hakodate":"函館","obihiro":"帯広",
+            # 北海道
+            "hakodate":"函館","aomori":"青森","iwakitaira":"いわき平","obihiro":"帯広",
+            # 関東
+            "yahiko":"弥彦","maebashi":"前橋","toride":"取手","utsunomiya":"宇都宮",
+            "omiya":"大宮","seibuen":"西武園","keiokaku":"京王閣","tachikawa":"立川",
+            "matsudo":"松戸","chiba":"千葉","kawasaki":"川崎","hiratsuka":"平塚",
+            "odawara":"小田原","ito":"伊東",
+            # 中部
+            "shizuoka":"静岡","nagoya":"名古屋","gifu":"岐阜","ogaki":"大墓",
+            "toyohashi":"豊橋","toyama":"富山","matsusaka":"松阪","yokkaichi":"四日市",
+            "fukui":"福井",
+            # 近畿
+            "nara":"奈良","mukomachi":"向日町","wakayama":"和歌山","kishiwada":"岸和田",
+            # 中国・四国
+            "tamano":"玉野","hiroshima":"広島","hofu":"防府",
+            "takamatsu":"高松","komatsushima":"小松島","kochi":"高知","matsuyama":"松山",
+            # 九州
+            "kokura":"小倉","kurume":"久留米","takeo":"武雄","sasebo":"佐世保",
+            "beppu":"別府","kumamoto":"熊本","yamaguchi":"山口",
+            # その他
+            "otsu":"大津","takasaki":"高崎","sendai":"仙台",
         }
 
         grades_map = {"GP":"GP","G1":"G1","G2":"G2","G3":"G3","FI":"FI","FII":"FII"}
 
-        for slug, venue_url in venue_list[:15]:
-            venue_name = SLUG_TO_NAME.get(slug, slug) + "競輪場"
+        for slug, name_jp, grade, list_url, race_id in venue_list[:15]:
+            # 日本語場名（既に抽出済み）
+            venue_name = (name_jp or SLUG_TO_NAME.get(slug, slug)) + "競輪場"
             try:
-                # 開催ページから最終レース情報を取得
-                v_html = fetch(base + venue_url)
+                # 開催一覧ページから最終レースURLを取得
+                v_html = fetch(list_url)
                 time.sleep(1)
 
-                # グレード取得
-                grade_m = re.search(r'(GP|G[123I]|FI|FII)', v_html)
-                grade   = grade_m.group(1) if grade_m else ""
-
-                # 発走時刻取得（10:00〜21:00の範囲）
+                # 発走時刻取得（10:00～21:00の範囲）
                 times_m  = re.findall(r'(\d{1,2}:\d{2})', v_html)
                 valid_ts = [t for t in times_m if 8 <= int(t.split(":")[0]) <= 21]
                 t        = valid_ts[-1] if valid_ts else "--:--"
 
-                # レース詳細URLを取得
-                # 形式1: /aomori/racedetail/1220260412XXXX/
-                detail_urls = re.findall(r'href="(/[a-z]+/racedetail/\d+/)"', v_html)
-                # 形式2: /gamboo/keirin-kaisai/race-card/result/XXXX/
+                # レース詳細URLを取得（最終レース）
+                # 形式: /hakodate/racedetail/1120260415010012/
+                detail_urls = re.findall(
+                    rf'href="(https://keirin\.kdreams\.jp/{slug}/racedetail/(\d+)/)',
+                    v_html
+                )
                 if not detail_urls:
-                    detail_urls = re.findall(r'href="(/gamboo/keirin-kaisai/race-card/[^"]+)"', v_html)
+                    # 相対パスでも探す
+                    detail_urls_rel = re.findall(rf'href="(/{slug}/racedetail/(\d+)/)', v_html)
+                    detail_urls = [(base + u, rid) for u, rid in detail_urls_rel]
 
                 riders = []
                 if detail_urls:
-                    detail_url = base + detail_urls[-1]
-                    riders     = fetch_cycle_riders_kdreams(detail_url, venue_name)
-                    print(f"  [cycle/{slug}] {len(riders)}選手取得")
+                    # 重複除去してレース番号最大（最終レース）のURLを選択
+                    unique_detail = list(dict.fromkeys(detail_urls))
+                    last_race_url = max(unique_detail, key=lambda x: int(x[1][-2:]))[0]
+                    riders = fetch_cycle_riders_kdreams(last_race_url, venue_name)
+                    print(f"  [cycle/{slug}] {len(riders)}選手取得 (URL: {last_race_url})")
 
                 ev_results = calc_race_ev_cycle(riders, history) if riders else []
                 best       = next((r for r in ev_results if r["judge"] in ["強買い","買い"]),
@@ -1375,8 +1398,9 @@ def fetch_cycle_all():
 
             except Exception as e:
                 print(f"  [cycle/{slug}] エラー: {e}")
+                import traceback; traceback.print_exc()
                 races.append({"sport":"cycle","name":f"{venue_name} 注目レース",
-                              "venue":venue_name,"time":"--:--","grade":"","url":"keirin.html"})
+                              "venue":venue_name,"time":"--:--","grade":grade,"url":"keirin.html"})
 
         if not races:
             races.append(fallback("cycle"))
@@ -1397,12 +1421,21 @@ def fetch_cycle_riders_kdreams(detail_url, venue_name):
         bank_type = get_bank_type(venue_name.replace("競輪場",""))
 
         # 選手名を抽出（Kドリームスの出走表テーブル）
-        # 形式: 車番・選手名・都道府県/年齢/期別・級班・脚質...
-        names   = re.findall(r'<td[^>]*>([^\s<]{2,5}　[^\s<]{1,5})</td>', html)
+        # 形式: <td class="rider bdr_r">\n\t\t\t\t\t\t\t\t小林 泰正<br><span class="home">群　馬/31/113/S1</span>
+        names = re.findall(r'<td class="rider bdr_r">\s*([^\n<]+)<br>', html)
+        # 重複除去（最初の7名のみ）
+        seen_n = set()
+        unique_names = []
+        for n in names:
+            n = n.strip()
+            if n and n not in seen_n:
+                seen_n.add(n)
+                unique_names.append(n)
+        names = unique_names[:9]
         if not names:
-            names = re.findall(r'(\S{2,4}\s+\S{1,4})(?:\s+[^\s]+\s+S[12]|A[123])', html)
+            # フォールバック: 旧パターン
+            names = re.findall(r'([^\s<]{2,5}\s[^\s<]{1,5})(?:\s+[^\s]+\s+S[12]|A[123])', html)
         if not names:
-            # 着度数パターンで選手名取得
             names = re.findall(r'([^\d\s<>]{2,5})\s*\d+-\d+-\d+-\d+', html)
 
         # 着度数（1着-2着-3着-着外）
@@ -1412,8 +1445,39 @@ def fetch_cycle_riders_kdreams(detail_url, venue_name):
         odds_list = [float(o) for o in re.findall(r'(\d+\.\d)', html)
                      if 1.5 <= float(o) <= 99.9][:9]
 
-        # 脚質
-        styles = re.findall(r'(逃げ|捲り|差し|追込|自在|マーク)', html)
+        # 脚質（各選手の脚質を順番に取得）
+        # Kdrの出走表では選手行内に脚質情報が含まれる
+        # テーブルヘッダ: 逃・捧・差・マ の各列の数値から脚質を推定
+        # 各選手行: <tr class="n1 ">...<td>0</td><td class="bdr_r">2</td><td>0</td><td>4</td>...
+        # 列順: 車番, 番号, 選手名, 競走得点, S, B, 逃, 捧, 差, マ
+        style_rows = re.findall(r'<tr class="n(\d)[^"]*">(.*?)</tr>', html, re.DOTALL)
+        # 重複除去（最初の各車番のみ）
+        seen_rows = set()
+        styles_by_num = {}  # 車番 -> 脚質
+        for car_num, row_html in style_rows:
+            if car_num in seen_rows:
+                continue
+            seen_rows.add(car_num)
+            # 各列の数値を取得: 逃・捧・差・マ
+            td_vals = re.findall(r'<td[^>]*>\s*([\d.]+)\s*</td>', row_html)
+            # 選手行の構造: 車番(1), 番号(2), 選手名(3), 競走得点(4), S(5), B(6), 逃(7), 捧(8), 差(9), マ(10)
+            # td_valsは数値のみなのでインデックスがずれる場合あり
+            if len(td_vals) >= 6:
+                # 逃・捧・差・マの値を取得（得点後の4列）
+                # 得点の位置を特定（小数点を含む値）
+                score_idx = next((i for i, v in enumerate(td_vals) if '.' in v), 2)
+                style_vals = td_vals[score_idx+1:score_idx+5] if score_idx+4 < len(td_vals) else td_vals[-4:]
+                if style_vals:
+                    max_idx = max(range(len(style_vals)), key=lambda i: float(style_vals[i]) if style_vals[i].replace('.','').isdigit() else 0)
+                    style_names = ["逃げ","捲り","差し","マーク"]  # 逃・捧・差・マ（競輪の脚質列）
+                    styles_by_num[car_num] = style_names[max_idx] if max_idx < len(style_names) else "差し"
+        # 車番順に脚質リストを構築
+        styles = [styles_by_num.get(str(i+1), "差し") for i in range(9)]
+        # フォールバック: テキストパターン
+        if not any(styles_by_num.values()):
+            styles = re.findall(r'(逃げ|捲り|差し|追込|自在|マーク)', html)
+            if not styles:
+                styles = ["差し"] * 9
 
         # ライン情報
         line_groups = extract_line_groups(html)
@@ -1469,39 +1533,6 @@ def fetch_cycle_riders_kdreams(detail_url, venue_name):
     except Exception as e:
         print(f"  [cycle_kdreams] エラー: {e}")
         return []
-
-        for i, venue in enumerate(venues):
-            venue = venue.strip()
-            if venue in seen: continue
-            seen.add(venue)
-            grade = grades[i] if i < len(grades) else ""
-            t     = times[i]  if i < len(times)  else "--:--"
-
-            riders     = fetch_cycle_riders(base, venue, grade, history)
-            ev_results = calc_race_ev_cycle(riders, history) if riders else []
-            best       = next((r for r in ev_results if r["judge"] in ["強買い","買い"]),
-                              ev_results[0] if ev_results else None)
-
-            race = {"sport":"cycle","name":f"{venue} 注目レース","venue":venue,
-                    "time":t,"grade":grade,"url":"keirin.html"}
-            if best:
-                race.update({
-                    "honmei": best.get("name",""),
-                    "ev":     f"+{int((best['ev']-1)*100)}%" if best['ev'] > 1 else "",
-                    "judge":  best["judge"],
-                    "reason": f"推定勝率{int(best['prob']*100)}%・EV{best['ev']:.2f}倍・枠{int(best.get('frame_num',1))}番"
-                })
-            races.append(race)
-
-        if not races:
-            races.append(fallback("cycle"))
-
-    except Exception as e:
-        print(f"[cycle] エラー: {e}")
-        races.append(fallback("cycle"))
-
-    print(f"  競輪: {len(races)}件取得")
-    return races
 
 
 def fetch_cycle_riders(base, venue, grade, history):
@@ -2046,11 +2077,54 @@ if __name__ == "__main__":
             f.write(line_message)
         print(f"\n--- LINE配信テキスト ---\n{line_message}")
 
-    # ④ FTPアップロード
-    print("\n--- ④ FTPアップロード ---")
+    # ④.5 public_predictions.json生成（index.htmlの無料予想セクション用）
+    print("\n--- ④.5 public_predictions.json生成 ---")
+    try:
+        sport_icon = {"horse":"🐴","boat":"🚤","cycle":"🚴"}
+        sport_name = {"horse":"競馬","boat":"競艇","cycle":"競輪"}
+        predictions = []
+        for r in all_races:
+            if r.get("honmei") and r.get("judge") in ["強買い","買い"]:
+                predictions.append({
+                    "sport":    r["sport"],
+                    "icon":     sport_icon.get(r["sport"],"🏁"),
+                    "sport_name": sport_name.get(r["sport"],r["sport"]),
+                    "venue":    r.get("venue",""),
+                    "time":     r.get("time","--:--"),
+                    "grade":    r.get("grade",""),
+                    "honmei":   r.get("honmei",""),
+                    "ev":       r.get("ev",""),
+                    "judge":    r.get("judge",""),
+                    "reason":   r.get("reason",""),
+                    "url":      r.get("url","")
+                })
+        # EV順にソートし上位5件のみ公開
+        def get_ev_num(r):
+            try: return float(r.get("ev","").replace("%","").replace("+","")) / 100 + 1
+            except: return 0.0
+        predictions_sorted = sorted(predictions, key=get_ev_num, reverse=True)[:5]
+        pub_pred = {"date": today_str, "predictions": predictions_sorted}
+        with open("public_predictions.json","w",encoding="utf-8") as f:
+            json.dump(pub_pred, f, ensure_ascii=True, indent=2)
+        print(f"public_predictions.json生成完了（{len(predictions_sorted)}件）")
+    except Exception as e:
+        print(f"⚠️ public_predictions.json生成エラー: {e}")
+
+    # ⑤ FTPアップロード
+    print("\n--- ⑤ FTPアップロード ---")
     upload_ftp()
 
-    # ⑤ index.html生成＋FTPアップロード
+    # ⑤.5 public_predictions.json FTPアップロード
+    if os.path.exists("public_predictions.json"):
+        remote_base = os.environ.get("FTP_REMOTE",
+            "/home/c9048134/public_html/oyatojikka.online/races.json")
+        parts = [p for p in remote_base.split("/") if p]
+        remote_dir = "/" + "/".join(parts[:-1])
+        remote_pred = remote_dir + "/public_predictions.json"
+        print("\n--- ⑤.5 public_predictions.json FTPアップロード ---")
+        upload_ftp_file("public_predictions.json", remote_pred)
+
+    # ⑥ index.html生成＋FTPアップロード
     generate_index_html()
     if os.path.exists("index.html"):
         remote_base = os.environ.get("FTP_REMOTE",
@@ -2059,9 +2133,9 @@ if __name__ == "__main__":
         parts = [p for p in remote_base.split("/") if p]
         remote_dir = "/" + "/".join(parts[:-1])
         remote_index = remote_dir + "/index.html"
-        print("\n--- ⑤ index.html FTPアップロード ---")
+        print("\n--- ⑦ index.html FTPアップロード ---")
         upload_ftp_file("index.html", remote_index)
     else:
-        print("\n--- ⑤ index.html スキップ（ファイルなし）---")
+        print("\n--- ⑦ index.html スキップ（ファイルなし）---")
 
     print(f"\n✅ 全処理完了（{len(all_races)}件）")
