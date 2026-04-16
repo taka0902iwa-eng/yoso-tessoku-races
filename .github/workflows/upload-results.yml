@@ -14,22 +14,27 @@ jobs:
           FTP_REMOTE: ${{ secrets.FTP_REMOTE }}
         run: |
           python3 -c "
-          import ftplib, os, json
-          ftp_host = os.environ.get('FTP_HOST','').strip().replace('\n','').replace('\r','')
-          ftp_user = os.environ.get('FTP_USER','').strip().replace('\n','').replace('\r','')
-          ftp_pass = os.environ.get('FTP_PASS','').strip().replace('\n','').replace('\r','')
-          ftp_remote = os.environ.get('FTP_REMOTE','/public_html/oyatojikka.online/').strip().replace('\n','').replace('\r','')
-          if not ftp_host:
+          import ftplib, os
+          ftp_host = (os.environ.get('FTP_HOST','') or '').strip().replace('\n','').replace('\r','').replace(' ','')
+          ftp_user = (os.environ.get('FTP_USER','') or '').strip().replace('\n','').replace('\r','').replace(' ','')
+          ftp_pass = (os.environ.get('FTP_PASS','') or '').strip().replace('\n','').replace('\r','')
+          remote_base = (os.environ.get('FTP_REMOTE','/public_html/oyatojikka.online/races.json') or '').strip()
+          if not all([ftp_host, ftp_user, ftp_pass]):
               print('FTP環境変数が設定されていません')
               exit(1)
+          # result_updater.pyと同じパス処理
+          parts = [p for p in remote_base.split('/') if p]
+          remote_dir = '/' + '/'.join(parts[:-1])
+          remote_path = remote_dir + '/results.json'
+          print(f'アップロード先: {remote_path}')
           ftp = ftplib.FTP()
           ftp.connect(ftp_host, 21, timeout=30)
           ftp.login(ftp_user, ftp_pass)
           ftp.set_pasv(True)
           with open('results.json', 'rb') as f:
-              ftp.storbinary(f'STOR {ftp_remote}results.json', f)
+              ftp.storbinary(f'STOR {remote_path}', f)
           ftp.quit()
-          print(f'FTPアップロード完了: {ftp_remote}results.json')
+          print(f'FTPアップロード完了: {remote_path}')
           "
       - name: results.json の内容確認
         run: |
