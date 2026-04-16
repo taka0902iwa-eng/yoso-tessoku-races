@@ -1,0 +1,49 @@
+name: results.jsonをFTPアップロード
+on:
+  workflow_dispatch:
+jobs:
+  upload-results:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: results.jsonをFTPアップロード
+        env:
+          FTP_HOST:   ${{ secrets.FTP_HOST }}
+          FTP_USER:   ${{ secrets.FTP_USER }}
+          FTP_PASS:   ${{ secrets.FTP_PASS }}
+          FTP_REMOTE: ${{ secrets.FTP_REMOTE }}
+        run: |
+          python3 -c "
+          import ftplib, os, json
+          ftp_host = os.environ.get('FTP_HOST','').strip().replace('\n','').replace('\r','')
+          ftp_user = os.environ.get('FTP_USER','').strip().replace('\n','').replace('\r','')
+          ftp_pass = os.environ.get('FTP_PASS','').strip().replace('\n','').replace('\r','')
+          ftp_remote = os.environ.get('FTP_REMOTE','/public_html/oyatojikka.online/').strip().replace('\n','').replace('\r','')
+          if not ftp_host:
+              print('FTP環境変数が設定されていません')
+              exit(1)
+          ftp = ftplib.FTP()
+          ftp.connect(ftp_host, 21, timeout=30)
+          ftp.login(ftp_user, ftp_pass)
+          ftp.set_pasv(True)
+          with open('results.json', 'rb') as f:
+              ftp.storbinary(f'STOR {ftp_remote}results.json', f)
+          ftp.quit()
+          print(f'FTPアップロード完了: {ftp_remote}results.json')
+          "
+      - name: results.json の内容確認
+        run: |
+          python3 -c "
+          import json
+          with open('results.json') as f:
+              d = json.load(f)
+          s = d.get('summary', {})
+          print(f'総戦数: {s.get(\"total\",0)}件')
+          print(f'的中率: {s.get(\"hit_rate\",0)}%')
+          print(f'収支: ¥{s.get(\"profit\",0):,}')
+          records = d.get('records', [])
+          print(f'レコード数: {len(records)}件')
+          if records:
+              latest = sorted(records, key=lambda x: x.get('date',''), reverse=True)[0]
+              print(f'最新: {latest.get(\"date\",\"\")} {latest.get(\"name\",\"\")} {latest.get(\"result\",\"\")}')
+          "
