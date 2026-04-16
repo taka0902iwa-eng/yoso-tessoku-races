@@ -23,7 +23,7 @@ jobs:
           FTP_PASS:   ${{ secrets.FTP_PASS }}
           FTP_REMOTE: ${{ secrets.FTP_REMOTE }}
         run: python scraper.py
-      - name: 昨日のレース結果を取得してresults.jsonを更新
+      - name: 昨日のレース結果を取得してresults.jsonを更新・FTPアップロード
         env:
           FTP_HOST:   ${{ secrets.FTP_HOST }}
           FTP_USER:   ${{ secrets.FTP_USER }}
@@ -39,39 +39,15 @@ jobs:
                   data = json.loads(r.read())
               with open('results.json','w',encoding='utf-8') as f:
                   json.dump(data, f, ensure_ascii=False, indent=2)
-              print(f'results.json取得成功: {len(data.get(\"records\",[]))}件')
+              print(f'results.json取得成功: {len(data.get(chr(114)+chr(101)+chr(99)+chr(111)+chr(114)+chr(100)+chr(115),[]))}件')
           except Exception as e:
               print(f'results.json取得失敗（新規作成）: {e}')
               with open('results.json','w',encoding='utf-8') as f:
                   json.dump({'summary':{},'by_sport':{},'records':[]}, f, ensure_ascii=False)
           "
           python result_updater.py
-      - name: results.jsonをConoHaにアップロード
-        env:
-          FTP_HOST:   ${{ secrets.FTP_HOST }}
-          FTP_USER:   ${{ secrets.FTP_USER }}
-          FTP_PASS:   ${{ secrets.FTP_PASS }}
-          FTP_REMOTE: ${{ secrets.FTP_REMOTE }}
-        run: |
-          python3 -c "
-          import ftplib, os
-          host = os.environ['FTP_HOST']
-          user = os.environ['FTP_USER']
-          passwd = os.environ['FTP_PASS']
-          remote = os.environ.get('FTP_REMOTE', '/public_html')
-          try:
-              ftp = ftplib.FTP(host, user, passwd, timeout=30)
-              ftp.cwd(remote)
-              with open('results.json','rb') as f:
-                  ftp.storbinary('STOR results.json', f)
-              ftp.quit()
-              print('results.json アップロード成功')
-          except Exception as e:
-              print(f'results.json アップロード失敗: {e}')
-          "
       - name: races.json の内容確認
         run: |
-          echo "=== レース件数 ==="
           python3 -c "
           import json
           try:
@@ -87,7 +63,6 @@ jobs:
           " || echo "解析失敗"
       - name: results.json の内容確認
         run: |
-          echo "=== results.json ==="
           python3 -c "
           import json
           try:
