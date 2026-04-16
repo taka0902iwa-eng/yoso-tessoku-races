@@ -126,10 +126,10 @@ def fetch(url, timeout=20, retries=3):
         except Exception as e:
             last_err = e
             if attempt < retries - 1:
+                print(f"  [RETRY] fetch失敗 ({attempt+1}/{retries}): {e} -> {url}")
                 time.sleep(2 * (attempt + 1))
+    print(f"  [ERROR] fetch最終失敗: {last_err} -> {url}")
     raise last_err
-
-
 # ══════════════════════════════════════════════════
 # 競馬 EV計算（全改善版）
 # ══════════════════════════════════════════════════
@@ -156,7 +156,14 @@ EV_THRESHOLD_HORSE = {
 
 def get_ev_threshold_horse(track_type, distance_type, condition):
     tt = "ダ" if "ダ" in track_type else "芝"
-    return EV_THRESHOLD_HORSE.get((tt, distance_type, condition), (1.25, 1.05))
+    base_s, base_b = EV_THRESHOLD_HORSE.get((tt, distance_type, condition), (1.25, 1.05))
+    # EV補正係数（実績に基づく）を適用して閾値を自動調整
+    calib = get_ev_calib().get("horse", 1.0)
+    # 補正係数が高い（実績が良い）場合は閾値を下げて買いやすくする
+    # 補正係数が低い（実績が悪い）場合は閾値を上げて厳しくする
+    adj_s = max(1.10, base_s / calib)
+    adj_b = max(1.00, base_b / calib)
+    return (adj_s, adj_b)
 
 # ── Priority1: 直近5・10走の重み付け ────────────
 WEIGHT_RECENT5  = 0.50
@@ -517,17 +524,18 @@ def calc_race_ev_cycle(riders, history=None):
 
         # 条件別EV閾値（Step7の先行実装）
         if role == "先頭" and bt == 333:
-            threshold_strong = 1.20
-            threshold_buy    = 1.05
+            base_s, base_b = 1.20, 1.05
         elif role == "先頭":
-            threshold_strong = 1.25
-            threshold_buy    = 1.05
+            base_s, base_b = 1.25, 1.05
         elif role == "番手":
-            threshold_strong = 1.20
-            threshold_buy    = 1.00
+            base_s, base_b = 1.20, 1.00
         else:  # 単騎
-            threshold_strong = 1.30
-            threshold_buy    = 1.15
+            base_s, base_b = 1.30, 1.15
+            
+        # EV補正係数（実績に基づく）を適用して閾値を自動調整
+        calib = get_ev_calib().get("cycle", 1.0)
+        threshold_strong = max(1.10, base_s / calib)
+        threshold_buy    = max(1.00, base_b / calib)
 
         judge = "強買い" if ev > threshold_strong else "買い" if ev > threshold_buy else "見送り"
 
@@ -551,7 +559,17 @@ def calc_race_ev_cycle(riders, history=None):
 # ══════════════════════════════════════════════════
 # netkeiba から競馬データ取得
 # ══════════════════════════════════════════════════
-def fetch_horse_with_ev():
+def fetch_horse_with_ev(max_retries=3):
+    for attempt in range(max_retries):
+        try:
+            return _fetch_horse_with_ev_impl()
+        except Exception as e:
+            print(f"  [RETRY] 競馬スクレイピング失敗 ({attempt+1}/{max_retries}): {e}")
+            import time; time.sleep(5)
+    print("  [ERROR] 競馬スクレイピング最終失敗")
+    return []
+
+def _fetch_horse_with_ev_impl():
     races   = []
     history = load_history()
     print(" [horse] netkeiba.com 全レース取得開始...")
@@ -1413,7 +1431,17 @@ BOAT_CODES = {
 }
 
 # ── メイン取得関数 ────────────────────────────────
-def fetch_boat_all():
+def fetch_boat_all(max_retries=3):
+    for attempt in range(max_retries):
+        try:
+            return _fetch_boat_all_impl()
+        except Exception as e:
+            print(f"  [RETRY] 競艇スクレイピング失敗 ({attempt+1}/{max_retries}): {e}")
+            import time; time.sleep(5)
+    print("  [ERROR] 競艇スクレイピング最終失敗")
+    return []
+
+def _fetch_boat_all_impl():
     races   = []
     history = load_history()
     try:
@@ -1574,7 +1602,17 @@ def fetch_boat_all():
 # ══════════════════════════════════════════════════
 # 競輪: keirin.jp 全開催場取得 + EV計算
 # ══════════════════════════════════════════════════
-def fetch_cycle_all():
+def fetch_cycle_all(max_retries=3):
+    for attempt in range(max_retries):
+        try:
+            return _fetch_cycle_all_impl()
+        except Exception as e:
+            print(f"  [RETRY] 競輪スクレイピング失敗 ({attempt+1}/{max_retries}): {e}")
+            import time; time.sleep(5)
+    print("  [ERROR] 競輪スクレイピング最終失敗")
+    return []
+
+def _fetch_cycle_all_impl():
     races   = []
     history = load_history()
     try:
