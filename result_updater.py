@@ -793,7 +793,17 @@ def run_result_update(target_date: str = None):
     print(f"結果自動更新: {target_date}")
     print(f"{'='*50}")
 
-    results = match_and_update(target_date)
+    # 昨日の races_YYYY-MM-DD.json を優先して使用
+    # （GitHub Actions が毎日コミット保存したもの）
+    dated_races_path = f"races_{target_date}.json"
+    if os.path.exists(dated_races_path):
+        races_json_path = dated_races_path
+        print(f"  予想ファイル: {dated_races_path}")
+    else:
+        races_json_path = "races.json"
+        print(f"  予想ファイル: races.json（{dated_races_path} が見つからないため）")
+
+    results = match_and_update(target_date, races_json_path=races_json_path)
     if results:
         upload_results_ftp()
     return results
