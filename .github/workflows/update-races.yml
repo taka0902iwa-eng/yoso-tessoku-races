@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -23,6 +25,15 @@ jobs:
           FTP_PASS:   ${{ secrets.FTP_PASS }}
           FTP_REMOTE: ${{ secrets.FTP_REMOTE }}
         run: python scraper.py
+      - name: 今日のraces.jsonをGitHubにコミット保存（翌日の結果照合用）
+        run: |
+          TODAY=$(date -u +%Y-%m-%d)
+          cp races.json races_${TODAY}.json
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add races_${TODAY}.json
+          git diff --cached --quiet || git commit -m "auto: races_${TODAY}.json を保存"
+          git push
       - name: 昨日のレース結果を取得してresults.jsonを更新・FTPアップロード
         env:
           FTP_HOST:   ${{ secrets.FTP_HOST }}
