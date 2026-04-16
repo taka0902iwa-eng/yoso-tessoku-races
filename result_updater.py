@@ -423,98 +423,99 @@ def fetch_cycle_results(date_str: str) -> list:
     }
 
     results = []
-    # 開催場スラッグを取得（相対パス・絶対URL両対応）
-    venue_slugs = re.findall(r'href="(?:https://keirin\.kdreams\.jp)?/([a-z]+)/racecard/\d{8}/', html)
-    venue_slugs = list(dict.fromkeys(venue_slugs))
+    # トップページから直接racedetail URLを取得（絶対URL・相対パス両対応）
+    detail_urls = re.findall(
+        r'href="((?:https://keirin\.kdreams\.jp)?/([a-z]+)/racedetail/(\d{14,20})/)',
+        html
+    )
+    # (full_url, slug, race_id) のリスト
+    seen = set()
+    unique_details = []
+    for full, slug, race_id in detail_urls:
+        if race_id not in seen:
+            seen.add(race_id)
+            if not full.startswith('http'):
+                full = 'https://keirin.kdreams.jp' + full
+            unique_details.append((full, slug, race_id))
 
-    for slug in venue_slugs[:15]:
+    print(f"  racedetail URL数: {len(unique_details)}件")
+
+    for detail_url, slug, race_id in unique_details[:60]:  # 最大4場×12レース
         venue_name = slug_to_venue.get(slug, slug)
-        venue_url = f"https://keirin.kdreams.jp/{slug}/racecard/{ymd}/"
-        venue_html = fetch_html(venue_url)
-        if not venue_html:
+        detail_html = fetch_html(detail_url)
+        if not detail_html:
             continue
-        time.sleep(0.5)
+        time.sleep(0.3)
 
-        # レース結果URLを取得（result ページ）
-        result_links = re.findall(
-            rf'href="(?:https://keirin\.kdreams\.jp)?/{slug}/result/\d{{8}}/(\d{{2}})/"',
-            venue_html
+        # 1着車番を取得（order_1クラス）
+        order1_m = re.search(r'class="order_1">([^<]+)</', detail_html)
+        if not order1_m:
+            continue
+        winner_num = order1_m.group(1).strip()  # 車番（文字列）
+
+        # 車番に対応する選手名を取得
+        # riderクラスの選手名を車番順に取得
+        riders = re.findall(
+            r'class="rider"[^>]*>([^<]+)<br',
+            detail_html
         )
-        if not result_links:
-            result_links = re.findall(
-                rf'/{slug}/result/{ymd}/(\d{{2}})/',
-                venue_html
+        if not riders:
+            riders = re.findall(
+                r'class="[^"]*rider[^"]*"[^>]*>([^　0-9<\n]{2,10})<br',
+                detail_html
             )
-        result_links = list(dict.fromkeys(result_links))
 
-        for rno in result_links[:12]:
-            result_url = f"https://keirin.kdreams.jp/{slug}/result/{ymd}/{rno}/"
-            result_html = fetch_html(result_url)
-            if not result_html:
-                continue
-            time.sleep(0.3)
+        # 車番リストを取得（num.nXクラス）
+        car_nums = re.findall(r'class="num n(\d)"', detail_html)
+        if not car_nums:
+            car_nums = re.findall(r'class="no"[^>]*>(\d)</td', detail_html)
 
-            # 1着選手名（複数パターン対応）
-            winner = ""
-            # パターン1: rank1 クラス
-            winner_m = re.search(
-                r'class="[^"]*rank1[^"]*"[^>]*>.*?<td[^>]*class="[^"]*rider[^"]*"[^>]*>([^<]+)</td>',
-                result_html, re.DOTALL
-            )
-            if winner_m:
-                winner = winner_m.group(1).strip()
-            if not winner:
-                # パターン2: 1着の直後の選手名
-                winner_m = re.search(
-                    r'1着[^<]*<[^>]*>([^\d<\s]{2,10})[^<]*</[^>]*>',
-                    result_html
-                )
-                if winner_m:
-                    winner = winner_m.group(1).strip()
-            if not winner:
-                # パターン3: テーブルの1行目の選手名
-                tr_rows = re.findall(r'<tr[^>]*>(.*?)</tr>', result_html, re.DOTALL)
-                for row in tr_rows[:5]:
-                    cells = re.findall(r'<td[^>]*>(.*?)</td>', row, re.DOTALL)
-                    cells_text = [re.sub(r'<[^>]+>', '', c).strip() for c in cells]
-                    if cells_text and cells_text[0] == '1' and len(cells_text) >= 2:
-                        # 2列目以降に選手名らしい文字列を探す
-                        for ct in cells_text[1:5]:
-                            if re.search(r'[\u3040-\u9fff]{2,}', ct) and len(ct) >= 2:
-                                winner = ct
-                                break
-                        if winner:
-                            break
+        winner = ""
+        if riders and car_nums and len(riders) == len(car_nums):
+            # 車番インデックスで選手名を取得
+            for i, num in enumerate(car_nums):
+                if num == winner_num and i < len(riders):
+                    winner = riders[i].strip()
+                    break
+        if not winner and riders:
+            # 車番インデックスが取れない場合は順番で取得
+            try:
+                idx = int(winner_num) - 1
+                if 0 <= idx < len(riders):
+                    winner = riders[idx].strip()
+            except:
+                pass
 
-            # 単勝配当（円）
-            odds = 0.0
-            # パターン1: 単勝配当テーブル
-            odds_m = re.search(r'単勝[^<]*<[^>]*>([0-9,]+)円', result_html)
+        # 単勝配当（円）
+        odds = 0.0
+        odds_m = re.search(r'単勝[^<]*<[^>]*>([0-9,]+)円', detail_html)
+        if odds_m:
+            try:
+                odds = float(odds_m.group(1).replace(",", "")) / 100.0
+            except:
+                pass
+        if odds == 0.0:
+            odds_m = re.search(r'([0-9,]{3,6})円', detail_html)
             if odds_m:
                 try:
-                    odds = float(odds_m.group(1).replace(",", "")) / 100.0
+                    odds_val = float(odds_m.group(1).replace(",", ""))
+                    if 100 <= odds_val <= 99900:
+                        odds = odds_val / 100.0
                 except:
                     pass
-            if odds == 0.0:
-                # パターン2: 配当テーブルの数値
-                odds_m = re.search(r'([0-9,]{3,6})円', result_html)
-                if odds_m:
-                    try:
-                        odds_val = float(odds_m.group(1).replace(",", ""))
-                        if 100 <= odds_val <= 99900:
-                            odds = odds_val / 100.0
-                    except:
-                        pass
 
-            if winner:
-                results.append({
-                    "race_id": f"{slug}_{rno}_{ymd}",
-                    "slug": slug, "rno": rno, "date": date_str,
-                    "winner": winner,
-                    "odds": odds,
-                    "venue": venue_name,
-                    "url": result_url
-                })
+        # レース番号をrace_idから取得（下2桁）
+        rno = race_id[-2:]
+
+        if winner:
+            results.append({
+                "race_id": race_id,
+                "slug": slug, "rno": rno, "date": date_str,
+                "winner": winner,
+                "odds": odds,
+                "venue": venue_name,
+                "url": detail_url
+            })
 
     print(f"  競輪結果取得: {len(results)}件 ({date_str})")
     return results
