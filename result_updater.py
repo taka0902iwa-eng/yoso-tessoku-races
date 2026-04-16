@@ -108,12 +108,32 @@ def recalc_summary(data: dict) -> dict:
             "recovery_rate": round(sp_ret / sp_bet * 100, 1) if sp_bet > 0 else 0.0,
         }
 
+    # 場所別集計
+    by_venue = {}
+    for r in records:
+        sport = r.get("sport", "")
+        venue = r.get("venue", "")
+        if not sport or not venue: continue
+        key = f"{sport}_{venue}"
+        if key not in by_venue:
+            by_venue[key] = {"total": 0, "hit": 0, "bet": 0, "return": 0}
+        by_venue[key]["total"] += 1
+        if r.get("result") == "hit":
+            by_venue[key]["hit"] += 1
+        by_venue[key]["bet"] += r.get("bet_amount", 0)
+        by_venue[key]["return"] += r.get("return_amount", 0)
+    
+    for k, v in by_venue.items():
+        v["hit_rate"] = round(v["hit"] / v["total"] * 100, 1) if v["total"] > 0 else 0.0
+        v["recovery_rate"] = round(v["return"] / v["bet"] * 100, 1) if v["bet"] > 0 else 0.0
+
     data["summary"] = {
         "total": total, "hit": hit, "hit_rate": hit_rate,
         "bet": bet, "return": ret, "recovery_rate": recovery_rate,
         "profit": profit, "streak": streak
     }
     data["by_sport"] = by_sport
+    data["by_venue"] = by_venue
     return data
 
 
@@ -737,6 +757,81 @@ def match_and_update(
 # ──────────────────────────────────────────────
 # FTPアップロード
 # ──────────────────────────────────────────────
+
+# ──────────────────────────────────────────────
+# 成績グラフ生成
+# ──────────────────────────────────────────────
+def generate_profit_chart(results_path="results.json", output_path="profit_chart.png"):
+    import matplotlib.pyplot as plt
+    import matplotlib.dates as mdates
+    from datetime import datetime
+    
+    if not os.path.exists(results_path):
+        return False
+        
+    with open(results_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+        
+    records = data.get("records", [])
+    if not records:
+        return False
+        
+    # 日付順にソート
+    records.sort(key=lambda x: x.get("date", ""))
+    
+    dates = []
+    profits = []
+    current_profit = 0
+    
+    # 日付ごとの収支を集計
+    daily_profit = {}
+    for r in records:
+        date_str = r.get("date", "")
+        if not date_str: continue
+        
+        profit = r.get("return_amount", 0) - r.get("bet_amount", 0)
+        if date_str not in daily_profit:
+            daily_profit[date_str] = 0
+        daily_profit[date_str] += profit
+        
+    # 累積収支を計算
+    for date_str in sorted(daily_profit.keys()):
+        try:
+            dt = datetime.strptime(date_str, "%Y-%m-%d")
+            dates.append(dt)
+            current_profit += daily_profit[date_str]
+            profits.append(current_profit)
+        except:
+            pass
+            
+    if not dates:
+        return False
+        
+    # グラフ描画
+    plt.figure(figsize=(10, 5))
+    plt.plot(dates, profits, marker='o', linestyle='-', color='b', linewidth=2)
+    
+    # ゼロライン
+    plt.axhline(y=0, color='r', linestyle='--', alpha=0.5)
+    
+    # フォーマット設定
+    plt.title('Cumulative Profit', fontsize=16)
+    plt.xlabel('Date', fontsize=12)
+    plt.ylabel('Profit (Yen)', fontsize=12)
+    plt.grid(True, alpha=0.3)
+    
+    # 日付フォーマット
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m/%d'))
+    plt.gcf().autofmt_xdate()
+    
+    # 保存
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=150)
+    plt.close()
+    
+    print(f"  成績グラフ生成完了: {output_path}")
+    return True
+
 def upload_results_ftp(results_json_path: str = "results.json",
                        calib_json_path: str = "ev_calibration.json"):
     """results.jsonとev_calibration.jsonをFTPでアップロードする"""
@@ -772,6 +867,13 @@ def upload_results_ftp(results_json_path: str = "results.json",
             with open(calib_json_path, "rb") as f:
                 ftp.storbinary(f"STOR {calib_path}", f)
             print(f"  ev_calibration.json FTPアップロード完了: {calib_path}")
+            
+        # profit_chart.png
+        if os.path.exists("profit_chart.png"):
+            chart_path = remote_dir + "/profit_chart.png"
+            with open("profit_chart.png", "rb") as f:
+                ftp.storbinary(f"STOR {chart_path}", f)
+            print(f"  profit_chart.png FTPアップロード完了: {chart_path}")
 
         ftp.quit()
     except Exception as e:
@@ -805,6 +907,10 @@ def run_result_update(target_date: str = None):
         print(f"  予想ファイル: races.json（{dated_races_path} が見つからないため）")
 
     results = match_and_update(target_date, races_json_path=races_json_path)
+    
+    # 成績グラフ生成
+    generate_profit_chart()
+    
     # 新規レコードがなくてもFTPアップロードを実行（results.jsonを常に最新に保つ）
     upload_results_ftp()
     return results
