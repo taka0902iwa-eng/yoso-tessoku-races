@@ -1598,16 +1598,25 @@ def fetch_cycle_all():
         if not html:
             return [fallback("cycle")]
 
-        # 開催場のURLを複数パターンで抽出
-        venue_urls = re.findall(r'href="(/([a-z]+)/racecard/\d+/)"', html)
+        # 開催場のURLを複数パターンで抽出（絶対URL対応）
+        today_str_nodash = today.strftime("%Y%m%d")
+        # パターン1: 絶対URL形式 https://keirin.kdreams.jp/{slug}/racecard/{id}/
+        venue_urls_abs = re.findall(
+            r'https://keirin\.kdreams\.jp/([a-z]+)/racecard/(\d+)/',
+            html
+        )
+        # 今日の日付を含むURLのみ（racecard IDに今日の日付が含まれる）
+        venue_urls = [(f"https://keirin.kdreams.jp/{slug}/racecard/{rid}/", slug)
+                      for slug, rid in venue_urls_abs if today_str_nodash in rid]
         if not venue_urls:
-            # パターン2: JavaScriptのデータから抽出
-            venue_urls = [(f"/{s}/racecard/{today.year}/{str(today.month).zfill(2)}/{str(today.day).zfill(2)}/", s)
-                          for s in re.findall(r'"venue_code":"([a-z]+)"', html)]
+            # パターン2: 相対URL形式
+            venue_urls_rel = re.findall(r'href="(/([a-z]+)/racecard/\d+/)"', html)
+            venue_urls = [(f"https://keirin.kdreams.jp{path}", slug)
+                          for path, slug in venue_urls_rel]
         if not venue_urls:
-            # パターン3: 場名から直接URL構築
-            found_slugs = re.findall(r'/([a-z]+)/racecard/', html)
-            venue_urls  = [(f"/{s}/racecard/{today.year}/{str(today.month).zfill(2)}/{str(today.day).zfill(2)}/", s)
+            # パターン3: 場名スラッグから直接URL構築
+            found_slugs = re.findall(r'https://keirin\.kdreams\.jp/([a-z]+)/racecard/', html)
+            venue_urls  = [(f"https://keirin.kdreams.jp/{s}/racecard/{today_str_nodash}0100/", s)
                            for s in dict.fromkeys(found_slugs)]
 
         # 重複除去・場名抽出
@@ -1640,7 +1649,8 @@ def fetch_cycle_all():
             venue_name = SLUG_TO_NAME.get(slug, slug) + "競輪場"
             try:
                 # 開催ページから最終レース情報を取得
-                v_html = fetch(base + venue_url)
+                # venue_urlは既に絶対URLなのでそのまま使用
+                v_html = fetch(venue_url)
                 time.sleep(1)
 
                 # グレード取得
@@ -1652,16 +1662,24 @@ def fetch_cycle_all():
                 valid_ts = [t for t in times_m if 8 <= int(t.split(":")[0]) <= 21]
                 t        = valid_ts[-1] if valid_ts else "--:--"
 
-                # レース詳細URLを取得
-                # 形式1: /aomori/racedetail/1220260412XXXX/
-                detail_urls = re.findall(r'href="(/[a-z]+/racedetail/\d+/)"', v_html)
-                # 形式2: /gamboo/keirin-kaisai/race-card/result/XXXX/
+                # レース詳細URLを取得（絶対URL対応）
+                # 形式1: 絶対URL https://keirin.kdreams.jp/{slug}/racedetail/{id}/
+                detail_urls_abs = re.findall(
+                    r'https://keirin\.kdreams\.jp/([a-z]+/racedetail/\d+/)',
+                    v_html
+                )
+                # 今日の日付を含むURLのみ
+                detail_urls = [f"https://keirin.kdreams.jp/{u}"
+                               for u in detail_urls_abs if today_str_nodash in u]
                 if not detail_urls:
-                    detail_urls = re.findall(r'href="(/gamboo/keirin-kaisai/race-card/[^"]+)"', v_html)
+                    # 形式2: 相対URL
+                    detail_urls_rel = re.findall(r'href="(/[a-z]+/racedetail/\d+/)"', v_html)
+                    detail_urls = [f"https://keirin.kdreams.jp{u}" for u in detail_urls_rel
+                                   if today_str_nodash in u]
 
                 riders = []
                 if detail_urls:
-                    detail_url = base + detail_urls[-1]
+                    detail_url = detail_urls[-1]  # 最後のレース詳細URL
                     riders     = fetch_cycle_riders_kdreams(detail_url, venue_name)
                     print(f"  [cycle/{slug}] {len(riders)}選手取得")
 
