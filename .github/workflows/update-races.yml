@@ -19,7 +19,7 @@ jobs:
           python-version: '3.11'
       - name: 依存パッケージインストール
         run: |
-          pip install requests beautifulsoup4 lxml
+          pip install requests beautifulsoup4 lxml matplotlib
       - name: スクレイピング＋EV計算＋FTPアップロード
         env:
           FTP_HOST:   ${{ secrets.FTP_HOST }}
@@ -56,7 +56,7 @@ jobs:
           except Exception as e:
               print(f'results.json取得失敗（新規作成）: {e}')
               with open('results.json','w',encoding='utf-8') as f:
-                  json.dump({'summary':{},'by_sport':{},'records':[]}, f, ensure_ascii=False)
+                  json.dump({'summary':{},'by_sport':{},'by_venue':{},'records':[]}, f, ensure_ascii=False)
           "
           python result_updater.py
       - name: races.json の内容確認
@@ -89,6 +89,11 @@ jobs:
               print(f'レコード数: {len(records)}件')
               if records:
                   print(f'最新: {records[0].get(\"date\",\"\")} {records[0].get(\"name\",\"\")} {records[0].get(\"result\",\"\")}')
+              # 競技別・場所別集計
+              by_sport = d.get('by_sport', {})
+              for sp, v in by_sport.items():
+                  if v.get('total', 0) > 0:
+                      print(f'  {sp}: {v[\"total\"]}戦 {v[\"hit_rate\"]}%的中 回収率{v[\"recovery_rate\"]}%')
           except Exception as e:
               print(f'エラー: {e}')
           " || echo "解析失敗"
@@ -103,5 +108,6 @@ jobs:
             races.json
             results.json
             ev_calibration.json
+            profit_chart.png
             line_message.txt
           retention-days: 7
