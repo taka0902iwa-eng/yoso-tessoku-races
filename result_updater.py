@@ -423,8 +423,8 @@ def fetch_cycle_results(date_str: str) -> list:
     }
 
     results = []
-    # 開催場スラッグを取得（複数パターン対応）
-    venue_slugs = re.findall(r'href="/([a-z]+)/racecard/\d{8}/', html)
+    # 開催場スラッグを取得（相対パス・絶対URL両対応）
+    venue_slugs = re.findall(r'href="(?:https://keirin\.kdreams\.jp)?/([a-z]+)/racecard/\d{8}/', html)
     venue_slugs = list(dict.fromkeys(venue_slugs))
 
     for slug in venue_slugs[:15]:
@@ -437,7 +437,7 @@ def fetch_cycle_results(date_str: str) -> list:
 
         # レース結果URLを取得（result ページ）
         result_links = re.findall(
-            rf'href="/{slug}/result/\d{{8}}/(\d{{2}})/"',
+            rf'href="(?:https://keirin\.kdreams\.jp)?/{slug}/result/\d{{8}}/(\d{{2}})/"',
             venue_html
         )
         if not result_links:
