@@ -805,8 +805,8 @@ def run_result_update(target_date: str = None):
         print(f"  予想ファイル: races.json（{dated_races_path} が見つからないため）")
 
     results = match_and_update(target_date, races_json_path=races_json_path)
-    if results:
-        upload_results_ftp()
+    # 新規レコードがなくてもFTPアップロードを実行（results.jsonを常に最新に保つ）
+    upload_results_ftp()
     return results
 
 if __name__ == "__main__":
