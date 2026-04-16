@@ -739,11 +739,11 @@ def upload_results_ftp(results_json_path: str = "results.json",
                        calib_json_path: str = "ev_calibration.json"):
     """results.jsonとev_calibration.jsonをFTPでアップロードする"""
     import ftplib
-    host = os.environ.get("FTP_HOST", "")
-    user = os.environ.get("FTP_USER", "")
-    passwd = os.environ.get("FTP_PASS", "")
-    remote_base = os.environ.get("FTP_REMOTE",
-        "/home/c9048134/public_html/oyatojikka.online/races.json")
+    host = (os.environ.get("FTP_HOST", "") or "").strip().replace("\n","").replace("\r","").replace(" ","")
+    user = (os.environ.get("FTP_USER", "") or "").strip().replace("\n","").replace("\r","").replace(" ","")
+    passwd = (os.environ.get("FTP_PASS", "") or "").strip().replace("\n","").replace("\r","")
+    remote_base = (os.environ.get("FTP_REMOTE",
+        "/home/c9048134/public_html/oyatojikka.online/races.json") or "").strip()
 
     if not all([host, user, passwd]):
         print("  [SKIP] FTP環境変数が設定されていません")
