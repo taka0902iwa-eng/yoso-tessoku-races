@@ -1836,13 +1836,20 @@ def fetch_cycle_riders_kdreams(detail_url, venue_name):
             if mark >= total * 0.4: return "マーク"
             return "自在"
 
-        # ── オッズ（単勝オッズ）────────────────────────────────────────────
-        odds_candidates = [float(o) for o in re.findall(r'(\d+\.\d)', html)
-                           if 1.5 <= float(o) <= 99.9]
-        # 最初の9個を各選手に割り当て
-        odds_list = odds_candidates[:9]
+        # ── オッズ推定（競走得点ベース）────────────────────────────────────────────────────────────────────────────────────
+        # Kdremsに単勝オッズはないため、競走得点から推定する
+        # 得点が高い選手ほど人気が高い（低オッズ）
+        scores_for_odds = [rd['score'] for rd in rider_data]
+        max_score = max(scores_for_odds) if scores_for_odds else 100.0
+        min_score = min(scores_for_odds) if scores_for_odds else 80.0
+        score_range = max(max_score - min_score, 1.0)
+        # 得点最高選手のオッズを約 2.0倍、最低選手を約 8.0倍として線形補間
+        def score_to_odds(score):
+            normalized = (score - min_score) / score_range  # 0.0～1.0
+            return round(2.0 + (1.0 - normalized) * 6.0, 1)  # 2.0～8.0
+        odds_list = [score_to_odds(rd['score']) for rd in rider_data]
 
-        # ── 選手リストを構築 ─────────────────────────────────────────────────
+        # ── 選手リストを構築 ────────────────────────────────────────────────────────────────────────────────────
         F = max(len(rider_data), 7) if rider_data else 9
         riders = []
         for i, rd in enumerate(rider_data):
