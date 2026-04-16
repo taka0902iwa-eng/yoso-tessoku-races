@@ -2484,12 +2484,23 @@ if __name__ == "__main__":
     print("\n--- ② 予想文生成（Claude API） ---")
     all_races, line_message = generate_prediction_text(all_races)
 
-    # ③ races.json生成
-    print("\n--- ③ races.json生成 ---")
-    output = {"date": today_str, "races": all_races, "line_message": line_message}
+    # ④ races.json生成
+    print("\n--- ④ races.json生成 ---")
+    # 旧構造互換フィールド（HTMLフロントエンドが data.boat / data.cycle / data.horse を期待）
+    boat_races  = [r for r in all_races if r.get("sport") == "boat"]
+    cycle_races = [r for r in all_races if r.get("sport") == "cycle"]
+    horse_races = [r for r in all_races if r.get("sport") == "horse"]
+    output = {
+        "date":         today_str,
+        "races":        all_races,
+        "boat":         boat_races,
+        "cycle":        cycle_races,
+        "horse":        horse_races,
+        "line_message": line_message
+    }
     with open("races.json","w",encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=True, indent=2)
-    print(f"races.json生成完了（{len(all_races)}件）")
+    print(f"races.json生成完了（{len(all_races)}件: 競馬{len(horse_races)}・競艇{len(boat_races)}・競輪{len(cycle_races)}）")
 
     if line_message:
         with open("line_message.txt","w",encoding="utf-8") as f:
