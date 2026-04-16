@@ -429,16 +429,17 @@ def fetch_cycle_results(date_str: str) -> list:
         html
     )
     # (full_url, slug, race_id) のリスト
+    # 指定日のレースのみフィルタリング（race_idに日付が含まれる）
     seen = set()
     unique_details = []
     for full, slug, race_id in detail_urls:
-        if race_id not in seen:
+        if race_id not in seen and ymd in race_id:  # 日付フィルタリング
             seen.add(race_id)
             if not full.startswith('http'):
                 full = 'https://keirin.kdreams.jp' + full
             unique_details.append((full, slug, race_id))
 
-    print(f"  racedetail URL数: {len(unique_details)}件")
+    print(f"  racedetail URL数: {len(unique_details)}件（{date_str}分のみ）")
 
     for detail_url, slug, race_id in unique_details[:60]:  # 最大4場×12レース
         venue_name = slug_to_venue.get(slug, slug)
