@@ -540,7 +540,7 @@ def fetch_horse_with_ev():
     unique_ids = sorted(list(dict.fromkeys(all_ids)))
     print(f" 本日のレースID: {len(unique_ids)}件（全件取得）")
     if not unique_ids:
-        return fetch_horse_fallback()
+        return []  # フォールバックは呼ばない（古いレースが混入するため)
 
     # JRAレースのみ・週末（土日）のみに絞る
     # race_id形式: YYYYMMDDCCRRXX → CC=競馬場コード(01-10=JRA)
@@ -575,7 +575,7 @@ def fetch_horse_with_ev():
                 time.sleep(0.5)
 
     if not races:
-        return fetch_horse_fallback()
+        return []  # フォールバックは呼ばない（古いレースが混入するため)
     print(f" 競馬: {len(races)}件取得（EV計算済み）")
     return races
 
@@ -2139,3 +2139,13 @@ if __name__ == "__main__":
         print("\n--- ⑦ index.html スキップ（ファイルなし）---")
 
     print(f"\n✅ 全処理完了（{len(all_races)}件）")
+
+# ──────────────────────────────────────────────
+# ⑧ 昨日のレース結果を自動更新
+# ──────────────────────────────────────────────
+try:
+    from result_updater import run_result_update
+    print("\n--- ⑧ 昨日のレース結果自動更新 ---")
+    run_result_update()
+except Exception as e:
+    print(f"⚠️ 結果自動更新エラー（スキップ）: {e}")
