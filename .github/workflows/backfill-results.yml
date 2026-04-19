@@ -1,0 +1,81 @@
+name: 過去分結果バックフィル
+on:
+  workflow_dispatch:
+    inputs:
+      start_date:
+        description: '開始日'
+        default: '2026-04-14'
+      end_date:
+        description: '終了日'
+        default: '2026-04-19'
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: install
+        run: pip install requests beautifulsoup4 lxml
+      - name: get results
+        run: |
+          python3 -c "
+          import urllib.request, json
+          try:
+              req = urllib.request.Request('https://oyatojikka.online/results.json', headers={'User-Agent':'Mozilla/5.0'})
+              with urllib.request.urlopen(req, timeout=15) as r:
+                  data = json.loads(r.read())
+              open('results.json','w').write(json.dumps(data, ensure_ascii=False, indent=2))
+              print(f'取得成功: {len(data.get(\"records\",[]))}件')
+          except Exception as e:
+              print(f'失敗: {e}')
+              open('results.json','w').write('{\"summary\":{},\"by_sport\":{},\"records\":[]}')
+          "
+      - name: backfill
+        run: |
+          python3 -c "
+          import os
+          from datetime import datetime, timedelta
+          from result_updater import run_result_update
+          start = datetime.strptime('${{ github.event.inputs.start_date }}', '%Y-%m-%d')
+          end = datetime.strptime('${{ github.event.inputs.end_date }}', '%Y-%m-%d')
+          d = start
+          while d <= end:
+              ds = d.strftime('%Y-%m-%d')
+              if os.path.exists(f'races_{ds}.json'):
+                  print(f'処理: {ds}')
+                  run_result_update(target_date=ds)
+              else:
+                  print(f'スキップ: {ds}')
+              d += timedelta(days=1)
+          "
+      - name: ftp upload
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USER: ${{ secrets.FTP_USER }}
+          FTP_PASS: ${{ secrets.FTP_PASS }}
+          FTP_REMOTE: ${{ secrets.FTP_REMOTE }}
+        run: |
+          python3 -c "
+          import ftplib, os
+          host=os.environ['FTP_HOST'].strip()
+          user=os.environ['FTP_USER'].strip()
+          pw=os.environ['FTP_PASS'].strip()
+          base=os.environ.get('FTP_REMOTE','').strip().replace('/races.json','') or '/home/c9048134/public_html/oyatojikka.online'
+          with ftplib.FTP(timeout=30) as ftp:
+              ftp.connect(host,21); ftp.login(user,pw); ftp.set_pasv(True)
+              ftp.cwd(base)
+              with open('results.json','rb') as f: ftp.storbinary('STOR results.json',f)
+          print('完了')
+          "
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backfill-${{ github.run_id }}
+          path: results.json
+          retention-days: 7
