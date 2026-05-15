@@ -4829,7 +4829,7 @@
       "sport": "boat",
       "name": "\u6c5f\u6238\u5ddd 12R",
       "venue": "\u6c5f\u6238\u5ddd",
-      "time": "16:25",
+      "time": "16:28",
       "grade": "G2",
       "url": "kyotei.html",
       "all_riders_ev": [
@@ -6679,7 +6679,7 @@
       "sport": "boat",
       "name": "\u5c3c\u5d0e 12R",
       "venue": "\u5c3c\u5d0e",
-      "time": "16:15",
+      "time": "14:50",
       "grade": "",
       "url": "kyotei.html",
       "all_riders_ev": [
@@ -11414,9 +11414,9 @@
         {
           "name": "\u5409\u7530 \u660c\u53f8",
           "frame_num": 1.0,
-          "prob": 0.2729,
+          "prob": 0.2723,
           "odds": 92.6,
-          "ev": 25.2746,
+          "ev": 25.2161,
           "judge": "\u898b\u9001\u308a",
           "role": "\u756a\u624b",
           "line_group": "",
@@ -11425,9 +11425,9 @@
         {
           "name": "\u7530\u4e2d \u548c\u78e8",
           "frame_num": 3.0,
-          "prob": 0.1972,
+          "prob": 0.199,
           "odds": 91.8,
-          "ev": 18.0992,
+          "ev": 18.2698,
           "judge": "\u898b\u9001\u308a",
           "role": "\u756a\u624b",
           "line_group": "",
@@ -11436,9 +11436,9 @@
         {
           "name": "\u84ee\u4e95 \u7950\u8f1d",
           "frame_num": 4.0,
-          "prob": 0.158,
+          "prob": 0.1576,
           "odds": 91.5,
-          "ev": 14.4581,
+          "ev": 14.4246,
           "judge": "\u898b\u9001\u308a",
           "role": "\u756a\u624b",
           "line_group": "",
@@ -11447,9 +11447,9 @@
         {
           "name": "\u5c0f\u5ddd \u8ce2\u4eba",
           "frame_num": 2.0,
-          "prob": 0.1404,
+          "prob": 0.1401,
           "odds": 92.2,
-          "ev": 12.9483,
+          "ev": 12.9183,
           "judge": "\u898b\u9001\u308a",
           "role": "\u5148\u982d",
           "line_group": "",
@@ -11458,9 +11458,9 @@
         {
           "name": "\u52a0\u85e4 \u572d\u4e00",
           "frame_num": 5.0,
-          "prob": 0.1175,
+          "prob": 0.1172,
           "odds": 91.4,
-          "ev": 10.7367,
+          "ev": 10.7119,
           "judge": "\u898b\u9001\u308a",
           "role": "\u756a\u624b",
           "line_group": "",
@@ -11469,9 +11469,9 @@
         {
           "name": "\u83c5\u8c37 \u9686\u53f8",
           "frame_num": 6.0,
-          "prob": 0.0755,
+          "prob": 0.0753,
           "odds": 90.9,
-          "ev": 6.8609,
+          "ev": 6.845,
           "judge": "\u898b\u9001\u308a",
           "role": "\u756a\u624b",
           "line_group": "",
@@ -11480,9 +11480,9 @@
         {
           "name": "\u9580\u7530 \u51cc",
           "frame_num": 7.0,
-          "prob": 0.0385,
+          "prob": 0.0384,
           "odds": 88.5,
-          "ev": 3.4074,
+          "ev": 3.3995,
           "judge": "\u898b\u9001\u308a",
           "role": "\u756a\u624b",
           "line_group": "",
@@ -11524,16 +11524,16 @@
           "others_chakudo": 9.0,
           "K": 1.032,
           "score": 0.33262,
-          "prob": 0.2729,
-          "ev": 25.2746,
+          "prob": 0.2723,
+          "ev": 25.2161,
           "judge": "\u898b\u9001\u308a",
           "all_riders_ev": [
             {
               "name": "\u5409\u7530 \u660c\u53f8",
               "frame_num": 1.0,
-              "prob": 0.2729,
+              "prob": 0.2723,
               "odds": 92.6,
-              "ev": 25.2746,
+              "ev": 25.2161,
               "judge": "\u898b\u9001\u308a",
               "role": "\u756a\u624b",
               "line_group": "",
@@ -11542,9 +11542,9 @@
             {
               "name": "\u7530\u4e2d \u548c\u78e8",
               "frame_num": 3.0,
-              "prob": 0.1972,
+              "prob": 0.199,
               "odds": 91.8,
-              "ev": 18.0992,
+              "ev": 18.2698,
               "judge": "\u898b\u9001\u308a",
               "role": "\u756a\u624b",
               "line_group": "",
@@ -11553,9 +11553,9 @@
             {
               "name": "\u84ee\u4e95 \u7950\u8f1d",
               "frame_num": 4.0,
-              "prob": 0.158,
+              "prob": 0.1576,
               "odds": 91.5,
-              "ev": 14.4581,
+              "ev": 14.4246,
               "judge": "\u898b\u9001\u308a",
               "role": "\u756a\u624b",
               "line_group": "",
@@ -11564,9 +11564,9 @@
             {
               "name": "\u5c0f\u5ddd \u8ce2\u4eba",
               "frame_num": 2.0,
-              "prob": 0.1404,
+              "prob": 0.1401,
               "odds": 92.2,
-              "ev": 12.9483,
+              "ev": 12.9183,
               "judge": "\u898b\u9001\u308a",
               "role": "\u5148\u982d",
               "line_group": "",
@@ -11575,9 +11575,9 @@
             {
               "name": "\u52a0\u85e4 \u572d\u4e00",
               "frame_num": 5.0,
-              "prob": 0.1175,
+              "prob": 0.1172,
               "odds": 91.4,
-              "ev": 10.7367,
+              "ev": 10.7119,
               "judge": "\u898b\u9001\u308a",
               "role": "\u756a\u624b",
               "line_group": "",
@@ -11586,9 +11586,9 @@
             {
               "name": "\u83c5\u8c37 \u9686\u53f8",
               "frame_num": 6.0,
-              "prob": 0.0755,
+              "prob": 0.0753,
               "odds": 90.9,
-              "ev": 6.8609,
+              "ev": 6.845,
               "judge": "\u898b\u9001\u308a",
               "role": "\u756a\u624b",
               "line_group": "",
@@ -11597,9 +11597,9 @@
             {
               "name": "\u9580\u7530 \u51cc",
               "frame_num": 7.0,
-              "prob": 0.0385,
+              "prob": 0.0384,
               "odds": 88.5,
-              "ev": 3.4074,
+              "ev": 3.3995,
               "judge": "\u898b\u9001\u308a",
               "role": "\u756a\u624b",
               "line_group": "",
@@ -11625,7 +11625,7 @@
           "E": 3.0,
           "F": 7,
           "odds": 91.8,
-          "line_rate": 1.05,
+          "line_rate": 1.08,
           "bank_rate": 1.0,
           "recent_form": 1.0,
           "frame_num": 3.0,
@@ -11635,10 +11635,10 @@
           "seconds_chakudo": 4.0,
           "thirds_chakudo": 4.0,
           "others_chakudo": 9.0,
-          "K": 1.02,
-          "score": 0.240266,
-          "prob": 0.1972,
-          "ev": 18.0992,
+          "K": 1.032,
+          "score": 0.243093,
+          "prob": 0.199,
+          "ev": 18.2698,
           "judge": "\u898b\u9001\u308a"
         },
         {
@@ -11669,8 +11669,8 @@
           "others_chakudo": 9.0,
           "K": 1.02,
           "score": 0.19256,
-          "prob": 0.158,
-          "ev": 14.4581,
+          "prob": 0.1576,
+          "ev": 14.4246,
           "judge": "\u898b\u9001\u308a"
         },
         {
@@ -11701,8 +11701,8 @@
           "others_chakudo": 9.0,
           "K": 1.02,
           "score": 0.171142,
-          "prob": 0.1404,
-          "ev": 12.9483,
+          "prob": 0.1401,
+          "ev": 12.9183,
           "judge": "\u898b\u9001\u308a"
         },
         {
@@ -11733,8 +11733,8 @@
           "others_chakudo": 9.0,
           "K": 1.02,
           "score": 0.143153,
-          "prob": 0.1175,
-          "ev": 10.7367,
+          "prob": 0.1172,
+          "ev": 10.7119,
           "judge": "\u898b\u9001\u308a"
         },
         {
@@ -11765,8 +11765,8 @@
           "others_chakudo": 9.0,
           "K": 1.02,
           "score": 0.091979,
-          "prob": 0.0755,
-          "ev": 6.8609,
+          "prob": 0.0753,
+          "ev": 6.845,
           "judge": "\u898b\u9001\u308a"
         },
         {
@@ -11797,8 +11797,8 @@
           "others_chakudo": 9.0,
           "K": 1.02,
           "score": 0.04692,
-          "prob": 0.0385,
-          "ev": 3.4074,
+          "prob": 0.0384,
+          "ev": 3.3995,
           "judge": "\u898b\u9001\u308a"
         }
       ]
@@ -12204,5 +12204,5 @@
       ]
     }
   ],
-  "line_message": "\ud83c\udfaf\u30105\u670815\u65e5\u306e\u4e88\u60f3\u3011\u4e88\u60f3\u306e\u9244\u5247\uff08\u5e73\u65e5\u53b3\u9078\uff09\n\n\ud83d\udea4\u7af6\u8247 \u3010G2\u3011\u6c5f\u6238\u5ddd 16:25\n\u25ce \u4f50\u85e4 \u60a0 EV+32%\uff08\u8cb7\u3044\uff09\n\u5c55\u958b: \u5dee\u3057\u30fb\u307e\u304f\u308a\u5c55\u958b\uff082\u30fb3\u53f7\u8266\u304c\u5f37\u3044\uff09\n2\u9023\u5358\u63a8\u5968: 1-2, 2-1\n\n\ud83d\udea4\u7af6\u8247 \u6238\u7530 16:30\n\u25ce \u5c71\u7530 \u6643\u5927 EV+11%\uff08\u8cb7\u3044\uff09\n\u5c55\u958b: \u9003\u3052\u6709\u5229\u5c55\u958b\uff081\u53f7\u8266\u304c\u5f37\u3044\uff09\n2\u9023\u5358\u63a8\u5968: 1-2, 2-1\n\n\ud83d\udea4\u7af6\u8247 \u6850\u751f 20:31\n\u25ce \u6e0b\u8c37 \u660e\u61b2 EV+6%\uff08\u8cb7\u3044\uff09\n\u5c55\u958b: \u9003\u3052\u6709\u5229\u5c55\u958b\uff081\u53f7\u8266\u304c\u5f37\u3044\uff09\n2\u9023\u5358\u63a8\u5968: 1-2, 1-3\n\n\ud83d\udea4\u7af6\u8247 \u5e73\u548c\u5cf6 17:44\n\u25ce \u4e09\u99ac \u5d07\u53f2 EV+3%\uff08\u8cb7\u3044\uff09\n\u5c55\u958b: \u9003\u3052\u6709\u5229\u5c55\u958b\uff081\u53f7\u8266\u304c\u5f37\u3044\uff09\n2\u9023\u5358\u63a8\u5968: 1-2, 2-1\n\n\u672c\u65e5\u306e\u5f37\u8cb7\u3044\u5019\u88dc: 0\u4ef6\uff08EV\u95be\u502430%\u4ee5\u4e0a\uff09\n\u203b\u53c2\u8003\u7a0b\u5ea6\u306b\u3002\u6295\u7968\u306f\u81ea\u5df1\u8cac\u4efb\u3067\u304a\u9858\u3044\u3057\u307e\u3059\ud83d\ude4f\n\u8a73\u7d30\u2192 oyatojikka.online"
+  "line_message": "\ud83c\udfaf\u30105\u670815\u65e5\u306e\u4e88\u60f3\u3011\u4e88\u60f3\u306e\u9244\u5247\uff08\u5e73\u65e5\u53b3\u9078\uff09\n\n\ud83d\udea4\u7af6\u8247 \u3010G2\u3011\u6c5f\u6238\u5ddd 16:28\n\u25ce \u4f50\u85e4 \u60a0 EV+32%\uff08\u8cb7\u3044\uff09\n\u5c55\u958b: \u5dee\u3057\u30fb\u307e\u304f\u308a\u5c55\u958b\uff082\u30fb3\u53f7\u8266\u304c\u5f37\u3044\uff09\n2\u9023\u5358\u63a8\u5968: 1-2, 2-1\n\n\ud83d\udea4\u7af6\u8247 \u6238\u7530 16:30\n\u25ce \u5c71\u7530 \u6643\u5927 EV+11%\uff08\u8cb7\u3044\uff09\n\u5c55\u958b: \u9003\u3052\u6709\u5229\u5c55\u958b\uff081\u53f7\u8266\u304c\u5f37\u3044\uff09\n2\u9023\u5358\u63a8\u5968: 1-2, 2-1\n\n\ud83d\udea4\u7af6\u8247 \u6850\u751f 20:31\n\u25ce \u6e0b\u8c37 \u660e\u61b2 EV+6%\uff08\u8cb7\u3044\uff09\n\u5c55\u958b: \u9003\u3052\u6709\u5229\u5c55\u958b\uff081\u53f7\u8266\u304c\u5f37\u3044\uff09\n2\u9023\u5358\u63a8\u5968: 1-2, 1-3\n\n\ud83d\udea4\u7af6\u8247 \u5e73\u548c\u5cf6 17:44\n\u25ce \u4e09\u99ac \u5d07\u53f2 EV+3%\uff08\u8cb7\u3044\uff09\n\u5c55\u958b: \u9003\u3052\u6709\u5229\u5c55\u958b\uff081\u53f7\u8266\u304c\u5f37\u3044\uff09\n2\u9023\u5358\u63a8\u5968: 1-2, 2-1\n\n\u672c\u65e5\u306e\u5f37\u8cb7\u3044\u5019\u88dc: 0\u4ef6\uff08EV\u95be\u502430%\u4ee5\u4e0a\uff09\n\u203b\u53c2\u8003\u7a0b\u5ea6\u306b\u3002\u6295\u7968\u306f\u81ea\u5df1\u8cac\u4efb\u3067\u304a\u9858\u3044\u3057\u307e\u3059\ud83d\ude4f\n\u8a73\u7d30\u2192 oyatojikka.online"
 }
