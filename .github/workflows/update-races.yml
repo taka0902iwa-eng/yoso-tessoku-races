@@ -44,17 +44,23 @@ jobs:
           FTP_REMOTE: ${{ secrets.FTP_REMOTE }}
         run: |
           python3 -c "
-          import urllib.request, json, os
-          try:
-              url = 'https://oyatojikka.online/results.json'
-              req = urllib.request.Request(url, headers={'Cache-Control':'no-cache'})
-              with urllib.request.urlopen(req, timeout=10) as r:
-                  data = json.loads(r.read())
-              with open('results.json','w',encoding='utf-8') as f:
-                  json.dump(data, f, ensure_ascii=False, indent=2)
-              print(f'results.json取得成功: {len(data.get(chr(114)+chr(101)+chr(99)+chr(111)+chr(114)+chr(100)+chr(115),[]))}件')
-          except Exception as e:
-              print(f'results.json取得失敗（新規作成）: {e}')
+          import json, os
+          # GitHubリポジトリ内のresults.jsonを使用（Nginxキャッシュ問題を回避）
+          if os.path.exists('results.json'):
+              with open('results.json', encoding='utf-8') as f:
+                  data = json.load(f)
+              records = data.get('records', [])
+              print(f'results.json読み込み成功: {len(records)}件')
+              # サンプルデータが混入していれば除去
+              sample_races = {'桜花賞','ニュージーランドT','SGオールスター','大阪杯','日本選手権競輪','高松宮記念','SG笹川賞','スプリングS','高松宮記念杯','チューリップ賞'}
+              real = [r for r in records if r.get('name', r.get('race', '')) not in sample_races]
+              if len(real) != len(records):
+                  print(f'サンプルデータ{len(records)-len(real)}件を除去')
+                  data['records'] = real
+                  with open('results.json', 'w', encoding='utf-8') as f:
+                      json.dump(data, f, ensure_ascii=False, indent=2)
+          else:
+              print('results.json なし（新規作成）')
               with open('results.json','w',encoding='utf-8') as f:
                   json.dump({'summary':{},'by_sport':{},'by_venue':{},'records':[]}, f, ensure_ascii=False)
           "
