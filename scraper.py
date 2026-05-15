@@ -2024,7 +2024,7 @@ def upload_ftp():
         print(f"FTPエラー: {e}")
         import traceback
         traceback.print_exc()
-        sys.exit(1)
+        print("FTPアップロード失敗。処理を続行します。")
 
 
 # ══════════════════════════════════════════════════
