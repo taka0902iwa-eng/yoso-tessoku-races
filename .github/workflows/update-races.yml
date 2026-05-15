@@ -103,6 +103,50 @@ jobs:
           except Exception as e:
               print(f'エラー: {e}')
           " || echo "解析失敗"
+      - name: results.htmlをConoHaにFTPアップロード
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USER: ${{ secrets.FTP_USER }}
+          FTP_PASS: ${{ secrets.FTP_PASS }}
+          FTP_REMOTE: ${{ secrets.FTP_REMOTE }}
+        run: |
+          python3 -c "
+          import ftplib, os
+          host     = os.environ.get('FTP_HOST','').strip().replace('\n','').replace('\r','').replace(' ','')
+          user     = os.environ.get('FTP_USER','').strip().replace('\n','').replace('\r','').replace(' ','')
+          password = os.environ.get('FTP_PASS','').strip().replace('\n','').replace('\r','')
+          remote_base = os.environ.get('FTP_REMOTE', '/home/c9048134/public_html/oyatojikka.online/races.json')
+          remote_base = remote_base.strip().replace('\n','').replace('\r','').replace(' ','')
+          # races.jsonのパスからディレクトリを取得
+          base_dir = '/'.join(remote_base.split('/')[:-1])
+          remote_path = base_dir + '/results.html'
+          print(f'FTPアップロード: {remote_path}')
+          if not all([host, user, password]):
+              print('FTP環境変数未設定。スキップ')
+          else:
+              try:
+                  with ftplib.FTP(timeout=60) as ftp:
+                      ftp.connect(host, 21)
+                      ftp.login(user, password)
+                      ftp.set_pasv(True)
+                      dirs = remote_path.split('/')
+                      fname = dirs[-1]
+                      dirpath = '/'.join(dirs[:-1])
+                      try: ftp.cwd(dirpath)
+                      except:
+                          path = ''
+                          for d in dirs[:-1]:
+                              if not d: continue
+                              path += '/' + d
+                              try: ftp.mkd(path)
+                              except: pass
+                          ftp.cwd(dirpath)
+                      with open('results.html', 'rb') as f:
+                          ftp.storbinary(f'STOR {fname}', f)
+                      print(f'FTPアップロード完了: {remote_path}')
+              except Exception as e:
+                  print(f'FTPエラー: {e}')
+          "
       - name: LINE配信テキスト確認
         run: cat line_message.txt 2>/dev/null || echo "line_message.txt なし"
       - name: 生成ファイルを Artifact として保存
