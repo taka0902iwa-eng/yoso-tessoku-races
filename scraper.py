@@ -464,7 +464,10 @@ def calc_score_cycle(rider):
     o = float(rider.get("others_chakudo", max(C_adj - B_adj, 0)))
     trend_adj = calc_cycle_trend_adj(w, s, t, o)
 
-    return role_rate * stability * market_edge * K * frame_adj * style_bank * trend_adj
+    raw_score = role_rate * stability * market_edge * K * frame_adj * style_bank * trend_adj
+    if stability < 0.3:
+        raw_score *= 0.8
+    return raw_score
 
 def calc_race_ev_cycle(riders, history=None):
     if history is None: history = {"cycle": []}
@@ -483,20 +486,20 @@ def calc_race_ev_cycle(riders, history=None):
 
         # 条件別EV閾値（Step7の先行実装）
         if role == "先頭" and bt == 333:
-            threshold_strong = 1.20
-            threshold_buy    = 1.05
+            threshold_strong = 1.40
+            threshold_buy    = 1.25
         elif role == "先頭":
-            threshold_strong = 1.25
-            threshold_buy    = 1.05
+            threshold_strong = 1.45
+            threshold_buy    = 1.30
         elif role == "番手":
-            threshold_strong = 1.20
-            threshold_buy    = 1.00
+            threshold_strong = 1.35
+            threshold_buy    = 1.20
         else:  # 単騎
-            threshold_strong = 1.30
-            threshold_buy    = 1.15
+            threshold_strong = 1.60
+            threshold_buy    = 1.40
 
         # EV異常値防止（超大穴・計算異常を除外）
-        if odds > 30.0 or ev > 3.0:
+        if odds > 30.0 or ev > 3.0 or prob < 0.35:
             judge = "見送り"
         else:
             judge = "強買い" if ev > threshold_strong else "買い" if ev > threshold_buy else "見送り"
