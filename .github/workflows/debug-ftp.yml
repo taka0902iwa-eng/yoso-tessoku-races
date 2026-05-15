@@ -1,0 +1,52 @@
+name: FTPデバッグ
+on:
+  workflow_dispatch:
+jobs:
+  debug-ftp:
+    runs-on: ubuntu-latest
+    steps:
+      - name: FTP接続デバッグ
+        env:
+          FTP_HOST:   ${{ secrets.FTP_HOST }}
+          FTP_USER:   ${{ secrets.FTP_USER }}
+          FTP_PASS:   ${{ secrets.FTP_PASS }}
+          FTP_REMOTE: ${{ secrets.FTP_REMOTE }}
+        run: |
+          python3 << 'PYEOF'
+          import ftplib, os, socket
+
+          ftp_host = os.environ.get('FTP_HOST','')
+          ftp_user = os.environ.get('FTP_USER','')
+          ftp_pass = os.environ.get('FTP_PASS','')
+          ftp_remote = os.environ.get('FTP_REMOTE','')
+
+          # 文字コード確認
+          print(f"FTP_HOST repr: {repr(ftp_host)}")
+          print(f"FTP_USER repr: {repr(ftp_user)}")
+          print(f"FTP_PASS length: {len(ftp_pass)}")
+          print(f"FTP_PASS repr (masked): {repr(ftp_pass[:3])}...{repr(ftp_pass[-3:])}")
+          print(f"FTP_REMOTE repr: {repr(ftp_remote)}")
+
+          # strip後
+          h = ftp_host.strip()
+          u = ftp_user.strip()
+          p = ftp_pass.strip()
+          print(f"\nAfter strip:")
+          print(f"  host: {repr(h)}")
+          print(f"  user: {repr(u)}")
+          print(f"  pass length: {len(p)}")
+
+          # FTP接続テスト
+          try:
+              print(f"\nFTP接続テスト: {h}:21")
+              ftp = ftplib.FTP()
+              ftp.set_debuglevel(2)
+              ftp.connect(h, 21, timeout=30)
+              print("接続成功")
+              print(f"Welcome: {ftp.getwelcome()}")
+              ftp.login(u, p)
+              print("ログイン成功!")
+              ftp.quit()
+          except Exception as e:
+              print(f"エラー: {type(e).__name__}: {e}")
+          PYEOF
