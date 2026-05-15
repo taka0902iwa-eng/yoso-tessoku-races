@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+  <meta name="description" content="競馬・競艇・競輪の全予想実績をリアルタイムで公開中。的中・外れをすべてデータで開示。的中率・回収率・月次収支グラフで長期的な成績を可視化しています。">
+  <meta name="robots" content="index,follow">
+  <!-- OGP -->
+  <meta property="og:type"        content="website">
+  <meta property="og:title"       content="予想実績 | 予想の鉄則">
+  <meta property="og:description" content="競馬・競艇・競輪の全予想実績をリアルタイムで公開中。的中・外れをすべてデータで開示。的中率・回収率・月次収支グラフで長期的な成績を可視化しています。">
+  <meta property="og:url"         content="https://oyatojikka.online/results.html">
+  <meta property="og:site_name"   content="予想の鉄則">
+  <meta property="og:image"       content="https://oyatojikka.online/avatar.png">
+  <meta property="og:locale"      content="ja_JP">
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary">
+  <meta name="twitter:title"       content="予想実績 | 予想の鉄則">
+  <meta name="twitter:description" content="競馬・競艇・競輪の全予想実績をリアルタイムで公開中。的中・外れをすべてデータで開示。的中率・回収率・月次収支グラフで長期的な成績を可視化しています。">
+  <meta name="twitter:image"       content="https://oyatojikka.online/avatar.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>予想実績 | 予想の鉄則</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@700;900&family=Bebas+Neue&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080c14;--bg-card:#0c1525;--bg-card2:#0f1e36;--navy:#0a1628;--gold:#c9a84c;--gold-l:#f0d080;--border:rgba(201,168,76,0.18);--horse:#c9a84c;--boat:#00b4d8;--cycle:#e8313a;--text:#eef0f5;--text-dim:#a8b0c4;--text-mute:#5a6278;--green:#2ecc71;--red:#e8313a}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-serif;font-weight:300;min-height:100vh;padding-bottom:60px}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px}
+
+/* HEADER */
+header{position:sticky;top:0;z-index:200;background:rgba(8,12,20,0.96);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:baseline;gap:10px;text-decoration:none}
+.logo-ja{font-family:'Noto Serif JP',serif;font-weight:900;font-size:1.2rem;color:var(--gold-l);letter-spacing:.06em}
+.logo-en{font-family:'Bebas Neue',sans-serif;font-size:.72rem;color:var(--text-mute);letter-spacing:.22em}
+nav a{color:var(--text-dim);text-decoration:none;font-size:.75rem;padding:6px 12px;transition:color .2s}
+nav a:hover{color:var(--gold-l)}
+nav a.active{color:var(--gold-l)}
+
+/* HERO */
+.hero{background:linear-gradient(160deg,#0d1a2e 0%,#080c14 60%);padding:40px 20px 36px;border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(201,168,76,.06) 0%,transparent 70%);pointer-events:none}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:4px 14px;margin-bottom:16px;border:1px solid rgba(201,168,76,.3);border-radius:1px;font-size:.68rem;letter-spacing:.18em;color:var(--gold);background:rgba(201,168,76,.05)}
+.hero-title{font-family:'Noto Serif JP',serif;font-weight:900;font-size:clamp(1.8rem,5vw,2.8rem);color:#fff;letter-spacing:.04em;margin-bottom:8px;line-height:1.2}
+.hero-title em{color:var(--gold-l);font-style:normal}
+.hero-sub{font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:.3em;color:var(--text-mute);margin-bottom:6px}
+.hero-updated{font-size:.68rem;color:var(--text-mute)}
+
+/* MAIN */
+.main{max-width:900px;margin:0 auto}
+.sec{padding:24px 20px 0}
+.sec-head{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.sec-line{width:3px;height:15px;background:var(--gold);border-radius:2px;flex-shrink:0}
+.sec-title{font-size:.76rem;letter-spacing:.12em;color:var(--gold);font-weight:700}
+
+/* BIG STATS */
+.big-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:1px solid var(--border);margin:0 20px 0}
+.big-stat{padding:20px 16px;text-align:center;border-right:1px solid var(--border);position:relative}
+.big-stat:last-child{border-right:none}
+.big-stat-label{font-size:.65rem;color:var(--text-mute);letter-spacing:.08em;margin-bottom:8px;display:block}
+.big-stat-val{font-family:'Bebas Neue',sans-serif;font-size:2.6rem;line-height:1;letter-spacing:.02em;display:block}
+.big-stat-val.gold{color:var(--gold-l)}
+.big-stat-val.green{color:var(--green)}
+.big-stat-val.red{color:var(--red)}
+.big-stat-val.white{color:#fff}
+.big-stat-sub{font-size:.62rem;color:var(--text-mute);margin-top:6px;display:block}
+
+/* STREAK BANNER */
+.streak-banner{margin:12px 20px 0;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;background:var(--bg-card);border-left:4px solid var(--green)}
+.streak-banner.miss{border-left-color:var(--red)}
+.streak-icon{font-size:1.4rem}
+.streak-text{flex:1;padding:0 14px}
+.streak-main{font-family:'Noto Serif JP',serif;font-weight:700;font-size:1rem;color:#fff}
+.streak-sub{font-size:.7rem;color:var(--text-mute);margin-top:2px}
+.streak-num{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;color:var(--green);letter-spacing:.05em}
+.streak-banner.miss .streak-num{color:var(--red)}
+
+/* SPORT CARDS */
+.sport-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.sport-card{background:var(--bg-card);border-radius:3px;padding:14px 16px;border-top:2px solid transparent}
+.sport-card.horse{border-top-color:var(--horse)}
+.sport-card.boat {border-top-color:var(--boat)}
+.sport-card.cycle{border-top-color:var(--cycle)}
+.sport-head{display:flex;align-items:center;gap:6px;margin-bottom:10px}
+.sport-icon{font-size:1rem}
+.sport-name{font-size:.72rem;font-weight:700}
+.sport-card.horse .sport-name{color:var(--horse)}
+.sport-card.boat  .sport-name{color:var(--boat)}
+.sport-card.cycle .sport-name{color:var(--cycle)}
+.sport-recovery{font-family:'Bebas Neue',sans-serif;font-size:2rem;line-height:1;color:#fff;margin-bottom:4px}
+.sport-stats{font-size:.65rem;color:var(--text-mute);line-height:1.6}
+
+/* MONTH CHART */
+.month-chart{background:var(--bg-card);padding:16px;border:1px solid var(--border)}
+.chart-bars{display:flex;align-items:flex-end;gap:4px;height:80px;margin-bottom:8px}
+.chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.chart-bar{width:100%;border-radius:2px 2px 0 0;min-height:2px;transition:height .3s}
+.chart-bar.pos{background:linear-gradient(to top,rgba(201,168,76,.6),rgba(240,208,128,.8))}
+.chart-bar.neg{background:linear-gradient(to top,rgba(232,49,58,.4),rgba(232,49,58,.6))}
+.chart-bar.zero{background:rgba(255,255,255,.1);min-height:4px}
+.chart-label{font-size:.58rem;color:var(--text-mute);text-align:center}
+.chart-val{font-size:.6rem;color:var(--text-dim);text-align:center}
+
+/* RECORD TABLE */
+.record-filters{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.filter-btn{padding:5px 12px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-dim);font-size:.72rem;border-radius:2px;cursor:pointer;font-family:'Noto Sans JP',sans-serif;transition:all .2s}
+.filter-btn.active{background:var(--gold);color:#080c14;border-color:var(--gold)}
+.filter-btn:hover:not(.active){border-color:rgba(201,168,76,.4);color:var(--text)}
+
+.record-list{display:flex;flex-direction:column;gap:4px;padding-bottom:24px}
+.record-item{background:var(--bg-card);border-left:3px solid transparent;padding:10px 14px;display:flex;align-items:center;gap:10px;transition:background .15s}
+.record-item:hover{background:var(--bg-card2)}
+.record-item.hit {border-left-color:var(--green)}
+.record-item.miss{border-left-color:var(--red)}
+.ri-date{font-size:.65rem;color:var(--text-mute);white-space:nowrap;width:56px;flex-shrink:0}
+.ri-sport{font-size:.6rem;padding:2px 6px;border-radius:2px;flex-shrink:0}
+.ris-horse{background:rgba(201,168,76,.15);color:var(--horse)}
+.ris-boat {background:rgba(0,180,216,.15);color:var(--boat)}
+.ris-cycle{background:rgba(232,49,58,.15);color:var(--cycle)}
+.ri-info{flex:1;min-width:0}
+.ri-race{font-size:.75rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ri-honmei{font-size:.65rem;color:var(--text-mute);margin-top:1px}
+.ri-badge{flex-shrink:0;text-align:right}
+.ri-result{font-size:.68rem;padding:2px 8px;border-radius:2px;font-weight:700;display:block;margin-bottom:2px}
+.ri-result.hit {background:rgba(46,204,113,.15);color:var(--green)}
+.ri-result.miss{background:rgba(232,49,58,.1);color:var(--red)}
+.ri-profit{font-family:'Bebas Neue',sans-serif;font-size:.95rem;letter-spacing:.04em}
+.ri-profit.pos{color:var(--green)}
+.ri-profit.neg{color:var(--red)}
+
+.empty{text-align:center;padding:48px;color:var(--text-mute);font-size:.82rem}
+.loading{text-align:center;padding:48px;color:var(--text-mute);font-size:.82rem}
+
+/* SHARE */
+.share-block{background:var(--bg-card);border:1px solid var(--border);padding:14px 20px;margin:16px 20px 0}
+.share-title{font-size:.68rem;color:var(--text-mute);margin-bottom:10px;letter-spacing:.05em}
+.share-buttons{display:flex;gap:8px;flex-wrap:wrap}
+.share-btn{display:flex;align-items:center;gap:6px;padding:9px 16px;border-radius:2px;font-size:.78rem;font-weight:700;text-decoration:none;border:none;cursor:pointer;font-family:'Noto Sans JP',sans-serif;transition:filter .2s;white-space:nowrap}
+.share-btn:hover{filter:brightness(1.15)}
+.share-x{background:#000;color:#fff;border:1px solid #333}
+.share-line{background:#06C755;color:#fff}
+.share-copy{background:var(--bg-card2);color:var(--text-dim);border:1px solid var(--border)}
+.share-copied{color:var(--gold-l)!important;border-color:var(--gold)!important}
+
+footer{background:#050810;border-top:1px solid rgba(201,168,76,.08);padding:28px 20px;text-align:center;margin-top:24px}
+.ft-logo{font-family:'Noto Serif JP',serif;font-weight:900;font-size:1rem;color:var(--gold-l);margin-bottom:8px}
+.ft-disc{font-size:.66rem;color:rgba(168,180,200,.45);line-height:1.7;max-width:460px;margin:0 auto 12px}
+.ft-links{display:flex;justify-content:center;gap:16px;flex-wrap:wrap}
+.ft-links a{font-size:.7rem;color:var(--text-mute);text-decoration:none}
+.ft-links a:hover{color:var(--gold-l)}
+
+@media(max-width:600px){
+  nav{display:none}
+  .big-stats{grid-template-columns:repeat(3,1fr)}
+  .big-stat-val{font-size:1.8rem}
+  .sport-grid{grid-template-columns:1fr}
+  .share-buttons{gap:6px}
+  .share-btn{font-size:.72rem;padding:8px 12px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="index.html">
+    <span class="logo-ja">予想の鉄則</span>
+    <span class="logo-en">YOSO NO TESSOKU</span>
+  </a>
+  <nav>
+    <a href="keiba.html">🐴 競馬</a>
+    <a href="kyotei.html">🚤 競艇</a>
+    <a href="keirin.html">🚴 競輪</a>
+    <a href="results.html" class="active">📊 実績</a>
+  </nav>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">📊 PREDICTION RESULTS</div>
+  <h1 class="hero-title">予想<em>実績</em></h1>
+  <p class="hero-sub">TRACK RECORD · 全予想公開</p>
+  <p class="hero-updated" id="updated-date">更新中...</p>
+</div>
+
+<div class="main">
+
+  <!-- BIG STATS -->
+  <div class="sec" style="padding-bottom:12px">
+    <div class="sec-head"><div class="sec-line"></div><span class="sec-title">累計成績</span></div>
+  </div>
+  <div class="big-stats" id="big-stats">
+    <div class="big-stat">
+      <span class="big-stat-label">回収率</span>
+      <span class="big-stat-val gold" id="bs-recovery">--%</span>
+      <span class="big-stat-sub" id="bs-recovery-sub">集計中</span>
+    </div>
+    <div class="big-stat">
+      <span class="big-stat-label">的中率</span>
+      <span class="big-stat-val white" id="bs-hitrate">--%</span>
+      <span class="big-stat-sub" id="bs-hitrate-sub">0勝 / 0戦</span>
+    </div>
+    <div class="big-stat">
+      <span class="big-stat-label">累計収支</span>
+      <span class="big-stat-val white" id="bs-profit">¥0</span>
+      <span class="big-stat-sub" id="bs-profit-sub">集計中</span>
+    </div>
+  </div>
+
+  <!-- STREAK -->
+  <div id="streak-wrap"></div>
+
+  <!-- SPORT BREAKDOWN -->
+  <div class="sec">
+    <div class="sec-head"><div class="sec-line"></div><span class="sec-title">競技別成績</span></div>
+    <div class="sport-grid" id="sport-grid">
+      <div class="sport-card horse"><div class="sport-head"><span class="sport-icon">🐴</span><span class="sport-name">競馬</span></div><div class="sport-recovery">--%</div><div class="sport-stats">集計中</div></div>
+      <div class="sport-card boat"> <div class="sport-head"><span class="sport-icon">🚤</span><span class="sport-name">競艇</span></div><div class="sport-recovery">--%</div><div class="sport-stats">集計中</div></div>
+      <div class="sport-card cycle"><div class="sport-head"><span class="sport-icon">🚴</span><span class="sport-name">競輪</span></div><div class="sport-recovery">--%</div><div class="sport-stats">集計中</div></div>
+    </div>
+  </div>
+
+  <!-- MONTH CHART -->
+  <div class="sec">
+    <div class="sec-head"><div class="sec-line"></div><span class="sec-title">月別収支</span></div>
+    <div class="month-chart">
+      <div class="chart-bars" id="chart-bars">
+        <div class="empty" style="width:100%">データを読み込み中...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECORD LIST -->
+  <div class="sec">
+    <div class="sec-head"><div class="sec-line"></div><span class="sec-title">全予想履歴</span></div>
+    <div class="record-filters">
+      <button class="filter-btn active" onclick="setFilter('all')">すべて</button>
+      <button class="filter-btn" onclick="setFilter('horse')">🐴 競馬</button>
+      <button class="filter-btn" onclick="setFilter('boat')">🚤 競艇</button>
+      <button class="filter-btn" onclick="setFilter('cycle')">🚴 競輪</button>
+      <button class="filter-btn" onclick="setFilter('hit')">◎ 的中</button>
+      <button class="filter-btn" onclick="setFilter('miss')">✕ 外れ</button>
+    </div>
+    <div class="record-list" id="record-list">
+      <div class="loading">実績データを読み込み中...</div>
+    </div>
+  </div>
+
+  <!-- SHARE -->
+  <div class="share-block">
+    <div class="share-title">📣 実績をシェアする</div>
+    <div class="share-buttons">
+      <a class="share-btn share-x" id="share-x" href="#" target="_blank" rel="noopener">𝕏 Xで投稿</a>
+      <a class="share-btn share-line" id="share-line" href="#" target="_blank" rel="noopener">LINE で送る</a>
+      <button class="share-btn share-copy" id="share-copy" onclick="copyURL()">🔗 URLコピー</button>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <p class="ft-logo">予想の鉄則</p>
+  <p class="ft-disc">本サイトの予想は情報提供を目的としています。公営競技の投票は自己責任でお願いします。18歳未満の方の投票は法律で禁じられています。</p>
+  <div class="ft-links">
+    <a href="index.html">トップ</a>
+    <a href="results.html">実績</a>
+    <a href="premium.html">プレミアム</a>
+    <a href="tokushoho.html">特定商取引法に基づく表記</a>
+    <a href="privacy.html">プライバシーポリシー</a>
+  </div>
+</footer>
+
+<script>
+const SPORT_META = {
+  horse:{icon:'🐴',label:'競馬',cls:'ris-horse'},
+  boat: {icon:'🚤',label:'競艇',cls:'ris-boat'},
+  cycle:{icon:'🚴',label:'競輪',cls:'ris-cycle'},
+};
+
+let allRecords = [];
+let currentFilter = 'all';
+
+// ── データ読み込み ──────────────────────────────────────────────
+async function loadData() {
+  // まずresults.jsonを試みる（ConoHaにアップロードされた場合）
+  try {
+    const res = await fetch('results.json?v=' + Date.now());
+    if (res.ok) {
+      const json = await res.json();
+      if (json.records && json.records.length) {
+        // results.jsonのレコードは name フィールドを使用するため、raceにマッピング
+        allRecords = json.records.map(r => ({
+          ...r,
+          race: r.race || r.name || '',
+          odds: r.odds || (r.return_amount && r.bet_amount ? (r.return_amount / r.bet_amount).toFixed(1) : 0)
+        }));
+        // summary・ by_sport・monthlyを統合してrenderAllに渡す
+        const s = calcSummary(allRecords);
+        // results.jsonのby_sport・summaryを優先使用
+        if (json.by_sport) s.by_sport = json.by_sport;
+        if (json.summary) {
+          Object.assign(s, {
+            total:         json.summary.total         || s.total,
+            hit:           json.summary.hit           || s.hit,
+            hit_rate:      json.summary.hit_rate      || s.hit_rate,
+            total_bet:     json.summary.bet           || s.total_bet,
+            total_ret:     json.summary.return        || s.total_ret,
+            recovery:      json.summary.recovery_rate || s.recovery,
+            profit:        json.summary.profit        || s.profit,
+          });
+        }
+        renderAll(s);
+        return;
+      }
+    }
+  } catch {}
+
+  // フォールバック: Claude Storageから読み込む
+  try {
+    const r = await window.storage.get('yoso-results');
+    if (r) {
+      allRecords = JSON.parse(r.value);
+      renderAll(calcSummary(allRecords));
+      return;
+    }
+  } catch {}
+
+  // results.jsonもストレージも取得できなかった場合はデータなしで表示
+  renderAll(calcSummary(allRecords));
+}
+
+// ── 集計 ────────────────────────────────────────────────
+function calcSummary(recs) {
+  const total     = recs.length;
+  const hit       = recs.filter(r => r.result === 'hit').length;
+  const total_bet = recs.reduce((s,r) => s + (r.bet_amount||0), 0);
+  const total_ret = recs.reduce((s,r) => s + (r.return_amount||0), 0);
+  const hit_rate  = total ? (hit/total*100).toFixed(1) : 0;
+  const recovery  = total_bet ? (total_ret/total_bet*100).toFixed(1) : 0;
+  const profit    = total_ret - total_bet;
+
+  let streak=0, streak_type='';
+  for (const r of recs) {
+    if (!streak) { streak=1; streak_type=r.result; }
+    else if (r.result===streak_type) streak++;
+    else break;
+  }
+
+  const sports=['horse','boat','cycle'];
+  const by_sport={};
+  for (const s of sports) {
+    const sr=recs.filter(r=>r.sport===s);
+    const sh=sr.filter(r=>r.result==='hit').length;
+    const sb=sr.reduce((a,r)=>a+(r.bet_amount||0),0);
+    const sr2=sr.reduce((a,r)=>a+(r.return_amount||0),0);
+    by_sport[s]={
+      total:sr.length, hit:sh,
+      hit_rate:sr.length?(sh/sr.length*100).toFixed(1):0,
+      recovery:sb?(sr2/sb*100).toFixed(1):0,
+      profit:sr2-sb
+    };
+  }
+
+  // 月別集計
+  const monthly={};
+  for (const r of recs) {
+    const ym = r.date ? r.date.slice(0,7) : '不明';
+    if (!monthly[ym]) monthly[ym]={bet:0,ret:0,hit:0,total:0};
+    monthly[ym].bet += r.bet_amount||0;
+    monthly[ym].ret += r.return_amount||0;
+    monthly[ym].total++;
+    if (r.result==='hit') monthly[ym].hit++;
+  }
+
+  return {total,hit,hit_rate,total_bet,total_ret,recovery,profit,streak,streak_type,by_sport,monthly,updated:new Date().toISOString().split('T')[0]};
+}
+
+// ── 描画 ────────────────────────────────────────────
+function renderAll(s) {
+  // sは calcSummary()の返り値形式を期待する
+  if (!s || (!s.total && !s.summary)) s = calcSummary(allRecords);
+  // summaryフィールドがあればそちらを使用、なければsそのまま
+  const d = s.summary ? {
+    ...s.summary,
+    total_bet: s.summary.bet || s.total_bet || 0,
+    total_ret: s.summary.return || s.total_ret || 0,
+    recovery:  s.summary.recovery_rate || s.recovery || 0,
+    by_sport:  s.by_sport || {},
+    monthly:   s.monthly || {},
+    updated:   s.updated || ''
+  } : s;
+
+  // 更新日
+  document.getElementById('updated-date').textContent =
+    `最終更新: ${d.updated || s.updated || ''}`;
+
+  // BIG STATS
+  const rec = parseFloat(d.recovery_rate || d.recovery || 0);
+  const rEl = document.getElementById('bs-recovery');
+  rEl.textContent = d.total_bet ? rec + '%' : '--%';
+  rEl.className = 'big-stat-val ' + (rec >= 100 ? 'green' : rec > 0 ? 'gold' : 'red');
+  document.getElementById('bs-recovery-sub').textContent =
+    `投資 ¥${(d.total_bet||0).toLocaleString()} / 回収 ¥${(d.total_return||d.total_ret||0).toLocaleString()}`;
+
+  document.getElementById('bs-hitrate').textContent =
+    d.total ? d.hit_rate + '%' : '--%';
+  document.getElementById('bs-hitrate-sub').textContent =
+    `${d.hit||0}勝 / ${d.total||0}戦`;
+
+  const profit = d.profit || ((d.total_return||d.total_ret||0) - (d.total_bet||0));
+  const pEl = document.getElementById('bs-profit');
+  pEl.textContent = (profit>=0?'+':'') + '¥' + profit.toLocaleString();
+  pEl.className = 'big-stat-val ' + (profit>0?'green':profit<0?'red':'white');
+  document.getElementById('bs-profit-sub').textContent =
+    `${d.total||0}戦の累計`;
+
+  // STREAK
+  renderStreak(d.streak||0, d.streak_type||'');
+
+  // SPORT BREAKDOWN
+  renderSports(d.by_sport || s.by_sport || {});
+
+  // MONTH CHART
+  renderChart(d.monthly || s.monthly || {});
+
+  // RECORDS
+  renderRecords();
+
+  // SNS
+  setupShare(rec, d.hit_rate, d.total);
+}
+
+function renderStreak(streak, type) {
+  const el = document.getElementById('streak-wrap');
+  if (!streak) { el.innerHTML=''; return; }
+  const isHit = type==='hit';
+  el.innerHTML = `
+    <div class="streak-banner ${isHit?'':'miss'}" style="margin:12px 20px 0;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;background:var(--bg-card);border-left:4px solid ${isHit?'var(--green)':'var(--red)'}">
+      <span style="font-size:1.6rem">${isHit?'🔥':'😓'}</span>
+      <div style="flex:1;padding:0 14px">
+        <div style="font-family:'Noto Serif JP',serif;font-weight:700;font-size:.95rem;color:#fff">
+          ${isHit?`現在${streak}連続的中中！`:`現在${streak}連続外れ中`}
+        </div>
+        <div style="font-size:.68rem;color:var(--text-mute);margin-top:2px">
+          ${isHit?'勢いに乗っています':'次こそ巻き返します'}
+        </div>
+      </div>
+      <span style="font-family:'Bebas Neue',sans-serif;font-size:2.4rem;color:${isHit?'var(--green)':'var(--red)'}">${streak}</span>
+    </div>`;
+}
+
+function renderSports(by_sport) {
+  const el = document.getElementById('sport-grid');
+  const sports = [
+    {key:'horse',icon:'🐴',label:'競馬',cls:'horse'},
+    {key:'boat', icon:'🚤',label:'競艇',cls:'boat'},
+    {key:'cycle',icon:'🚴',label:'競輪',cls:'cycle'},
+  ];
+  el.innerHTML = sports.map(s => {
+    const d = by_sport[s.key] || {total:0,hit:0,hit_rate:0,recovery_rate:0,recovery:0,profit:0};
+    const rec = parseFloat(d.recovery_rate || d.recovery || 0);
+    const col = rec>=100?'var(--green)':rec>0?'var(--gold-l)':'var(--red)';
+    return `<div class="sport-card ${s.cls}">
+      <div class="sport-head"><span class="sport-icon">${s.icon}</span><span class="sport-name">${s.label}</span></div>
+      <div class="sport-recovery" style="color:${col}">${d.total?rec+'%':'--'}</div>
+      <div class="sport-stats">
+        的中率 ${d.total?d.hit_rate+'%':'--'}<br>
+        ${d.hit||0}勝${(d.total-d.hit)||0}敗 / ${d.total||0}戦<br>
+        収支 ${d.profit>=0?'+':''}¥${(d.profit||0).toLocaleString()}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderChart(monthly) {
+  const el = document.getElementById('chart-bars');
+  const keys = Object.keys(monthly).sort().slice(-6);
+  if (!keys.length) {
+    el.innerHTML = '<div class="empty" style="width:100%;font-size:.75rem">データなし</div>';
+    return;
+  }
+  const profits = keys.map(k => (monthly[k].ret - monthly[k].bet));
+  const maxAbs = Math.max(...profits.map(Math.abs), 1);
+
+  el.innerHTML = keys.map((k, i) => {
+    const p = profits[i];
+    const pct = Math.abs(p) / maxAbs * 100;
+    const cls = p>0?'pos':p<0?'neg':'zero';
+    const label = k.slice(5) + '月';
+    return `<div class="chart-bar-wrap">
+      <div class="chart-val">${p>=0?'+':''}${Math.round(p/100)*100>=0?'':''}<span style="font-size:.58rem">${p>=0?'+':''}¥${Math.abs(p).toLocaleString()}</span></div>
+      <div class="chart-bar ${cls}" style="height:${Math.max(pct,3)}%"></div>
+      <div class="chart-label">${label}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── フィルター ──────────────────────────────────────────
+function setFilter(f) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  renderRecords();
+}
+
+function renderRecords() {
+  const el = document.getElementById('record-list');
+  let recs = [...allRecords];
+  if (currentFilter==='horse'||currentFilter==='boat'||currentFilter==='cycle')
+    recs = recs.filter(r=>r.sport===currentFilter);
+  else if (currentFilter==='hit'||currentFilter==='miss')
+    recs = recs.filter(r=>r.result===currentFilter);
+
+  if (!recs.length) {
+    el.innerHTML='<div class="empty">該当する予想履歴がありません</div>';
+    return;
+  }
+
+  el.innerHTML = recs.map(r => {
+    const m = SPORT_META[r.sport]||{icon:'🏁',label:r.sport,cls:''};
+    const profit = (r.return_amount||0) - (r.bet_amount||0);
+    return `<div class="record-item ${r.result}">
+      <span class="ri-date">${(r.date||'').slice(5).replace('-','/')}</span>
+      <span class="ri-sport ${m.cls}">${m.label}</span>
+      <div class="ri-info">
+        <div class="ri-race">${r.race||''}</div>
+        <div class="ri-honmei">${r.honmei||''}${r.memo?' · '+r.memo:''}</div>
+      </div>
+      <div class="ri-badge">
+        <span class="ri-result ${r.result}">${r.result==='hit'?'◎ 的中':'✕ 外れ'}</span>
+        <span class="ri-profit ${profit>=0?'pos':'neg'}">${profit>=0?'+':''}¥${Math.abs(profit).toLocaleString()}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── SNS共有 ─────────────────────────────────────────────
+function setupShare(recovery, hitrate, total) {
+  const url = encodeURIComponent(location.href);
+  const text = encodeURIComponent(
+    `【予想の鉄則 実績公開】回収率${recovery}% / 的中率${hitrate}% / ${total}戦の全予想を公開中！根拠ある予想で長期収支プラスを目指す👇 #競馬予想 #競艇予想 #競輪予想 #予想の鉄則`
+  );
+  document.getElementById('share-x').href = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
+  document.getElementById('share-line').href = `https://social-plugins.line.me/lineit/share?url=${url}`;
+}
+
+function copyURL() {
+  navigator.clipboard.writeText(location.href).then(() => {
+    const btn = document.getElementById('share-copy');
+    btn.textContent = '✅ コピーしました';
+    btn.classList.add('share-copied');
+    setTimeout(()=>{btn.textContent='🔗 URLコピー';btn.classList.remove('share-copied');},2000);
+  });
+}
+
+// 初期化
+loadData();
+</script>
+</body>
+</html>
