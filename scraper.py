@@ -274,9 +274,118 @@ def calc_score_horse(horse):
             * pace_adj * weight_adj)
 
 
+# ── 連勝式EV計算（ハーヴィル公式）────────────────
+def calc_umaren_ev(probs, odds_map):
+    """馬連のEV計算。probs: {馬番: 確率}, odds_map: {(i,j): オッズ}"""
+    result = []
+    keys = list(probs.keys())
+    for i in range(len(keys)):
+        for j in range(i+1, len(keys)):
+            a, b = keys[i], keys[j]
+            pa, pb = probs[a], probs[b]
+            if pa + pb <= 0: continue
+            # ハーヴィル公式: P(a1着,b2着) + P(b1着,a2着)
+            p_ab = pa * (pb / (1 - pa)) if pa < 1 else 0
+            p_ba = pb * (pa / (1 - pb)) if pb < 1 else 0
+            hit_prob = p_ab + p_ba
+            odds = odds_map.get((a,b), odds_map.get((b,a), 0))
+            ev = round(hit_prob * odds, 4) if odds > 0 else 0.0
+            result.append({"combo": f"{a}-{b}", "prob": round(hit_prob,4), "odds": odds, "ev": ev})
+    return sorted(result, key=lambda x: x["ev"], reverse=True)
+
+def calc_sanrenpuku_ev(probs, odds_map):
+    """3連複のEV計算。probs: {馬番: 確率}, odds_map: {(i,j,k): オッズ}"""
+    result = []
+    keys = list(probs.keys())
+    for i in range(len(keys)):
+        for j in range(i+1, len(keys)):
+            for k in range(j+1, len(keys)):
+                a, b, c = keys[i], keys[j], keys[k]
+                pa, pb, pc = probs[a], probs[b], probs[c]
+                total = pa + pb + pc
+                if total <= 0 or total >= 1: continue
+                # 3連複的中確率（ハーヴィル近似）
+                p = (pa*pb*(pc/(1-pa-pb)) + pa*pc*(pb/(1-pa-pc)) + pb*pc*(pa/(1-pb-pc))) / 3 * 6
+                p = min(p, 1.0)
+                odds = odds_map.get((a,b,c), 0)
+                ev = round(p * odds, 4) if odds > 0 else 0.0
+                result.append({"combo": f"{a}-{b}-{c}", "prob": round(p,4), "odds": odds, "ev": ev})
+    return sorted(result, key=lambda x: x["ev"], reverse=True)
+
+def build_horse_combo_summary(ev_results):
+    """全出走馬のEV一覧と連勝式推奨買い目を生成する"""
+    # 馬番→確率マップ
+    probs = {}
+    for h in ev_results:
+        num = h.get("horse_num", h.get("frame_num", 0))
+        if num:
+            probs[int(num)] = h.get("prob", 0)
+
+    # 馬連EV（デフォルトオッズなし → 確率のみ）
+    umaren_list = []
+    keys = sorted(probs.keys())
+    for i in range(len(keys)):
+        for j in range(i+1, len(keys)):
+            a, b = keys[i], keys[j]
+            pa, pb = probs[a], probs[b]
+            if pa + pb <= 0 or pa >= 1 or pb >= 1: continue
+            p_ab = pa * (pb / (1 - pa))
+            p_ba = pb * (pa / (1 - pb))
+            hit_prob = round(p_ab + p_ba, 4)
+            umaren_list.append({"combo": f"{a}-{b}", "prob": hit_prob})
+    umaren_top = sorted(umaren_list, key=lambda x: x["prob"], reverse=True)[:5]
+
+    # 3連複EV
+    sanrenpuku_list = []
+    for i in range(len(keys)):
+        for j in range(i+1, len(keys)):
+            for k in range(j+1, len(keys)):
+                a, b, c = keys[i], keys[j], keys[k]
+                pa, pb, pc = probs.get(a,0), probs.get(b,0), probs.get(c,0)
+                total = pa + pb + pc
+                if total <= 0 or total >= 1: continue
+                try:
+                    p = (pa*pb*(pc/(1-pa-pb)) + pa*pc*(pb/(1-pa-pc)) + pb*pc*(pa/(1-pb-pc))) / 3 * 6
+                    p = min(max(p, 0), 1.0)
+                    sanrenpuku_list.append({"combo": f"{a}-{b}-{c}", "prob": round(p,4)})
+                except ZeroDivisionError:
+                    pass
+    sanrenpuku_top = sorted(sanrenpuku_list, key=lambda x: x["prob"], reverse=True)[:3]
+
+    return {
+        "umaren_top": umaren_top,
+        "sanrenpuku_top": sanrenpuku_top
+    }
+
+def build_horse_pace_summary(ev_results):
+    """展開予想テキストを生成する（脚質分布から）"""
+    style_counts = {}
+    for h in ev_results:
+        style = h.get("running_style", "先行")
+        style_counts[style] = style_counts.get(style, 0) + 1
+
+    escape = style_counts.get("逃げ", 0)
+    front  = style_counts.get("先行", 0)
+    diff   = style_counts.get("差し", 0)
+    chase  = style_counts.get("追い込み", 0)
+
+    if escape + front >= 5:
+        pace_type = "ハイペース想定（前が多い）"
+        advantage = "差し・追い込み有利"
+    elif escape + front <= 2:
+        pace_type = "スローペース想定（前が少ない）"
+        advantage = "逃げ・先行有利"
+    else:
+        pace_type = "平均ペース想定"
+        advantage = "展開は流動的"
+
+    return f"{pace_type}｜{advantage}（逃{escape}先{front}差{diff}追{chase}）"
+
+
 def calc_race_ev_horse(horses, history=None):
     if history is None: history = {"horse": []}
-    scored = [{"data": h, "score": calc_score_horse(h)} for h in horses]
+    scored = [{
+"data": h, "score": calc_score_horse(h)} for h in horses]
     total  = sum(s["score"] for s in scored)
 
     # 推定順位を計算（人気乖離補正用）
@@ -314,7 +423,34 @@ def calc_race_ev_horse(horses, history=None):
             "judge":     judge,
             "dist_type": dist,
         })
-    return sorted(result, key=lambda x: x["ev"], reverse=True)
+    sorted_result = sorted(result, key=lambda x: x["ev"], reverse=True)
+
+    # 全出走馬のEV一覧表（サイト表示用）
+    all_horses_ev = [
+        {
+            "name":  h.get("name",""),
+            "num":   h.get("horse_num", h.get("frame_num", 0)),
+            "prob":  h.get("prob", 0),
+            "odds":  h.get("odds", 0),
+            "ev":    h.get("ev", 0),
+            "judge": h.get("judge",""),
+            "style": h.get("running_style",""),
+            "jockey":h.get("jockey",""),
+        }
+        for h in sorted_result
+    ]
+    # 連勝式推奨買い目（確率ベース）
+    combo_summary = build_horse_combo_summary(sorted_result)
+    # 展開予想
+    pace_summary = build_horse_pace_summary(sorted_result)
+
+    # 先頭のレースにメタ情報を付加
+    if sorted_result:
+        sorted_result[0]["all_horses_ev"]   = all_horses_ev
+        sorted_result[0]["combo_summary"]    = combo_summary
+        sorted_result[0]["pace_summary"]     = pace_summary
+
+    return sorted_result
 
 
 # ══════════════════════════════════════════════════
@@ -469,6 +605,85 @@ def calc_score_cycle(rider):
         raw_score *= 0.8
     return raw_score
 
+def build_cycle_line_visual(ev_results):
+    """競輪のライン構成をテキストで可視化する
+    例: 「北日本ライン: 山田(先頭)→佐藤(番手) | 関東ライン: 田中(先頭)」
+    """
+    if not ev_results:
+        return ""
+
+    CIRCLES = "①②③④⑤⑥⑦⑧⑨"
+
+    # ラインごとにまとめる
+    lines_map = {}
+    single    = []
+    for r in ev_results:
+        lg = r.get("line_group", "")
+        if lg:
+            if lg not in lines_map:
+                lines_map[lg] = []
+            lines_map[lg].append(r)
+        else:
+            single.append(r)
+
+    parts = []
+    for lg, members in lines_map.items():
+        # 先頭→番手の順に並び替える
+        ordered = sorted(members, key=lambda x: 0 if x.get("role") == "先頭" else 1)
+        chain_parts = []
+        for r in ordered:
+            fn = int(r.get("frame_num", 1))
+            circle = CIRCLES[fn-1] if 1 <= fn <= 9 else str(fn)
+            role_str = ""
+            if r.get("role") == "先頭":
+                role_str = "(先頭)"
+            elif r.get("role") == "番手":
+                role_str = "(番手)"
+            chain_parts.append(circle + r.get("name", "") + role_str)
+        chain = "→".join(chain_parts)
+        parts.append(f"{lg}: {chain}")
+
+    for r in single:
+        fn = int(r.get("frame_num", 1))
+        circle = CIRCLES[fn-1] if 1 <= fn <= 9 else str(fn)
+        parts.append(f"単騎: {circle}{r.get('name','')}")
+
+    return " | ".join(parts)
+
+
+def build_cycle_race_summary(ev_results):
+    """競輪の展開予想テキストを生成する"""
+    if not ev_results:
+        return ""
+
+    # 先頭選手の確率合計
+    lead_prob   = sum(r.get("prob", 0) for r in ev_results if r.get("role") == "先頭")
+    # 番手選手の確率合計
+    second_prob = sum(r.get("prob", 0) for r in ev_results if r.get("role") == "番手")
+    # 単騎選手の確率合計
+    single_prob = sum(r.get("prob", 0) for r in ev_results if r.get("role") == "単騎")
+
+    bt = ev_results[0].get("bank_type", 400) if ev_results else 400
+    bank_note = "（333mバンク・先行有利）" if bt == 333 else ""
+
+    # 展開パターン判定
+    if lead_prob >= 0.50:
+        pattern = f"先行有利展開{bank_note}"
+    elif single_prob >= 0.40:
+        pattern = "単騎有利展開（ライン戦崩れ注意）"
+    elif second_prob >= 0.35:
+        pattern = "番手マクリ有利展開"
+    else:
+        pattern = "流動展開（各ライン均衡）"
+
+    top3 = sorted(ev_results, key=lambda x: x.get("prob", 0), reverse=True)[:3]
+    top3_str = "・".join([
+        f"{r.get('name','')}({r.get('role','')})→{int(r.get('prob',0)*100)}%"
+        for r in top3
+    ])
+    return f"{pattern} | {top3_str}"
+
+
 def calc_race_ev_cycle(riders, history=None):
     if history is None: history = {"cycle": []}
 
@@ -527,7 +742,37 @@ def calc_race_ev_cycle(riders, history=None):
             "role":  role,
             "bank_type": bt,
         })
-    return sorted(result, key=lambda x: x["ev"], reverse=True)
+    sorted_result = sorted(result, key=lambda x: x["ev"], reverse=True)
+
+    # 全選手EV一覧（サイト表示用）
+    all_riders_ev = [
+        {
+            "name":       r.get("name",""),
+            "frame_num":  r.get("frame_num", 0),
+            "prob":       r.get("prob", 0),
+            "odds":       r.get("odds", 0),
+            "ev":         r.get("ev", 0),
+            "judge":      r.get("judge",""),
+            "role":       r.get("role",""),
+            "line_group": r.get("line_group",""),
+            "score_rank": r.get("score_rank", 0),
+        }
+        for r in sorted_result
+    ]
+
+    # ライン構成テキスト可視化
+    line_visual = build_cycle_line_visual(sorted_result)
+
+    # 展開予想テキスト
+    race_summary = build_cycle_race_summary(sorted_result)
+
+    # 先頭のレコードにメタ情報を付加
+    if sorted_result:
+        sorted_result[0]["all_riders_ev"] = all_riders_ev
+        sorted_result[0]["line_visual"]   = line_visual
+        sorted_result[0]["race_summary"]  = race_summary
+
+    return sorted_result
 
 
 # ══════════════════════════════════════════════════
@@ -707,18 +952,31 @@ def fetch_race_details(base, race_id, history):
         ev_results = calc_race_ev_horse(horses_data, history)
         best       = next((h for h in ev_results if h["judge"] in ["強買い","買い"]), ev_results[0] if ev_results else None)
 
+        # 全出走馬一覧・連勝式・展開予想を先頭レコードから取り出す
+        all_horses_ev  = ev_results[0].get("all_horses_ev", [])  if ev_results else []
+        combo_summary  = ev_results[0].get("combo_summary", {})  if ev_results else {}
+        pace_summary   = ev_results[0].get("pace_summary", "")   if ev_results else ""
+
+        # 展開予想をreasonに組み込む
+        reason_text = f"推定勝率{int(best['prob']*100)}%・EV{best['ev']:.2f}倍・{track_condition}" if best else ""
+        if pace_summary:
+            reason_text += f" / 展開: {pace_summary}"
+
         return {
-            "sport":     "horse",
-            "name":      race_name,
-            "venue":     venue,
-            "time":      race_time,
-            "grade":     grade,
-            "url":       "keiba.html",
-            "ev_detail": ev_results[:5],
-            "honmei":    best["name"] if best else "",
-            "ev":     f"+{min(int((best['ev']-1)*100),99)}%" if best and best['ev'] > 1 else "",
-            "judge":     best["judge"] if best else "見送り",
-            "reason":    f"推定勝率{int(best['prob']*100)}%・EV{best['ev']:.2f}倍・{track_condition}" if best else ""
+            "sport":         "horse",
+            "name":          race_name,
+            "venue":         venue,
+            "time":          race_time,
+            "grade":         grade,
+            "url":           "keiba.html",
+            "ev_detail":     ev_results[:5],
+            "all_horses_ev": all_horses_ev,
+            "combo_summary": combo_summary,
+            "pace_summary":  pace_summary,
+            "honmei":        best["name"] if best else "",
+            "ev":     f"+{min(int((best['ev']-1)*100),999)}%" if best and best['ev'] > 1 else "",
+            "judge":         best["judge"] if best else "見送り",
+            "reason":        reason_text
         }
     except Exception as e:
         print(f"  [race_details/{race_id}] エラー: {e}")
@@ -1028,6 +1286,92 @@ VENUE_1ST_RATE = {
 
 DEFAULT_ODDS_MAP = {1:3.5, 2:5.0, 3:7.0, 4:10.0, 5:14.0, 6:18.0}
 
+# ── 競艇 全艦券種期待値計算（2連単・3連単）────────────────
+def calc_boat_2rentan_ev(probs):
+    """
+    2連単の的中確率をハーヴィル公式で計算する。
+    probs: {1: 0.35, 2: 0.20, ...} などの艦番→確率マップ
+    返り値: [{combo, prob}] 上位10件
+    """
+    result = []
+    keys = list(probs.keys())
+    for i in range(len(keys)):
+        for j in range(len(keys)):
+            if i == j: continue
+            a, b = keys[i], keys[j]
+            pa, pb = probs[a], probs[b]
+            if pa <= 0 or pb <= 0 or pa >= 1: continue
+            # P(aが1着, bが2着) = pa * pb/(1-pa)
+            p = pa * (pb / (1 - pa))
+            result.append({"combo": f"{a}-{b}", "prob": round(p, 4)})
+    return sorted(result, key=lambda x: x["prob"], reverse=True)[:10]
+
+def calc_boat_3rentan_ev(probs):
+    """
+    3連単の的中確率をハーヴィル公式で計算する。
+    返り値: [{combo, prob}] 上位10件
+    """
+    result = []
+    keys = list(probs.keys())
+    for i in range(len(keys)):
+        for j in range(len(keys)):
+            if i == j: continue
+            for k in range(len(keys)):
+                if k == i or k == j: continue
+                a, b, c = keys[i], keys[j], keys[k]
+                pa, pb, pc = probs[a], probs[b], probs[c]
+                if pa <= 0 or pb <= 0 or pc <= 0: continue
+                if pa >= 1 or (pa + pb) >= 1: continue
+                # P(a1着, b2着, c3着) = pa * pb/(1-pa) * pc/(1-pa-pb)
+                try:
+                    p = pa * (pb / (1 - pa)) * (pc / (1 - pa - pb))
+                    result.append({"combo": f"{a}-{b}-{c}", "prob": round(p, 5)})
+                except ZeroDivisionError:
+                    pass
+    return sorted(result, key=lambda x: x["prob"], reverse=True)[:10]
+
+def build_boat_combo_summary(ev_results):
+    """競艇全選手のEV一覧と全艦券種推奨買い目を生成する"""
+    probs = {}
+    for r in ev_results:
+        bn = int(float(r.get("frame_num", 0)))
+        if bn:
+            probs[bn] = r.get("prob", 0)
+
+    rentan_2 = calc_boat_2rentan_ev(probs)
+    rentan_3 = calc_boat_3rentan_ev(probs)
+
+    return {
+        "rentan_2_top": rentan_2[:5],
+        "rentan_3_top": rentan_3[:5]
+    }
+
+def build_boat_race_summary(ev_results, venue_name=""):
+    """競艇の展開予想テキストを生成する（コース別確率から）"""
+    # 1号艦の確率が高い場合は「逃げ有利」、低い場合は「差し・まくり有利」
+    if not ev_results:
+        return ""
+    sorted_by_course = sorted(ev_results, key=lambda x: float(x.get("frame_num",1)))
+    probs_by_course  = [r.get("prob",0) for r in sorted_by_course]
+
+    p1 = probs_by_course[0] if len(probs_by_course) > 0 else 0
+    p2 = probs_by_course[1] if len(probs_by_course) > 1 else 0
+    p3 = probs_by_course[2] if len(probs_by_course) > 2 else 0
+
+    if p1 >= 0.40:
+        pattern = "逃げ有利展開（1号艦が強い）"
+    elif p2 + p3 >= 0.40:
+        pattern = "差し・まくり展開（2・3号艦が強い）"
+    elif p1 + p2 >= 0.55:
+        pattern = "内果中心展開（1・2号艦有利）"
+    else:
+        pattern = "流動展開（各艦均衡）"
+
+    top3 = sorted(ev_results, key=lambda x: x.get("prob",0), reverse=True)[:3]
+    top3_str = "・".join([f"{int(float(r.get('frame_num',0)))}号{r.get('name','')}→{int(r.get('prob',0)*100)}%" for r in top3])
+    return f"{pattern} | {top3_str}"
+
+
 def get_venue_course_adj(venue_name, course_num):
     base_1st     = VENUE_1ST_RATE.get(venue_name, 0.542)
     ratio        = base_1st / 0.542
@@ -1111,7 +1455,35 @@ def calc_boat_race_ev_v2(riders, venue_name=""):
             "course_exp":round(COURSE_STATS.get(course_n, {}).get("win", 0.1), 3),
         })
 
-    return sorted(result, key=lambda x: x["ev"] if x.get("real_odds") else x["prob"], reverse=True)
+    sorted_result = sorted(result, key=lambda x: x["ev"] if x.get("real_odds") else x["prob"], reverse=True)
+
+    # 全選手一覧表（サイト表示用）
+    all_riders_ev = [
+        {
+            "name":      r.get("name",""),
+            "frame_num": int(float(r.get("frame_num",0))),
+            "prob":      r.get("prob",0),
+            "odds":      r.get("odds",0),
+            "ev":        r.get("ev",0),
+            "judge":     r.get("judge",""),
+            "win_rate":  r.get("win_rate",0),
+            "motor_win_rate": r.get("motor_win_rate",0),
+            "exhibition_time": r.get("exhibition_time",0),
+        }
+        for r in sorted_result
+    ]
+    # 全艦券種推奨買い目
+    combo_summary = build_boat_combo_summary(sorted_result)
+    # 展開予想
+    race_summary  = build_boat_race_summary(sorted_result, venue_name)
+
+    # 先頭のレコードにメタ情報を付加
+    if sorted_result:
+        sorted_result[0]["all_riders_ev"]  = all_riders_ev
+        sorted_result[0]["combo_summary"]   = combo_summary
+        sorted_result[0]["race_summary"]    = race_summary
+
+    return sorted_result
 
 # (後方互換関数は削除済み)
 
@@ -1246,9 +1618,14 @@ def fetch_boat_all():
                 # TODO: 安定したオッズ取得方法が確立したら有効化
                 pass
 
-                ev_results = calc_boat_race_ev(riders) if riders else []
+                ev_results = calc_boat_race_ev_v2(riders, venue) if riders else []
                 best       = next((r for r in ev_results if r["judge"] in ["強買い","買い"]),
                                   ev_results[0] if ev_results else None)
+
+                # 全選手一覧・連勝式・展開予想を先頭レコードから取り出す
+                all_riders_ev = ev_results[0].get("all_riders_ev", []) if ev_results else []
+                combo_summary = ev_results[0].get("combo_summary", {}) if ev_results else {}
+                race_summary  = ev_results[0].get("race_summary", "")  if ev_results else ""
 
                 race = {
                     "sport": "boat",
@@ -1256,14 +1633,20 @@ def fetch_boat_all():
                     "venue": venue,
                     "time":  t,
                     "grade": grade,
-                    "url":   "kyotei.html"
+                    "url":   "kyotei.html",
+                    "all_riders_ev": all_riders_ev,
+                    "combo_summary": combo_summary,
+                    "race_summary":  race_summary,
                 }
                 if best and best.get("judge") in ["強買い", "買い"]:
+                    reason_text = f"推定勝率{int(best['prob']*100)}%・EV{best['ev']:.2f}倍・{int(best.get('frame_num',1))}号艇"
+                    if race_summary:
+                        reason_text += f" / 展開: {race_summary.split('|')[0].strip()}"
                     race.update({
                         "honmei":    best.get("name",""),
-                        "ev":        f"+{min(int((best['ev']-1)*100), 99)}%" if best and best['ev']>1 else "",
+                        "ev":        f"+{min(int((best['ev']-1)*100), 999)}%" if best and best['ev']>1 else "",
                         "judge":     best["judge"],
-                        "reason":    f"推定勝率{int(best['prob']*100)}%・EV{best['ev']:.2f}倍・{int(best.get('frame_num',1))}号艇",
+                        "reason":    reason_text,
                         "ev_detail": ev_results[:6]
                     })
                 elif best:
@@ -1419,22 +1802,41 @@ def fetch_cycle_all():
                 best       = next((r for r in ev_results if r["judge"] in ["強買い","買い"]),
                                   ev_results[0] if ev_results else None)
 
-                race = {"sport":"cycle","name":f"{venue_name} 注目レース","venue":venue_name,
-                        "time":t,"grade":grade,"url":"keirin.html"}
+                # 全選手一覧・ライン可視化・展開予想を先頭レコードから取り出す
+                all_riders_ev = ev_results[0].get("all_riders_ev", []) if ev_results else []
+                line_visual   = ev_results[0].get("line_visual", "")   if ev_results else ""
+                race_summary  = ev_results[0].get("race_summary", "")  if ev_results else ""
+
+                race = {
+                    "sport":         "cycle",
+                    "name":          f"{venue_name} 注目レース",
+                    "venue":         venue_name,
+                    "time":          t,
+                    "grade":         grade,
+                    "url":           "keirin.html",
+                    "all_riders_ev": all_riders_ev,
+                    "line_visual":   line_visual,
+                    "race_summary":  race_summary,
+                }
                 if best and best.get("judge") in ["強買い", "買い"]:
+                    reason_text = f"推定勝率{int(best['prob']*100)}%・EV{best['ev']:.2f}倍"
+                    if race_summary:
+                        reason_text += f" / 展開: {race_summary.split('|')[0].strip()}"
                     race.update({
-                        "honmei": best.get("name","予想公開中"),
-                        "ev":     f"+{int((best['ev']-1)*100)}%" if best.get('ev',0)>1 else "",
-                        "judge":  best["judge"],
-                        "reason": f"推定勝率{int(best['prob']*100)}%・EV{best['ev']:.2f}倍"
+                        "honmei":    best.get("name","予想公開中"),
+                        "ev":        f"+{int((best['ev']-1)*100)}%" if best.get('ev',0)>1 else "",
+                        "judge":     best["judge"],
+                        "reason":    reason_text,
+                        "ev_detail": ev_results[:9],
                     })
                 elif best:
                     # 強買い・買いなしの場合は見送り表示
                     race.update({
-                        "honmei": "",
-                        "ev":     "",
-                        "judge":  "見送り",
-                        "reason": "本日は推奨レースなし"
+                        "honmei":    "",
+                        "ev":        "",
+                        "judge":     "見送り",
+                        "reason":    "本日は推奨レースなし",
+                        "ev_detail": ev_results[:9],
                     })
                 races.append(race)
 
@@ -1968,6 +2370,36 @@ def generate_prediction_text(races):
                 line += f" EV{ev}"
             if judge in ["強買い","買い"]:
                 line += f"（{judge}）"
+
+            # 展開予想を追加（競馬: pace_summary, 競艇: race_summary, 競輪: race_summary）
+            summary = r.get("pace_summary") or r.get("race_summary","")
+            if summary:
+                # 長すぎる場合は先頭部分のみ
+                summary_short = summary.split("|")[0].strip()[:30]
+                line += f"\n展開: {summary_short}"
+
+            # 競馬: 馬連推奨買い目を追加
+            if r.get("sport") == "horse":
+                combo = r.get("combo_summary", {})
+                umaren = combo.get("umaren_top", [])
+                if umaren:
+                    top2 = umaren[:2]
+                    line += f"\n馬連推奨: {', '.join([u['combo'] for u in top2])}"
+
+            # 競艇: 2連単推奨買い目を追加
+            if r.get("sport") == "boat":
+                combo = r.get("combo_summary", {})
+                rentan2 = combo.get("rentan_2_top", [])
+                if rentan2:
+                    top2 = rentan2[:2]
+                    line += f"\n2連単推奨: {', '.join([u['combo'] for u in top2])}"
+
+            # 競輪: ライン構成を追加
+            if r.get("sport") == "cycle":
+                lv = r.get("line_visual","")
+                if lv:
+                    line += f"\nライン: {lv[:40]}"
+
             lines.append(line)
 
         ev_count = len([r for r in races if r.get("judge") == "強買い"])
@@ -2109,10 +2541,36 @@ if __name__ == "__main__":
 
     # ③ races.json生成
     print("\n--- ③ races.json生成 ---")
+    # races.jsonは全データを含める（all_horses_ev等も含む）
     output = {"date": today_str, "races": all_races, "line_message": line_message}
     with open("races.json","w",encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=True, indent=2)
     print(f"races.json生成完了（{len(all_races)}件）")
+
+    # races_summary.json（軽量版・index.html用）
+    try:
+        races_summary = []
+        for r in all_races:
+            races_summary.append({
+                "sport":        r.get("sport",""),
+                "name":         r.get("name",""),
+                "venue":        r.get("venue",""),
+                "time":         r.get("time",""),
+                "grade":        r.get("grade",""),
+                "honmei":       r.get("honmei",""),
+                "ev":           r.get("ev",""),
+                "judge":        r.get("judge",""),
+                "reason":       r.get("reason",""),
+                "url":          r.get("url",""),
+                "pace_summary": r.get("pace_summary",""),
+                "race_summary": r.get("race_summary",""),
+                "line_visual":  r.get("line_visual",""),
+            })
+        with open("races_summary.json","w",encoding="utf-8") as f:
+            json.dump({"date": today_str, "races": races_summary}, f, ensure_ascii=True, indent=2)
+        print(f"races_summary.json生成完了（{len(races_summary)}件）")
+    except Exception as e:
+        print(f"⚠️ races_summary.json生成エラー: {e}")
 
     if line_message:
         with open("line_message.txt","w",encoding="utf-8") as f:
@@ -2128,17 +2586,29 @@ if __name__ == "__main__":
         for r in all_races:
             if r.get("honmei") and r.get("judge") in ["強買い","買い"]:
                 predictions.append({
-                    "sport":    r["sport"],
-                    "icon":     sport_icon.get(r["sport"],"🏁"),
-                    "sport_name": sport_name.get(r["sport"],r["sport"]),
-                    "venue":    r.get("venue",""),
-                    "time":     r.get("time","--:--"),
-                    "grade":    r.get("grade",""),
-                    "honmei":   r.get("honmei",""),
-                    "ev":       r.get("ev",""),
-                    "judge":    r.get("judge",""),
-                    "reason":   r.get("reason",""),
-                    "url":      r.get("url","")
+                    "sport":         r["sport"],
+                    "icon":          sport_icon.get(r["sport"],"🏁"),
+                    "sport_name":    sport_name.get(r["sport"],r["sport"]),
+                    "venue":         r.get("venue",""),
+                    "time":          r.get("time","--:--"),
+                    "grade":         r.get("grade",""),
+                    "honmei":        r.get("honmei",""),
+                    "ev":            r.get("ev",""),
+                    "judge":         r.get("judge",""),
+                    "reason":        r.get("reason",""),
+                    "url":           r.get("url",""),
+                    # 全選手EV一覧（競技別）
+                    "all_horses_ev": r.get("all_horses_ev", []),
+                    "all_riders_ev": r.get("all_riders_ev", []),
+                    # 連勝式推奨買い目
+                    "combo_summary": r.get("combo_summary", {}),
+                    # 展開予想
+                    "pace_summary":  r.get("pace_summary",""),
+                    "race_summary":  r.get("race_summary",""),
+                    # 競輪ライン可視化
+                    "line_visual":   r.get("line_visual",""),
+                    # 直前情報フラグ（直前オッズ再取得が必要な場合true）
+                    "needs_refresh": r.get("needs_refresh", False),
                 })
         # EV順にソートし上位5件のみ公開
         def get_ev_num(r):
