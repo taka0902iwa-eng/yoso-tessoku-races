@@ -7,6 +7,7 @@
       "venue": "\u4eac\u90fd\u7af6\u99ac\u5834",
       "time": "15:40",
       "grade": "G1",
+      "is_graded": true,
       "url": "keiba.html",
       "ev_detail": [
         {
@@ -620,6 +621,7 @@
       "venue": "\u5c0f\u5009\u7af6\u99ac\u5834",
       "time": "15:40",
       "grade": "G1",
+      "is_graded": true,
       "url": "keiba.html",
       "ev_detail": [
         {
@@ -1233,6 +1235,7 @@
       "venue": "\u4e2d\u4eac\u7af6\u99ac\u5834",
       "time": "13:35",
       "grade": "G2",
+      "is_graded": true,
       "url": "keiba.html",
       "ev_detail": [
         {
@@ -1586,6 +1589,7 @@
       "venue": "\u6771\u4eac\u7af6\u99ac\u5834",
       "time": "15:45",
       "grade": "G3",
+      "is_graded": true,
       "url": "keiba.html",
       "ev_detail": [
         {
