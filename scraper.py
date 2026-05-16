@@ -803,6 +803,15 @@ def fetch_horse_with_ev():
     if not unique_ids:
         return fetch_horse_fallback()
 
+    # ── 日付フィルタリング: race_idの先頭8桁が今日の日付のものだけに絞る ──
+    # race_id形式: YYYYMMDDCCRRXX → 先頭8桁=日付, CC=競馬場コード(01-10=JRA)
+    today_ids = [rid for rid in unique_ids if len(rid) >= 8 and rid[:8] == today_ymd]
+    if today_ids:
+        unique_ids = today_ids
+        print(f" 本日({today_ymd})のレースID: {len(unique_ids)}件（日付フィルタ適用）")
+    else:
+        print(f" 警告: 本日({today_ymd})のrace_idが0件。日付フィルタをスキップ")
+
     # JRAレースのみ・週末（土日）のみに絞る
     # race_id形式: YYYYMMDDCCRRXX → CC=競馬場コード(01-10=JRA)
     jra_ids = [rid for rid in unique_ids if len(rid) >= 10 and rid[8:10] in
@@ -1137,6 +1146,11 @@ def fetch_horse_fallback():
                 print(f" [horse/fallback] {base_fb}: レースID {len(ids)}件検出")
                 history = load_history()
                 result  = []
+                # 日付フィルタリング: 今日のrace_idのみに絞る
+                today_ids_fb = [rid for rid in ids if len(rid) >= 8 and rid[:8] == today_ymd]
+                if today_ids_fb:
+                    ids = today_ids_fb
+                    print(f" [horse/fallback] 日付フィルタ適用: {len(ids)}件")
                 for rid in list(dict.fromkeys(ids))[:8]:
                     try:
                         info = fetch_race_details("https://race.netkeiba.com", rid, history)
