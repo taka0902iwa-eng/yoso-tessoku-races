@@ -21,7 +21,7 @@ jobs:
         with:
           python-version: '3.11'
       - name: install
-        run: pip install requests beautifulsoup4 lxml
+        run: pip install requests beautifulsoup4 lxml matplotlib
       - name: get results
         run: |
           python3 -c "
