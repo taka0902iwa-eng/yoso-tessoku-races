@@ -227,6 +227,66 @@
       "return_amount": 0,
       "actual_odds": 0.0,
       "memo": "推定勝率35%・EV1.21倍"
+    },
+    {
+      "date": "2026-05-16",
+      "sport": "boat",
+      "venue": "桐生",
+      "race_name": "桐生 12R",
+      "honmei": "濱本 優一",
+      "result": "miss",
+      "bet": 1000,
+      "return": 0,
+      "odds": 4.4,
+      "winner": "坪井 康晴"
+    },
+    {
+      "date": "2026-05-16",
+      "sport": "boat",
+      "venue": "戸田",
+      "race_name": "戸田 12R",
+      "honmei": "入澤 友治",
+      "result": "miss",
+      "bet": 1000,
+      "return": 0,
+      "odds": 1.0,
+      "winner": "椎名 豊"
+    },
+    {
+      "date": "2026-05-16",
+      "sport": "boat",
+      "venue": "江戸川",
+      "race_name": "江戸川 12R",
+      "honmei": "井上 一輝",
+      "result": "miss",
+      "bet": 1000,
+      "return": 0,
+      "odds": 0.0,
+      "winner": "小池 修平"
+    },
+    {
+      "date": "2026-05-16",
+      "sport": "boat",
+      "venue": "平和島",
+      "race_name": "平和島 12R",
+      "honmei": "松田 祐季",
+      "result": "miss",
+      "bet": 1000,
+      "return": 0,
+      "odds": 1.0,
+      "winner": "吉田 拡郎"
+    },
+    {
+      "date": "2026-05-16",
+      "sport": "boat",
+      "venue": "若松",
+      "race_name": "若松 12R",
+      "honmei": "後藤 美翼",
+      "result": "miss",
+      "bet": 1000,
+      "return": 0,
+      "odds": 9.2,
+      "winner": "清水 愛海"
     }
   ]
 }
