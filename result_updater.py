@@ -317,15 +317,12 @@ def fetch_horse_results(date_str: str) -> list:
 def fetch_boat_results(date_str: str) -> list:
     """
     指定日の競艇レース結果を取得する（公式サイト）。
-    返り値: [{"race_id": "...", "jcd": "01", "rno": "1", "winner_boat": "1",
-              "winner_name": "選手名", "odds": 3.5, "venue": "桐生"}, ...]
+    改善版: resultlistページが使えない場合に各会場の最終レースを直接取得する。
+    返り値: [{"race_id": "...", "jcd": "01", "rno": "12", "winner_boat": "1",
+              "winner_name": "選手名", "odds": 3.5, "venue": "桐生",
+              "all_racers": [{"boat": "1", "name": "選手名"}, ...]}, ...]
     """
     ymd = date_str.replace("-", "")
-    url = f"https://boatrace.jp/owpc/pc/race/resultlist?hd={ymd}"
-    html = fetch_html(url)
-    if not html:
-        return []
-
     # 会場コードと会場名のマッピング
     venue_map = {
         "01":"桐生","02":"戸田","03":"江戸川","04":"平和島","05":"多摩川",
@@ -334,86 +331,109 @@ def fetch_boat_results(date_str: str) -> list:
         "16":"児島","17":"宮島","18":"徳山","19":"下関","20":"若松",
         "21":"芦屋","22":"福岡","23":"唐津","24":"大村"
     }
-
     results = []
-    # レース結果リンクを抽出（jcd・rno・hdを取得）
-    race_links = re.findall(
-        r'href="[^"]*result[^"]*jcd=(\d{2})[^"]*rno=(\d{1,2})[^"]*hd=(\d{8})[^"]*"',
-        html
-    )
-    if not race_links:
-        # 別パターン
-        race_links = re.findall(
-            r'raceresult\?rno=(\d{1,2})&jcd=(\d{2})&hd=(\d{8})',
-            html
-        )
-        race_links = [(jcd, rno, hd) for rno, jcd, hd in race_links]
 
-    race_links = list(dict.fromkeys(race_links))[:60]  # 最大60レース
-
-    for jcd, rno, hd in race_links:
-        result_url = f"https://boatrace.jp/owpc/pc/race/raceresult?rno={rno}&jcd={jcd}&hd={hd}"
-        result_html = fetch_html(result_url)
-        if not result_html:
-            continue
-        time.sleep(0.3)
-
-        # 1着艇番（複数パターン対応）
+    def parse_race_result(result_html, jcd, rno, hd):
+        """レース結果HTMLから1着・全選手・オッズを取得する"""
+        if not result_html or "システムエラー" in result_html:
+            return None
+        # 1着の行: <td>１</td> <td class="...is-boatColorX...">X</td> <td>...<span>名前</span>...</td>
         winner_boat = ""
-        # パターン1: is-rank1 クラス
-        winner_m = re.search(
-            r'class="[^"]*is-rank1[^"]*"[^>]*>.*?<span[^>]*>([1-6])</span>',
-            result_html, re.DOTALL
-        )
-        if winner_m:
-            winner_boat = winner_m.group(1)
-        if not winner_boat:
-            # パターン2: 1着の直後の艇番
-            winner_m = re.search(r'1着.*?([1-6])号艇', result_html)
-            if winner_m:
-                winner_boat = winner_m.group(1)
-        if not winner_boat:
-            # パターン3: 結果テーブルの1行目
-            winner_m = re.search(r'<tr[^>]*>.*?<td[^>]*>1</td>.*?<td[^>]*>([1-6])</td>', result_html, re.DOTALL)
-            if winner_m:
-                winner_boat = winner_m.group(1)
-
-        # 1着選手名
         winner_name = ""
-        name_m = re.search(
-            r'class="[^"]*is-rank1[^"]*"[^>]*>.*?toban=\d+"[^>]*>([^<]+)</a>',
+        first_row_m = re.search(
+            r'<td[^>]*>１</td>\s*<td[^>]*is-boatColor(\d)[^>]*>(\d)</td>\s*<td[^>]*>.*?<span[^>]*>\d+</span>\s*\u3000\s*<span[^>]*>([^<]+)</span>',
             result_html, re.DOTALL
         )
-        if name_m:
-            winner_name = re.sub(r'\s+', ' ', name_m.group(1).strip())
-
-        # 単勝配当（円）
+        if first_row_m:
+            winner_boat = first_row_m.group(2)
+            winner_name = re.sub(r'\s+', ' ', first_row_m.group(3).strip()).replace("\u3000", " ").strip()
+        # 全選手リスト（照合用）
+        all_racers = []
+        boats = re.findall(
+            r'<td[^>]*is-boatColor\d[^>]*>(\d)</td>\s*<td[^>]*>.*?<span[^>]*>\d+</span>\s*\u3000\s*<span[^>]*>([^<]+)</span>',
+            result_html, re.DOTALL
+        )
+        for boat_num, name in boats:
+            name_clean = re.sub(r'\s+', ' ', name.strip()).replace("\u3000", " ").strip()
+            all_racers.append({"boat": boat_num, "name": name_clean})
+        # 単勝配当（&yen;XXX 形式）
         odds = 0.0
-        odds_m = re.search(r'単勝.*?([0-9,]+)円', result_html, re.DOTALL)
+        odds_m = re.search(r'単勝.*?&yen;([\d,]+)', result_html, re.DOTALL)
         if odds_m:
             try:
                 odds = float(odds_m.group(1).replace(",", "")) / 100.0
             except:
                 pass
-
+        if not odds:
+            # is-payout1 クラスのパターン
+            payout_m = re.search(r'is-payout1[^>]*>&yen;([\d,]+)', result_html)
+            if payout_m:
+                try:
+                    odds = float(payout_m.group(1).replace(",", "")) / 100.0
+                except:
+                    pass
         if winner_boat:
-            results.append({
+            return {
                 "race_id": f"{jcd}_{rno}_{hd}",
                 "jcd": jcd, "rno": rno, "hd": hd,
                 "winner_boat": winner_boat,
                 "winner_name": winner_name,
                 "odds": odds,
                 "venue": venue_map.get(jcd, ""),
-                "url": result_url
-            })
+                "all_racers": all_racers,
+                "url": f"https://boatrace.jp/owpc/pc/race/raceresult?rno={rno}&jcd={jcd}&hd={hd}"
+            }
+        return None
+
+    # まずresultlistページから会場・レース番号を取得する
+    url = f"https://boatrace.jp/owpc/pc/race/resultlist?hd={ymd}"
+    html = fetch_html(url)
+    race_links = []
+    if html and "システムエラー" not in html:
+        # パターン1: href内にjcd・rno・hdが含まれるリンク
+        race_links = re.findall(
+            r'href="[^"]*raceresult[^"]*jcd=(\d{2})[^"]*rno=(\d{1,2})[^"]*hd=(\d{8})[^"]*"',
+            html
+        )
+        if not race_links:
+            # パターン2: raceresult?rno=X&jcd=XX&hd=XXXXXXXX
+            links2 = re.findall(r'raceresult\?rno=(\d{1,2})&jcd=(\d{2})&hd=(\d{8})', html)
+            race_links = [(jcd, rno, hd) for rno, jcd, hd in links2]
+        race_links = list(dict.fromkeys(race_links))[:60]
+
+    if race_links:
+        # resultlistから取得できた場合は通常通り処理
+        for jcd, rno, hd in race_links:
+            result_url = f"https://boatrace.jp/owpc/pc/race/raceresult?rno={rno}&jcd={jcd}&hd={hd}"
+            result_html = fetch_html(result_url)
+            if not result_html:
+                continue
+            time.sleep(0.3)
+            parsed = parse_race_result(result_html, jcd, rno, hd)
+            if parsed:
+                results.append(parsed)
+    else:
+        # resultlistが使えない場合: 各会場の12Rを直接取得
+        print(f"  [INFO] resultlistページ取得失敗、各会場12Rを直接取得します ({date_str})")
+        all_jcds = [f"{i:02d}" for i in range(1, 25)]
+        for jcd in all_jcds:
+            result_url = f"https://boatrace.jp/owpc/pc/race/raceresult?rno=12&jcd={jcd}&hd={ymd}"
+            result_html = fetch_html(result_url)
+            if not result_html:
+                continue
+            # 当日開催されていない会場はスキップ
+            if "システムエラー" in result_html:
+                time.sleep(0.1)
+                continue
+            parsed = parse_race_result(result_html, jcd, "12", ymd)
+            if parsed:
+                results.append(parsed)
+                venue_name = venue_map.get(jcd, jcd)
+                print(f"    {venue_name} 12R: 1着={parsed['winner_boat']}号艇 {parsed['winner_name']}")
+            time.sleep(0.3)
 
     print(f"  競艇結果取得: {len(results)}件 ({date_str})")
     return results
-
-
-# ──────────────────────────────────────────────
-# 競輪結果取得（Kドリームス）
-# ──────────────────────────────────────────────
 def fetch_cycle_results(date_str: str) -> list:
     """
     指定日の競輪レース結果を取得する（Kドリームス）。
@@ -654,43 +674,62 @@ def match_and_update(
 
         # ── 競艇の照合 ──────────────────────────────────────────────────────────
         elif sport == "boat":
+            # honmeiから選手名を抽出（「1号艇 山田太郎」→「山田太郎」、「山田太郎」→「山田太郎」）
+            honmei_name = re.sub(r'\d号艇\s*', '', honmei).strip()
+            honmei_last = honmei_name.split()[-1] if ' ' in honmei_name else honmei_name
             # honmeiから艇番を抽出（例: "1号艇 山田太郎" → "1"）
             boat_num_m = re.search(r'(\d)号艇|(\d)番', honmei)
             boat_num = (boat_num_m.group(1) or boat_num_m.group(2)) if boat_num_m else ""
-
             # 会場名からjcdを取得
             venue_clean = venue.replace("競艇場", "").replace("ボートレース", "").strip()
             jcd = venue_to_jcd.get(venue_clean, "")
-
             # レース番号を抽出（race_nameから）
-            rno_m = re.search(r'(\d{1,2})R', race_name)
-            rno = rno_m.group(1).zfill(2) if rno_m else ""
-
-            if jcd and rno:
-                # 会場・レース番号で絞り込み
-                br = boat_index.get((jcd, rno))
-                if br:
-                    if boat_num and boat_num == br.get("winner_boat", ""):
-                        result = "hit"
-                        actual_odds = br.get("odds", 0.0)
-                        return_amount = int(actual_odds * bet_amount)
-                    else:
-                        result = "miss"
-                elif boat_results:
-                    result = "miss"
-            else:
-                # jcdまたはrnoが取得できない場合は全結果から検索
-                for br in boat_results:
-                    if boat_num and boat_num == br.get("winner_boat", ""):
-                        result = "hit"
-                        actual_odds = br.get("odds", 0.0)
-                        return_amount = int(actual_odds * bet_amount)
-                        break
+            rno_m = re.search(r'(\d{1,2})R', race_name) if race_name else None
+            rno = rno_m.group(1).zfill(2) if rno_m else "12"  # デフォルトは12R
+            # 会場・レース番号で絞り込み
+            br = boat_index.get((jcd, rno)) if jcd else None
+            if br is None and jcd:
+                # 12Rを試みる
+                br = boat_index.get((jcd, "12"))
+            if br:
+                winner_name = br.get("winner_name", "")
+                winner_boat = br.get("winner_boat", "")
+                # 照合: 選手名（姓のみでも可）または艇番
+                is_hit = False
+                if honmei_name and winner_name:
+                    # 選手名の姓で照合（スペース・全角スペースを除去して比較）
+                    honmei_clean = honmei_name.replace(" ", "").replace("\u3000", "")
+                    winner_clean = winner_name.replace(" ", "").replace("\u3000", "")
+                    honmei_last_clean = honmei_last.replace(" ", "").replace("\u3000", "")
+                    winner_last_clean = winner_name.split()[0].replace(" ", "").replace("\u3000", "") if ' ' in winner_name else winner_clean
+                    if honmei_clean == winner_clean:
+                        is_hit = True
+                    elif honmei_last_clean and (honmei_last_clean in winner_clean or winner_last_clean in honmei_clean):
+                        is_hit = True
+                if not is_hit and boat_num and boat_num == winner_boat:
+                    is_hit = True
+                if is_hit:
+                    result = "hit"
+                    actual_odds = br.get("odds", 0.0)
+                    return_amount = int(actual_odds * bet_amount) if actual_odds > 0 else 0
                 else:
-                    if boat_results:
-                        result = "miss"
-
-        # ── 競輪の照合 ──────────────────────────────────────────────────────────
+                    result = "miss"
+            elif boat_results:
+                # 会場が特定できない場合は全結果から選手名で検索
+                for br in boat_results:
+                    winner_name = br.get("winner_name", "")
+                    if honmei_name and winner_name:
+                        honmei_clean = honmei_name.replace(" ", "").replace("\u3000", "")
+                        winner_clean = winner_name.replace(" ", "").replace("\u3000", "")
+                        honmei_last_clean = honmei_last.replace(" ", "").replace("\u3000", "")
+                        if honmei_clean == winner_clean or (honmei_last_clean and honmei_last_clean in winner_clean):
+                            result = "hit"
+                            actual_odds = br.get("odds", 0.0)
+                            return_amount = int(actual_odds * bet_amount) if actual_odds > 0 else 0
+                            break
+                else:
+                    result = "miss"
+                # ── 競輪の照合 ──────────────────────────────────────────────────────────
         elif sport == "cycle":
             # 会場名で絞り込み
             venue_clean = venue.replace("競輪場", "").strip()
