@@ -1,51 +1,182 @@
 {
   "summary": {
     "total": 22,
-    "hits": 1,
+    "hit": 1,
     "hit_rate": 4.5,
+    "bet": 22000,
+    "return": 26100,
     "recovery_rate": 118.6,
     "profit": 4100,
-    "bet_total": 22000,
-    "return_total": 26100
+    "streak": -11
   },
   "by_sport": {
     "horse": {
       "total": 0,
-      "hits": 0,
+      "hit": 0,
       "hit_rate": 0,
-      "bet_total": 0,
-      "return_total": 0,
+      "bet": 0,
+      "return": 0,
       "recovery_rate": 0
     },
     "boat": {
       "total": 9,
-      "hits": 0,
+      "hit": 0,
       "hit_rate": 0.0,
-      "bet_total": 9000,
-      "return_total": 0,
+      "bet": 9000,
+      "return": 0,
       "recovery_rate": 0.0
     },
     "cycle": {
       "total": 13,
-      "hits": 1,
+      "hit": 1,
       "hit_rate": 7.7,
-      "bet_total": 13000,
-      "return_total": 26100,
+      "bet": 13000,
+      "return": 26100,
       "recovery_rate": 200.8
     }
   },
   "by_month": {
     "2026-04": {
       "total": 13,
-      "hits": 1,
-      "bet_total": 13000,
-      "return_total": 26100
+      "hit": 1,
+      "bet": 13000,
+      "return": 26100
     },
     "2026-05": {
       "total": 9,
-      "hits": 0,
-      "bet_total": 9000,
-      "return_total": 0
+      "hit": 0,
+      "bet": 9000,
+      "return": 0
+    }
+  },
+  "by_venue": {
+    "cycle__静岡競輪場": {
+      "total": 1,
+      "hit": 0,
+      "bet": 1000,
+      "return": 0,
+      "hit_rate": 0.0,
+      "recovery_rate": 0.0
+    },
+    "cycle__伊東競輪場": {
+      "total": 1,
+      "hit": 0,
+      "bet": 1000,
+      "return": 0,
+      "hit_rate": 0.0,
+      "recovery_rate": 0.0
+    },
+    "cycle__松山競輪場": {
+      "total": 1,
+      "hit": 1,
+      "bet": 1000,
+      "return": 26100,
+      "hit_rate": 100.0,
+      "recovery_rate": 2610.0
+    },
+    "cycle__ito競輪場": {
+      "total": 1,
+      "hit": 0,
+      "bet": 1000,
+      "return": 0,
+      "hit_rate": 0.0,
+      "recovery_rate": 0.0
+    },
+    "cycle__奈良競輪場": {
+      "total": 1,
+      "hit": 0,
+      "bet": 1000,
+      "return": 0,
+      "hit_rate": 0.0,
+      "recovery_rate": 0.0
+    },
+    "cycle__防府競輪場": {
+      "total": 1,
+      "hit": 0,
+      "bet": 1000,
+      "return": 0,
+      "hit_rate": 0.0,
+      "recovery_rate": 0.0
+    },
+    "cycle__武雄競輪場": {
+      "total": 1,
+      "hit": 0,
+      "bet": 1000,
+      "return": 0,
+      "hit_rate": 0.0,
+      "recovery_rate": 0.0
+    },
+    "cycle__大宮競輪場": {
+      "total": 1,
+      "hit": 0,
+      "bet": 1000,
+      "return": 0,
+      "hit_rate": 0.0,
+      "recovery_rate": 0.0
+    },
+    "cycle__keiokaku競輪場": {
+      "total": 1,
+      "hit": 0,
+      "bet": 1000,
+      "return": 0,
+      "hit_rate": 0.0,
+      "recovery_rate": 0.0
+    },
+    "cycle__松戸競輪場": {
+      "total": 2,
+      "hit": 0,
+      "bet": 2000,
+      "return": 0,
+      "hit_rate": 0.0,
+      "recovery_rate": 0.0
+    },
+    "cycle__岐阜競輪場": {
+      "total": 2,
+      "hit": 0,
+      "bet": 2000,
+      "return": 0,
+      "hit_rate": 0.0,
+      "recovery_rate": 0.0
+    },
+    "boat__桐生": {
+      "total": 2,
+      "hit": 0,
+      "bet": 2000,
+      "return": 0,
+      "hit_rate": 0.0,
+      "recovery_rate": 0.0
+    },
+    "boat__戸田": {
+      "total": 2,
+      "hit": 0,
+      "bet": 2000,
+      "return": 0,
+      "hit_rate": 0.0,
+      "recovery_rate": 0.0
+    },
+    "boat__江戸川": {
+      "total": 2,
+      "hit": 0,
+      "bet": 2000,
+      "return": 0,
+      "hit_rate": 0.0,
+      "recovery_rate": 0.0
+    },
+    "boat__平和島": {
+      "total": 2,
+      "hit": 0,
+      "bet": 2000,
+      "return": 0,
+      "hit_rate": 0.0,
+      "recovery_rate": 0.0
+    },
+    "boat__若松": {
+      "total": 1,
+      "hit": 0,
+      "bet": 1000,
+      "return": 0,
+      "hit_rate": 0.0,
+      "recovery_rate": 0.0
     }
   },
   "records": [
