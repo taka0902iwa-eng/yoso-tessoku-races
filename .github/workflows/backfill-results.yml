@@ -25,16 +25,14 @@ jobs:
       - name: get results
         run: |
           python3 -c "
-          import urllib.request, json
-          try:
-              req = urllib.request.Request('https://oyatojikka.online/results.json', headers={'User-Agent':'Mozilla/5.0'})
-              with urllib.request.urlopen(req, timeout=15) as r:
-                  data = json.loads(r.read())
-              open('results.json','w').write(json.dumps(data, ensure_ascii=False, indent=2))
-              print(f'取得成功: {len(data.get(\"records\",[]))}件')
-          except Exception as e:
-              print(f'失敗: {e}')
-              open('results.json','w').write('{\"summary\":{},\"by_sport\":{},\"records\":[]}')
+          import json, os
+          # GitHubリポジトリのresults.jsonをそのまま使う（checkout済み）
+          if os.path.exists('results.json'):
+              data = json.loads(open('results.json').read())
+              print(f'リポジトリから取得: {len(data.get(chr(34)+chr(114)+chr(101)+chr(99)+chr(111)+chr(114)+chr(100)+chr(115)+chr(34),[]))}件')
+          else:
+              open('results.json','w').write('{"summary":{},"by_sport":{},"records":[]}')
+              print('results.json新規作成')
           "
       - name: backfill
         run: |
