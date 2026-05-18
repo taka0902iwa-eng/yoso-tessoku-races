@@ -386,7 +386,8 @@
       "return": 0,
       "odds": 4.4,
       "winner": "坪井 康晴",
-      "name": "桐生 12R"
+      "name": "桐生 12R",
+      "bet_amount": 1000
     },
     {
       "date": "2026-05-16",
@@ -399,7 +400,8 @@
       "return": 0,
       "odds": 1.0,
       "winner": "椎名 豊",
-      "name": "戸田 12R"
+      "name": "戸田 12R",
+      "bet_amount": 1000
     },
     {
       "date": "2026-05-16",
@@ -412,7 +414,8 @@
       "return": 0,
       "odds": 0.0,
       "winner": "小池 修平",
-      "name": "江戸川 12R"
+      "name": "江戸川 12R",
+      "bet_amount": 1000
     },
     {
       "date": "2026-05-16",
@@ -425,7 +428,8 @@
       "return": 0,
       "odds": 1.0,
       "winner": "吉田 拡郎",
-      "name": "平和島 12R"
+      "name": "平和島 12R",
+      "bet_amount": 1000
     },
     {
       "date": "2026-05-16",
@@ -438,7 +442,8 @@
       "return": 0,
       "odds": 9.2,
       "winner": "清水 愛海",
-      "name": "若松 12R"
+      "name": "若松 12R",
+      "bet_amount": 1000
     },
     {
       "race_id": "2026-05-15_boat_桐生_None",
