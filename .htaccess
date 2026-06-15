@@ -1,0 +1,11 @@
+# HTMLとJSONファイルのキャッシュを無効化
+<FilesMatch "\.(html|json)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+</FilesMatch>
+
+# 静的アセット（CSS、JS、画像）は長期キャッシュ
+<FilesMatch "\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2)$">
+    Header set Cache-Control "public, max-age=86400"
+</FilesMatch>
