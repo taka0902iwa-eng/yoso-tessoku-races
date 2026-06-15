@@ -316,6 +316,7 @@ fetch('races.json?v=' + Date.now())
         <h2 class="article-title">【${r.grade||'注目'}】${r.name} 本命予想</h2>
         <div class="article-body">
           ${r.reason ? `<p>${r.reason}</p>` : '<p>EV計算に基づく本命予想です。</p>'}
+          ${r.pace_summary ? `<p style="font-size:.75rem;color:var(--text-mute);margin-top:4px">📈 展開: ${r.pace_summary.length>60?r.pace_summary.slice(0,60)+'…':r.pace_summary}</p>` : ''}
         </div>
         ${r.honmei ? `
         <div class="picks-row">

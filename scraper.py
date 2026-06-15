@@ -965,10 +965,9 @@ def fetch_race_details(base, race_id, history):
         combo_summary  = ev_results[0].get("combo_summary", {})  if ev_results else {}
         pace_summary   = ev_results[0].get("pace_summary", "")   if ev_results else ""
 
-        # 展開予想をreasonに組み込む
+        # reasonはEV+馬場状態のみ（展開詳細はpace_summaryに分離）
         reason_text = f"EV{'+' if best.get('ev',0)>=1 else ''}{int((best.get('ev',1)-1)*100)}% ({track_condition})" if best else ""
-        if pace_summary:
-            reason_text += f" / 展開: {pace_summary}"
+        # 展開情報はpace_summaryに保持（HTMLで必要に応じて表示）
 
         is_graded = grade in ["G1","G2","G3","重賞","JG1","JG2","JG3"]
         # 重賞は見送りでも本命・展開を表示するため judge を上書きしない
@@ -1681,8 +1680,6 @@ def fetch_boat_all():
                 }
                 if best and best.get("judge") in ["強買い", "買い"]:
                     reason_text = f"EV{'+' if best.get('ev',0)>=1 else ''}{int((best.get('ev',1)-1)*100)}% ({int(best.get('frame_num',1))}号艇)"
-                    if race_summary:
-                        reason_text += f" / 展開: {race_summary.split('|')[0].strip()}"
                     race.update({
                         "honmei":    best.get("name",""),
                         "ev":        f"+{min(int((best['ev']-1)*100), 999)}%" if best and best['ev']>1 else "",
@@ -1861,8 +1858,6 @@ def fetch_cycle_all():
                 }
                 if best and best.get("judge") in ["強買い", "買い"]:
                     reason_text = f"EV{'+' if best.get('ev',0)>=1 else ''}{int((best.get('ev',1)-1)*100)}%"
-                    if race_summary:
-                        reason_text += f" / 展開: {race_summary.split('|')[0].strip()}"
                     race.update({
                         "honmei":    best.get("name","予想公開中"),
                         "ev":        f"+{int((best['ev']-1)*100)}%" if best.get('ev',0)>1 else "",
