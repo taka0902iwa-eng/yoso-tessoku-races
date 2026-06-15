@@ -4,38 +4,38 @@
     "hit": 3,
     "hit_rate": 5.1,
     "bet": 59000,
-    "return": 39300,
     "recovery_rate": 66.6,
     "profit": -19700,
-    "streak": -20
+    "streak": -20,
+    "total_return": 39300
   },
   "by_sport": {
     "horse": {
       "total": 0,
       "hit": 0,
       "bet": 0,
-      "return": 0,
       "hit_rate": 0.0,
       "recovery_rate": 0.0,
-      "profit": 0
+      "profit": 0,
+      "total_return": 0
     },
     "boat": {
       "total": 48,
       "hit": 2,
       "bet": 48000,
-      "return": 13200,
       "hit_rate": 4.2,
       "recovery_rate": 27.5,
-      "profit": -34800
+      "profit": -34800,
+      "total_return": 13200
     },
     "cycle": {
       "total": 11,
       "hit": 1,
       "bet": 11000,
-      "return": 26100,
       "hit_rate": 9.1,
       "recovery_rate": 237.3,
-      "profit": 15100
+      "profit": 15100,
+      "total_return": 26100
     }
   },
   "by_month": {
