@@ -8,6 +8,7 @@ on:
       - 'kyotei.html'
       - 'keirin.html'
       - 'results.html'
+      - 'index.html'
 
 jobs:
   upload-sport-pages:
@@ -28,7 +29,7 @@ jobs:
           user     = os.environ.get('FTP_USER','').strip()
           password = os.environ.get('FTP_PASS','').strip()
           base_dir = '/home/c9048134/public_html/oyatojikka.online'
-          files    = ['keiba.html', 'kyotei.html', 'keirin.html', 'results.html']
+          files    = ['index.html', 'keiba.html', 'kyotei.html', 'keirin.html', 'results.html']
           if not host:
               print('FTP環境変数未設定。スキップ')
               exit(0)

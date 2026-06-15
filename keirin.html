@@ -207,7 +207,7 @@ fetch('races.json?v=' + Date.now())
             </div>
             <h2 class="article-title">${r.name} 本命予想</h2>
             <div class="article-body">
-              ${r.reason ? `<p>${r.reason.length>80?r.reason.slice(0,80)+'…':r.reason}</p>` : '<p>EV計算に基づく本命予想です。</p>'}
+              ${r.reason ? `<p>${r.reason.split('/')[0].trim().length>80?r.reason.split('/')[0].trim().slice(0,80)+'…':r.reason.split('/')[0].trim()}</p>` : '<p>EV計算に基づく本命予想です。</p>'}
             </div>
             ${r.honmei ? `
             <div class="picks-row">

@@ -308,6 +308,14 @@ async function loadData() {
         const s = calcSummary(allRecords);
         // results.jsonのby_sport・summaryを優先使用
         if (json.by_sport) s.by_sport = json.by_sport;
+        // by_monthをmonthly形式（ret/bet）に変換して設定
+        if (json.by_month) {
+          const bm = {};
+          for (const [ym, v] of Object.entries(json.by_month)) {
+            bm[ym] = { bet: v.bet||0, ret: v.return||v.ret||0, hit: v.hit||0, total: v.total||0 };
+          }
+          s.monthly = bm;
+        }
         if (json.summary) {
           Object.assign(s, {
             total:         json.summary.total         || s.total,
@@ -532,7 +540,8 @@ function renderChart(monthly) {
   // 月ラベルを別要素に表示
   if (labelsEl) {
     labelsEl.innerHTML = keys.map(k => {
-      const label = k.slice(5) + '月';
+      const [y, m] = k.split('-');
+      const label = `'${y.slice(2)}/${parseInt(m)}月`;
       return `<div class="chart-label-wrap"><span class="chart-label">${label}</span></div>`;
     }).join('');
   }
@@ -571,7 +580,8 @@ function renderRecords() {
       </div>
       <div class="ri-badge">
         <span class="ri-result ${r.result}">${r.result==='hit'?'◎ 的中':'✕ 外れ'}</span>
-        <span class="ri-profit ${profit>=0?'pos':'neg'}">${profit>=0?'+':''}¥${Math.abs(profit).toLocaleString()}</span>
+        <span class="ri-profit ${profit>=0?'pos':'neg'}">${profit>=0?'+':''}\u00a5${Math.abs(profit).toLocaleString()}</span>
+        ${r.result==='miss'&&r.winner?`<span style="font-size:.62rem;color:var(--text-mute)">→${r.winner}</span>`:''}
       </div>
     </div>`;
   }).join('');

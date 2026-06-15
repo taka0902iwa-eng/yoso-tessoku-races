@@ -327,7 +327,7 @@ fetch('races.json?v=' + Date.now())
           <p style="font-size:.75rem;color:var(--text-mute);margin-bottom:2px">${r.venue}／${r.grade||'一般'}</p>
           <p style="font-size:.88rem;color:#fff;font-weight:700;margin-bottom:4px">${r.name}</p>
           <p style="font-size:.78rem;color:var(--text-dim)">◎ 本命：<strong style="color:#fff">${r.honmei}</strong></p>
-          ${r.reason ? `<p style="font-size:.7rem;color:var(--text-mute);margin-top:2px">${r.reason}</p>` : ''}
+          ${r.reason ? `<p style="font-size:.7rem;color:var(--text-mute);margin-top:2px">${r.reason.length>60?r.reason.slice(0,60)+'…':r.reason}</p>` : ''}
         </div>
         <div style="text-align:right;flex-shrink:0">
           <span style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:${evColor}">EV${r.ev||''}</span><br>
@@ -362,7 +362,7 @@ fetch('races.json?v=' + Date.now())
         </div>
         <h2 class="article-title">${r.name} 本命予想</h2>
         <div class="article-body">
-          ${r.reason ? `<p>${r.reason.length>80?r.reason.slice(0,80)+'…':r.reason}</p>` : '<p>EV計算に基づく本命予想です。</p>'}
+          ${r.reason ? `<p>${r.reason.split('/')[0].trim().length>80?r.reason.split('/')[0].trim().slice(0,80)+'…':r.reason.split('/')[0].trim()}</p>` : '<p>EV計算に基づく本命予想です。</p>'}
         </div>
         ${r.honmei ? `
         <div class="picks-row">
