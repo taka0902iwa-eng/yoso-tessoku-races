@@ -716,7 +716,7 @@ function renderAllRaces(races) {
     const m = SPORT_META[r.sport] || {icon:'🏁', label:r.sport, url:'#', cls:'horse'};
     const judgeClass = r.judge === '強買い' ? 'strong' : r.judge === '買い' ? 'buy' : 'watch';
     const judgeLabel = r.judge || '—';
-    const evStr = r.ev ? `+${r.ev.replace('+','')}` : '';
+    const evStr = r.ev ? (r.ev.startsWith('+') || r.ev.startsWith('-') ? r.ev : '+' + r.ev) : '';
     const raceName = r.name || r.venue || '';
 
     return `<a class="race-item ${m.cls}" href="${m.url}">

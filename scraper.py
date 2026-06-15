@@ -1024,6 +1024,20 @@ def fetch_horse_stats(horse_id, horse_name, F, odds, weight_diff, track_conditio
         wins_r10    = sum(1 for r in all_ranks[:10] if r == 1)
         starts_r10  = min(len(all_ranks), 10)
 
+        # ── データ取得失敗時のフォールバック（netkeibaログイン必須化対策） ──
+        # 着順データが全く取得できない場合、オッズから推定勝率を計算
+        if wins == 0 and len(all_ranks) == 0:
+            print(f"    [horse_stats/{horse_id}] 成績データなし → オッズベース推定に切替")
+            est_prob = min(0.55, max(0.02, 0.75 / odds)) if odds > 0 else 0.12
+            est_starts = max(10, F * 2)
+            est_wins   = max(1, round(est_prob * est_starts))
+            wins       = est_wins
+            total      = est_starts
+            wins_r5    = max(0, round(est_prob * 5))
+            starts_r5  = 5
+            wins_r10   = max(0, round(est_prob * 10))
+            starts_r10 = 10
+
         # 上がり3F（直近5走の平均）
         last3f_m    = re.findall(r'(\d{2}\.\d)', html[:6000])
         avg_last3f  = sum(float(t) for t in last3f_m[:5]) / len(last3f_m[:5]) if last3f_m else 36.0
