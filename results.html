@@ -316,7 +316,8 @@ async function loadData() {
             total_bet:     json.summary.bet           || s.total_bet,
             total_ret:     json.summary.total_return  || json.summary.return || s.total_ret,
             recovery:      json.summary.recovery_rate || s.recovery,
-            profit:        json.summary.profit        || s.profit,
+            profit:        json.summary.profit        !== undefined ? json.summary.profit : s.profit,
+            streak:        json.summary.streak        !== undefined ? json.summary.streak : s.streak,
           });
         }
         renderAll(s);
@@ -472,7 +473,7 @@ function renderSports(by_sport) {
     const rec = parseFloat(d.recovery_rate || d.recovery || 0);
     const col = d.total===0?'var(--text-mute)':rec>=100?'var(--green)':rec>=50?'var(--gold-l)':'var(--red)';
     const profit = d.profit !== undefined ? d.profit : ((d.return||d.total_ret||0) - (d.bet||d.total_bet||0));
-    const profitStr = d.total===0 ? '—' : (profit>=0?'+':'')+'¥'+Math.abs(profit).toLocaleString();
+    const profitStr = d.total===0 ? '—' : (profit>=0?'+':'-')+'¥'+Math.abs(profit).toLocaleString();
     return `<div class="sport-card ${s.cls}">
       <div class="sport-head"><span class="sport-icon">${s.icon}</span><span class="sport-name">${s.label}</span></div>
       <div class="sport-recovery" style="color:${col}">${d.total?rec+'%':'—'}</div>
