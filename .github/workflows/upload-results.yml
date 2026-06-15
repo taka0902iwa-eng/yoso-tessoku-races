@@ -18,51 +18,53 @@ jobs:
           FTP_PASS:   ${{ secrets.FTP_PASS }}
           FTP_REMOTE: ${{ secrets.FTP_REMOTE }}
         run: |
-          python3 -c "
+          python3 << 'PYEOF'
           import ftplib, os
-          ftp_host = (os.environ.get('FTP_HOST','') or '').strip().replace('\n','').replace('\r','').replace(' ','')
-          ftp_user = (os.environ.get('FTP_USER','') or '').strip().replace('\n','').replace('\r','').replace(' ','')
-          ftp_pass = (os.environ.get('FTP_PASS','') or '').strip().replace('\n','').replace('\r','')
-          remote_base = (os.environ.get('FTP_REMOTE','/public_html/oyatojikka.online/races.json') or '').strip()
+          ftp_host = (os.environ.get("FTP_HOST","") or "").strip().replace("\n","").replace("\r","").replace(" ","")
+          ftp_user = (os.environ.get("FTP_USER","") or "").strip().replace("\n","").replace("\r","").replace(" ","")
+          ftp_pass = (os.environ.get("FTP_PASS","") or "").strip().replace("\n","").replace("\r","")
+          remote_base = (os.environ.get("FTP_REMOTE","/public_html/oyatojikka.online/races.json") or "").strip()
           if not all([ftp_host, ftp_user, ftp_pass]):
-              print('FTP環境変数が設定されていません')
+              print("FTP環境変数が設定されていません")
               exit(1)
-          parts = [p for p in remote_base.split('/') if p]
-          remote_dir = '/' + '/'.join(parts[:-1])
-          print(f'アップロード先ディレクトリ: {remote_dir}')
+          parts = [p for p in remote_base.split("/") if p]
+          remote_dir = "/" + "/".join(parts[:-1])
+          print(f"アップロード先ディレクトリ: {remote_dir}")
           ftp = ftplib.FTP()
           ftp.connect(ftp_host, 21, timeout=30)
           ftp.login(ftp_user, ftp_pass)
           ftp.set_pasv(True)
-          # アップロードするファイル一覧
           files_to_upload = [
-              ('results.json', remote_dir + '/results.json'),
-              ('results.html', remote_dir + '/results.html'),
-              ('index.html',   remote_dir + '/index.html'),
+              ("results.json", remote_dir + "/results.json"),
+              ("results.html", remote_dir + "/results.html"),
+              ("index.html",   remote_dir + "/index.html"),
           ]
           for local_file, remote_path in files_to_upload:
               if os.path.exists(local_file):
-                  with open(local_file, 'rb') as f:
-                      ftp.storbinary(f'STOR {remote_path}', f)
-                  print(f'アップロード完了: {local_file} -> {remote_path}')
+                  with open(local_file, "rb") as f:
+                      ftp.storbinary(f"STOR {remote_path}", f)
+                  print(f"アップロード完了: {local_file} -> {remote_path}")
               else:
-                  print(f'スキップ（ファイルなし）: {local_file}')
+                  print(f"スキップ（ファイルなし）: {local_file}")
           ftp.quit()
-          print('全FTPアップロード完了')
-          "
+          print("全FTPアップロード完了")
+          PYEOF
       - name: アップロード内容確認
         run: |
-          python3 -c "
-          import json, os
-          with open('results.json') as f:
+          python3 << 'PYEOF'
+          import json
+          with open("results.json") as f:
               d = json.load(f)
-          s = d.get('summary', {})
-          print(f'総戦数: {s.get("total",0)}件')
-          print(f'的中率: {s.get("hit_rate",0)}%')
-          print(f'収支: ¥{s.get("profit",0):,}')
-          records = d.get('records', [])
-          print(f'レコード数: {len(records)}件')
+          s = d.get("summary", {})
+          total = s.get("total", 0)
+          hit_rate = s.get("hit_rate", 0)
+          profit = s.get("profit", 0)
+          records = d.get("records", [])
+          print(f"総戦数: {total}件")
+          print(f"的中率: {hit_rate}%")
+          print(f"収支: ¥{profit:,}")
+          print(f"レコード数: {len(records)}件")
           if records:
-              latest = sorted(records, key=lambda x: x.get('date',''), reverse=True)[0]
-              print(f'最新: {latest.get("date","")} {latest.get("name","")} {latest.get("result","")}')
-          "
+              latest = sorted(records, key=lambda x: x.get("date",""), reverse=True)[0]
+              print(f"最新: {latest.get('date','')} {latest.get('name','')} {latest.get('result','')}")
+          PYEOF
