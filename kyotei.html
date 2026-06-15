@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+  <meta name="description" content="本日の競艇（ボートレース）本命予想を公開中。SG・G1を中心にモーター評価・展示タイムをもとにEV計算で厳選した狙い艇を毎日更新。実績もすべて公開中。">
+  <meta name="robots" content="index,follow">
+  <!-- OGP -->
+  <meta property="og:type"        content="website">
+  <meta property="og:title"       content="競艇予想 | 予想の鉄則">
+  <meta property="og:description" content="本日の競艇（ボートレース）本命予想を公開中。SG・G1を中心にモーター評価・展示タイムをもとにEV計算で厳選した狙い艇を毎日更新。実績もすべて公開中。">
+  <meta property="og:url"         content="https://oyatojikka.online/kyotei.html">
+  <meta property="og:site_name"   content="予想の鉄則">
+  <meta property="og:image"       content="https://oyatojikka.online/avatar.png">
+  <meta property="og:locale"      content="ja_JP">
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary">
+  <meta name="twitter:title"       content="競艇予想 | 予想の鉄則">
+  <meta name="twitter:description" content="本日の競艇（ボートレース）本命予想を公開中。SG・G1を中心にモーター評価・展示タイムをもとにEV計算で厳選した狙い艇を毎日更新。実績もすべて公開中。">
+  <meta name="twitter:image"       content="https://oyatojikka.online/avatar.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>競艇予想 | 予想の鉄則</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@700;900&family=Bebas+Neue&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080c14;--bg-card:#0c1525;--bg-card2:#0f1e36;--gold:#c9a84c;--gold-l:#f0d080;--border:rgba(201,168,76,.18);--boat:#00b4d8;--boat-d:#0080a0;--text:#eef0f5;--text-dim:#a8b0c4;--text-mute:#5a6278;--green:#2ecc71;--red:#e8313a}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:#080c14;color:var(--text);font-family:'Noto Sans JP',sans-serif;font-weight:300;min-height:100vh;padding-bottom:60px}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--boat)}
+header{position:sticky;top:0;z-index:200;background:rgba(8,12,20,.97);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:baseline;gap:10px;text-decoration:none}
+.logo-ja{font-family:'Noto Serif JP',serif;font-weight:900;font-size:1.2rem;color:var(--gold-l);letter-spacing:.06em}
+.logo-en{font-family:'Bebas Neue',sans-serif;font-size:.72rem;color:var(--text-mute);letter-spacing:.22em}
+nav a{color:var(--text-dim);text-decoration:none;font-size:.75rem;padding:6px 12px;transition:color .2s}
+nav a:hover,nav a.active{color:var(--boat)}
+.hero{background:linear-gradient(160deg,#0a1e30 0%,#080c14 70%);padding:40px 20px 36px;border-bottom:1px solid rgba(0,180,216,.15);position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(0,180,216,.07) 0%,transparent 70%);pointer-events:none}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:4px 14px;margin-bottom:16px;border:1px solid rgba(0,180,216,.3);border-radius:1px;font-size:.68rem;letter-spacing:.18em;color:var(--boat);background:rgba(0,180,216,.05)}
+.hero-title{font-family:'Noto Serif JP',serif;font-weight:900;font-size:clamp(1.8rem,5vw,2.8rem);color:#fff;letter-spacing:.04em;margin-bottom:8px;line-height:1.2}
+.hero-title em{color:var(--boat);font-style:normal}
+.hero-sub{font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:.3em;color:var(--text-mute)}
+.main{max-width:760px;margin:0 auto}
+.sec{padding:24px 20px 0}
+.sec-head{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.sec-line{width:3px;height:15px;background:var(--boat);border-radius:2px;flex-shrink:0}
+.sec-title{font-size:.76rem;letter-spacing:.12em;color:var(--boat);font-weight:700}
+.race-tabs{display:flex;gap:6px;padding:0 20px;overflow-x:auto;scrollbar-width:none;margin-bottom:12px}
+.race-tabs::-webkit-scrollbar{display:none}
+.race-tab{padding:8px 14px;background:var(--bg-card);border:1px solid var(--border);color:var(--text-dim);font-size:.75rem;cursor:pointer;white-space:nowrap;transition:all .2s;border-radius:2px;font-family:'Noto Sans JP',sans-serif}
+.race-tab.active{background:var(--boat-d);border-color:var(--boat);color:#fff;font-weight:700}
+.race-card{background:var(--bg-card);border:1px solid rgba(0,180,216,.2);border-top:3px solid var(--boat);margin:0 20px;overflow:hidden}
+.race-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.race-name{font-family:'Noto Serif JP',serif;font-weight:700;font-size:1.05rem;color:#fff}
+.race-meta{font-size:.7rem;color:var(--text-mute);margin-top:3px}
+.race-grade{font-family:'Bebas Neue',sans-serif;font-size:.85rem;padding:3px 10px;border-radius:2px}
+.grade-sg{background:var(--red);color:#fff}
+.grade-g1{background:var(--boat);color:#080c14}
+.grade-g2{background:#6a6a8a;color:#fff}
+.grade-general{background:rgba(255,255,255,.1);color:var(--text-dim)}
+.boat-grid{display:grid;grid-template-columns:repeat(6,1fr);border-bottom:1px solid var(--border)}
+.boat-cell{padding:10px 4px;text-align:center;border-right:1px solid rgba(255,255,255,.05)}
+.boat-cell:last-child{border-right:none}
+.boat-num{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;line-height:1;margin-bottom:3px;display:inline-block;padding:1px 6px;border-radius:2px}
+.b1{background:#4a90d9;color:#fff}.b2{background:#1a1a1a;color:#fff;border:1px solid #444}
+.b3{background:#e8313a;color:#fff}.b4{background:#c9a84c;color:#080c14}
+.b5{background:#3a7a3a;color:#fff}.b6{background:#aa5500;color:#fff}
+.boat-name{font-size:.62rem;color:var(--text-dim);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 2px}
+.boat-odds{font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--text)}
+.boat-exh{font-size:.6rem;color:var(--text-mute);margin-top:2px}
+.boat-ev{font-size:.65rem;font-weight:700;margin-top:2px}
+.ev-pos{color:var(--green)}.ev-neg{color:var(--text-mute)}
+.boat-judge{font-size:.58rem;padding:1px 4px;border-radius:2px;margin-top:2px;display:inline-block}
+.judge-strong{background:rgba(201,168,76,.2);color:var(--gold-l)}
+.judge-buy{background:rgba(46,204,113,.15);color:var(--green)}
+.judge-pass{background:rgba(255,255,255,.04);color:var(--text-mute)}
+.honmei-sec{padding:14px 16px;border-bottom:1px solid var(--border)}
+.honmei-label{font-size:.65rem;color:var(--boat);font-weight:700;letter-spacing:.1em;margin-bottom:8px}
+.honmei-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.honmei-num{font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--boat);line-height:1}
+.honmei-name{font-family:'Noto Serif JP',serif;font-weight:700;font-size:1rem;color:#fff}
+.honmei-reason{font-size:.72rem;color:var(--text-dim);margin-top:3px;line-height:1.6}
+.ev-badge{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;padding:4px 12px;border-radius:2px;margin-left:auto}
+.ev-badge.pos{background:rgba(46,204,113,.15);color:var(--green);border:1px solid rgba(46,204,113,.3)}
+.exh-section{padding:14px 16px;border-bottom:1px solid var(--border)}
+.exh-label{font-size:.68rem;color:var(--boat);font-weight:700;letter-spacing:.08em;margin-bottom:10px}
+.exh-table{width:100%;border-collapse:collapse;font-size:.75rem}
+.exh-table th{color:var(--text-mute);padding:6px 8px;border-bottom:1px solid var(--border);text-align:left;font-weight:400;font-size:.65rem}
+.exh-table td{padding:8px 8px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--text)}
+.exh-fast{color:var(--green);font-weight:700}
+.exh-slow{color:var(--red)}
+.loading{text-align:center;padding:40px;color:var(--text-mute);font-size:.85rem}
+.empty{text-align:center;padding:32px;color:var(--text-mute);font-size:.82rem}
+.line-cta{background:rgba(6,199,85,.05);border:1px solid rgba(6,199,85,.2);padding:14px 16px;margin:16px 20px 0;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.line-cta-title{font-size:.82rem;font-weight:700;color:#fff;margin-bottom:3px}
+.line-cta-sub{font-size:.7rem;color:var(--text-mute)}
+.line-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;background:#06C755;color:#fff;font-size:.8rem;font-weight:700;text-decoration:none;border-radius:3px;white-space:nowrap}
+.caution{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);padding:12px 16px;margin:16px 20px 0;font-size:.7rem;color:var(--text-mute);line-height:1.8}
+.share-block{background:var(--bg-card);border:1px solid var(--border);padding:14px 20px;margin:16px 20px 0}
+.share-title{font-size:.68rem;color:var(--text-mute);margin-bottom:10px}
+.share-buttons{display:flex;gap:8px;flex-wrap:wrap}
+.share-btn{display:flex;align-items:center;gap:6px;padding:9px 14px;border-radius:2px;font-size:.76rem;font-weight:700;text-decoration:none;border:none;cursor:pointer;font-family:'Noto Sans JP',sans-serif;transition:filter .2s}
+.share-btn:hover{filter:brightness(1.12)}
+.share-x{background:#000;color:#fff;border:1px solid #333}
+.share-line-btn{background:#06C755;color:#fff}
+.share-copy{background:var(--bg-card2);color:var(--text-dim);border:1px solid var(--border)}
+footer{background:#050810;border-top:1px solid rgba(201,168,76,.08);padding:28px 20px;text-align:center;margin-top:24px}
+.ft-logo{font-family:'Noto Serif JP',serif;font-weight:900;font-size:1rem;color:var(--gold-l);margin-bottom:8px}
+.ft-disc{font-size:.66rem;color:rgba(168,180,200,.45);line-height:1.7;max-width:460px;margin:0 auto 12px}
+.ft-links{display:flex;justify-content:center;gap:16px;flex-wrap:wrap}
+.ft-links a{font-size:.7rem;color:var(--text-mute);text-decoration:none}
+@media(max-width:480px){nav{display:none}.boat-grid{grid-template-columns:repeat(3,1fr)}.boat-cell:nth-child(3){border-right:none}}
+</style>
+</head><div class="sec" id="kyotei-predictions">
+    <div class="sec-head"><div class="sec-line"></div><span class="sec-title">本日の予想</span></div>
+    <div id="kyotei-article-list">
+      <div style="padding:32px;text-align:center;color:var(--text-mute);font-size:.82rem">読み込み中...</div>
+    </div>
+  </div>
+
+  <div class="sec" style="padding-bottom:12px">
+    <div class="sec-head"><div class="sec-line"></div><span class="sec-title">本日の開催場</span></div>
+    <div class="race-tabs" id="race-tabs"><div class="loading">読み込み中...</div></div>
+  </div>
+  <div id="race-card-wrap"><div class="loading">データを取得中...</div></div>
+
+  <div class="line-cta">
+    <div style="flex:1;min-width:160px">
+      <div class="line-cta-title">📩 毎朝の予想をLINEで受け取る</div>
+      <div class="line-cta-sub">展示タイム・EV根拠付きで毎朝配信。登録無料。</div>
+    </div>
+    <a class="line-btn" href="https://line.me/R/ti/p/@414irikx" target="_blank" rel="noopener">💬 友だち追加</a>
+  </div>
+
+  <div class="caution">
+    <strong style="color:var(--text-dim);display:block;margin-bottom:4px">⚠️ 注意事項</strong>
+    本予想は情報提供を目的としたものです。投票は必ず自己責任で行ってください。展示タイム・オッズは変更になる場合があります。18歳未満の方の投票は法律で禁じられています。
+  </div>
+
+  <div class="share-block">
+    <div class="share-title">📣 この予想をシェアする</div>
+    <div class="share-buttons">
+      <a class="share-btn share-x" id="share-x" href="#" target="_blank" rel="noopener">𝕏 Xで投稿</a>
+      <a class="share-btn share-line-btn" id="share-line" href="#" target="_blank" rel="noopener">LINE で送る</a>
+      <button class="share-btn share-copy" id="share-copy" onclick="copyURL()">🔗 URLコピー</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p class="ft-logo">予想の鉄則</p>
+  <p class="ft-disc">本サイトの予想は情報提供を目的としています。公営競技の投票は自己責任でお願いします。18歳未満の方の投票は法律で禁じられています。</p>
+  <div class="ft-links">
+    <a href="index.html">トップ</a>
+    <a href="results.html">実績</a>
+    <a href="premium.html">プレミアム</a>
+    <a href="tokushoho.html">特定商取引法に基づく表記</a>
+    <a href="privacy.html">プライバシーポリシー</a>
+  </div>
+</footer>
+
+
+<div class="sec" style="padding-bottom:0">
+  <div class="sec-head">
+    <div class="sec-line" style="background:var(--boat)"></div>
+    <span class="sec-title" style="color:var(--boat)">たかの予想メモ｜競艇</span>
+  </div>
+  <div style="background:var(--bg-card);border:1px solid rgba(0,180,216,.18);padding:18px 20px;margin-bottom:8px;line-height:1.9;font-size:.82rem;color:var(--text-dim)">
+    <p style="color:#fff;font-weight:700;margin-bottom:8px;font-family:'Noto Serif JP',serif">今週のポイント</p>
+    <p>競艇のEV計算で最重要なのは「展示タイム」と「モーター勝率」です。1号艇の有利は事実ですが、展示タイムが遅い場合は積極的に逆らいます。</p>
+    <p style="margin-top:8px">コース別勝率（1コース：約55%）をベースに、本番展示で良化した艇がオッズに反映されていないとき、EV+が発生します。</p>
+    <p style="margin-top:8px;font-size:.75rem;color:var(--text-mute)">※予想は情報提供目的です。投票は自己責任でお願いします。</p>
+  </div>
+  <div style="background:linear-gradient(135deg,rgba(0,180,216,.08),rgba(0,180,216,.03));border:1px solid rgba(0,180,216,.25);padding:16px 20px;margin-bottom:8px">
+    <p style="font-size:.65rem;color:var(--boat);letter-spacing:.12em;font-weight:700;margin-bottom:10px">📋 本日の推奨買い目</p>
+    <div id="kyotei-kaime-body">
+      <p style="color:var(--text-mute);font-size:.8rem;text-align:center;padding:16px 0">races.jsonが更新されると本日の買い目が表示されます</p>
+    </div>
+    <p style="font-size:.62rem;color:var(--text-mute);margin-top:10px;border-top:1px solid rgba(0,180,216,.15);padding-top:8px">※EV+の場合のみ表示。2連単・3連単の推奨組み合わせはLINEで配信。</p>
+  </div>
+  <div style="background:var(--bg-card);border:1px solid var(--border);padding:16px 20px;margin-bottom:8px">
+    <p style="font-size:.65rem;color:var(--gold);letter-spacing:.12em;font-weight:700;margin-bottom:12px">🎉 読者からの的中報告</p>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="background:rgba(0,180,216,.05);border-left:3px solid var(--boat);padding:10px 14px">
+        <p style="font-size:.78rem;color:var(--text);margin-bottom:4px">「展示タイムを見るようになってから、1号艇だけじゃなく2・3号艇の穴も狙えるようになった。先週の住之江で3連単26倍的中！」</p>
+        <p style="font-size:.65rem;color:var(--text-mute)">— LINE登録者 Sさん（50代）</p>
+      </div>
+      <div style="background:rgba(0,180,216,.05);border-left:3px solid var(--boat);padding:10px 14px">
+        <p style="font-size:.78rem;color:var(--text);margin-bottom:4px">「SGのオールスター、配信通りに2号艇を軸にしたら当たりました。根拠があると安心して買えますね」</p>
+        <p style="font-size:.65rem;color:var(--text-mute)">— LINE登録者 Mさん（30代）</p>
+      </div>
+    </div>
+    <p style="margin-top:12px;font-size:.72rem;color:var(--text-dim)">的中報告は<a href="https://line.me/R/ti/p/@414irikx" style="color:#06C755;font-weight:700" target="_blank" rel="noopener">LINE公式（@414irikx）</a>へ</p>
+  </div>
+</div>
+<script>
+let boatRaces = [];
+
+async function loadRaces() {
+  try {
+    const res  = await fetch('races.json?v=' + Date.now());
+    const json = await res.json();
+    boatRaces  = (json.races || []).filter(r => r.sport === 'boat');
+
+    if (!boatRaces.length) {
+      document.getElementById('race-tabs').innerHTML     = '<div class="empty">本日の競艇開催情報はありません</div>';
+      document.getElementById('race-card-wrap').innerHTML= '';
+      return;
+    }
+    renderTabs();
+    renderRaceCard(0);
+  } catch(e) {
+    document.getElementById('race-card-wrap').innerHTML = '<div class="empty">データの取得に失敗しました</div>';
+  }
+}
+
+function renderTabs() {
+  document.getElementById('race-tabs').innerHTML = boatRaces.map((r, i) => {
+    const g = r.grade ? `<span style="font-size:.58rem;padding:1px 4px;background:rgba(0,180,216,.2);color:var(--boat);border-radius:2px;margin-left:3px">${r.grade}</span>` : '';
+    return `<button class="race-tab ${i===0?'active':''}" onclick="selectRace(${i})">${r.venue}${g}</button>`;
+  }).join('');
+}
+
+function selectRace(idx) {
+  document.querySelectorAll('.race-tab').forEach((t,i) => t.classList.toggle('active', i===idx));
+  renderRaceCard(idx);
+}
+
+function renderRaceCard(idx) {
+  const r   = boatRaces[idx];
+  const el  = document.getElementById('race-card-wrap');
+  const gc  = r.grade==='SG'?'grade-sg':r.grade==='G1'?'grade-g1':r.grade==='G2'?'grade-g2':'grade-general';
+  const riders = r.ev_detail || [];
+
+  // 艇番グリッド
+  const gridHtml = `<div class="boat-grid">${
+    (riders.length > 0 ? riders.slice(0,6) : [1,2,3,4,5,6].map(n=>({frame_num:n}))).map((rd,i) => {
+      const fn    = Math.round(rd.frame_num || (i+1));
+      const evNum = parseFloat(rd.ev||0);
+      const evPct = evNum>0 ? `+${Math.round((evNum-1)*100)}%` : '';
+      const jCls  = rd.judge==='強買い'?'judge-strong':rd.judge==='買い'?'judge-buy':'judge-pass';
+      return `<div class="boat-cell">
+        <div class="boat-num b${fn}">${fn}</div>
+        <div class="boat-name">${rd.name||'—'}</div>
+        <div class="boat-odds">${rd.odds?rd.odds.toFixed(1):'—'}</div>
+        <div class="boat-exh">${rd.exhibition_time?`${rd.exhibition_time}秒`:''}</div>
+        ${evPct?`<div class="boat-ev ${evNum>=1?'ev-pos':'ev-neg'}">EV${evPct}</div>`:''}
+        ${rd.judge?`<div class="boat-judge ${jCls}">${rd.judge}</div>`:''}
+      </div>`;
+    }).join('')
+  }</div>`;
+
+  // 本命
+  const honmeiHtml = r.honmei ? `
+    <div class="honmei-sec">
+      <div class="honmei-label">◎ 本命予想</div>
+      <div class="honmei-row">
+        <div class="honmei-num">${(r.honmei.match(/\d/)||['1'])[0]}</div>
+        <div>
+          <div class="honmei-name">${r.honmei}</div>
+          <div class="honmei-reason">${r.reason?(r.reason.length>60?r.reason.slice(0,60)+'…':r.reason):''}</div>
+        </div>
+        ${r.ev?`<div class="ev-badge pos">EV ${r.ev}</div>`:''}
+      </div>
+    </div>` : '';
+
+  // 展示タイム表
+  const exhRiders = riders.filter(rd => rd.exhibition_time > 0).sort((a,b) => a.exhibition_time - b.exhibition_time);
+  const exhHtml   = exhRiders.length > 0 ? `
+    <div class="exh-section">
+      <div class="exh-label">📊 展示タイム（速い順）</div>
+      <table class="exh-table">
+        <thead><tr><th>艇</th><th>選手名</th><th>展示タイム</th><th>EV</th></tr></thead>
+        <tbody>${exhRiders.map((rd,i) => {
+          const evNum = parseFloat(rd.ev||0);
+          return `<tr>
+            <td>${Math.round(rd.frame_num||1)}号艇</td>
+            <td>${rd.name||'—'}</td>
+            <td class="${i===0?'exh-fast':i===exhRiders.length-1?'exh-slow':''}">${rd.exhibition_time}秒${i===0?' ⚡':''}</td>
+            <td style="color:${evNum>=1?'var(--green)':'var(--text-mute)'}">${evNum>0?`+${Math.round((evNum-1)*100)}%`:'—'}</td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>` : '';
+
+  const d = new Date();
+  el.innerHTML = `
+    <div class="race-card">
+      <div class="race-header">
+        <div>
+          <div class="race-name">${r.name}</div>
+          <div class="race-meta">${r.venue} ／ 発走 ${r.time} ／ ${d.getMonth()+1}/${d.getDate()}</div>
+        </div>
+        <span class="race-grade ${gc}">${r.grade||'一般'}</span>
+      </div>
+      ${honmeiHtml}
+      ${gridHtml}
+      ${exhHtml}
+    </div>`;
+}
+
+// SNS共有
+const u = encodeURIComponent(location.href);
+const t = encodeURIComponent('【競艇予想】本日の注目レースをEV計算で予想中！展示タイム分析付き👇 #競艇予想 #ボートレース #予想の鉄則');
+document.getElementById('share-x').href    = `https://twitter.com/intent/tweet?text=${t}&url=${u}`;
+document.getElementById('share-line').href = `https://social-plugins.line.me/lineit/share?url=${u}`;
+function copyURL() {
+  navigator.clipboard.writeText(location.href).then(() => {
+    const btn = document.getElementById('share-copy');
+    btn.textContent = '✅ コピーしました';
+    setTimeout(()=>{btn.textContent='🔗 URLコピー';},2000);
+  });
+}
+
+loadRaces();
+
+fetch('races.json?v=' + Date.now())
+  .then(r => r.ok ? r.json() : null)
+  .then(json => {
+    if (!json || !json.races) return;
+    const races = json.races.filter(r => r.sport === 'boat' && r.honmei && r.judge !== '見送り');
+    const el = document.getElementById('kyotei-kaime-body');
+    if (!el || !races.length) return;
+    el.innerHTML = races.slice(0, 3).map(r => {
+      const evColor = r.judge === '強買い' ? '#2ecc71' : 'var(--boat)';
+      return `<div style="border-bottom:1px solid rgba(255,255,255,.05);padding:10px 0;display:flex;align-items:flex-start;gap:12px">
+        <div style="flex:1">
+          <p style="font-size:.75rem;color:var(--text-mute);margin-bottom:2px">${r.venue}／${r.grade||'一般'}</p>
+          <p style="font-size:.88rem;color:#fff;font-weight:700;margin-bottom:4px">${r.name}</p>
+          <p style="font-size:.78rem;color:var(--text-dim)">◎ 本命：<strong style="color:#fff">${r.honmei}</strong></p>
+          ${r.reason ? `<p style="font-size:.7rem;color:var(--text-mute);margin-top:2px">${r.reason}</p>` : ''}
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <span style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:${evColor}">EV${r.ev||''}</span><br>
+          <span style="font-size:.62rem;color:${evColor}">${r.judge}</span>
+        </div>
+      </div>`;
+    }).join('') + `<p style="font-size:.7rem;color:var(--text-mute);margin-top:8px">💬 詳細な舟券組み合わせは<a href="https://line.me/R/ti/p/@414irikx" style="color:#06C755" target="_blank" rel="noopener">LINE公式</a>で配信中</p>`;
+  }).catch(() => {});
+
+// ── races.jsonから競艇予想を動的生成 ──
+fetch('races.json?v=' + Date.now())
+  .then(r => r.ok ? r.json() : null)
+  .then(json => {
+    if (!json || !json.races) return;
+    const races = json.races.filter(r => r.sport === 'boat');
+    const el = document.getElementById('kyotei-article-list');
+    if (!el) return;
+    const showRaces = races.filter(r => r.judge && r.judge !== '見送り');
+    if (!showRaces.length) {
+      el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-mute);font-size:.82rem">本日の競艇予想は準備中です</div>';
+      return;
+    }
+    const today = new Date();
+    const dateStr = `${today.getFullYear()}/${String(today.getMonth()+1).padStart(2,'0')}/${String(today.getDate()).padStart(2,'0')}(${['日','月','火','水','木','金','土'][today.getDay()]})`;
+    el.innerHTML = showRaces.map(r => {
+      const evColor = r.judge === '強買い' ? '#2ecc71' : r.judge === '買い' ? 'var(--gold)' : 'var(--text-mute)';
+      return `<div class="article-card">
+        <div class="article-meta">
+          <span class="article-date">${dateStr}</span>
+          ${r.grade ? `<span class="article-grade" style="background:var(--boat);color:#fff;font-family:'Bebas Neue',sans-serif;font-size:.75rem;padding:2px 8px;border-radius:2px">${r.grade}</span>` : ''}
+          <span class="article-race">${r.venue} ${r.name}</span>
+        </div>
+        <h2 class="article-title">${r.name} 本命予想</h2>
+        <div class="article-body">
+          ${r.reason ? `<p>${r.reason.length>80?r.reason.slice(0,80)+'…':r.reason}</p>` : '<p>EV計算に基づく本命予想です。</p>'}
+        </div>
+        ${r.honmei ? `
+        <div class="picks-row">
+          <div class="pick-box honmei">
+            <div class="pick-label">◎ 本命</div>
+            <div class="pick-num" style="font-size:1.8rem">${r.honmei}</div>
+            <div class="pick-reason" style="color:${evColor};font-size:.75rem;margin-top:4px">EV${r.ev||''} ${r.judge||''}</div>
+          </div>
+        </div>` : ''}
+        <div style="margin-top:12px;padding:10px 14px;background:rgba(6,199,85,.05);border:1px solid rgba(6,199,85,.15);font-size:.75rem;color:var(--text-dim)">
+          💬 詳細な買い目は<a href="https://line.me/R/ti/p/@414irikx" style="color:#06C755;font-weight:700" target="_blank" rel="noopener">LINE公式</a>で配信中
+        </div>
+      </div>`;
+    }).join('');
+  }).catch(() => {
+    const el = document.getElementById('kyotei-article-list');
+    if (el) el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-mute);font-size:.82rem">本日の競艇予想は準備中です</div>';
+  });
+</script>
+</body>
+</html>

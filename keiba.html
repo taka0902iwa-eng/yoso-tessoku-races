@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+  <meta name="description" content="本日の競馬本命予想を公開中。JRAのG1・重賞からEV（期待値）計算で厳選した狙い馬を毎日更新。過去全予想の実績・買い目の根拠も詳しく解説します。">
+  <meta name="robots" content="index,follow">
+  <!-- OGP -->
+  <meta property="og:type"        content="website">
+  <meta property="og:title"       content="競馬予想 | 予想の鉄則">
+  <meta property="og:description" content="本日の競馬本命予想を公開中。JRAのG1・重賞からEV（期待値）計算で厳選した狙い馬を毎日更新。過去全予想の実績・買い目の根拠も詳しく解説します。">
+  <meta property="og:url"         content="https://oyatojikka.online/keiba.html">
+  <meta property="og:site_name"   content="予想の鉄則">
+  <meta property="og:image"       content="https://oyatojikka.online/avatar.png">
+  <meta property="og:locale"      content="ja_JP">
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary">
+  <meta name="twitter:title"       content="競馬予想 | 予想の鉄則">
+  <meta name="twitter:description" content="本日の競馬本命予想を公開中。JRAのG1・重賞からEV（期待値）計算で厳選した狙い馬を毎日更新。過去全予想の実績・買い目の根拠も詳しく解説します。">
+  <meta name="twitter:image"       content="https://oyatojikka.online/avatar.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>競馬予想 | 予想の鉄則</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@700;900&family=Bebas+Neue&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080c14;--bg-card:#0c1525;--bg-card2:#0f1e36;--navy:#0a1628;--gold:#c9a84c;--gold-l:#f0d080;--border:rgba(201,168,76,0.18);--accent:#c9a84c;--accent-l:#f0d080;--accent-dim:rgba(201,168,76,0.15);--text:#eef0f5;--text-dim:#a8b0c4;--text-mute:#5a6278}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-serif;font-weight:300;min-height:100vh}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px}
+header{position:sticky;top:0;z-index:200;background:rgba(8,12,20,0.96);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:baseline;gap:10px;text-decoration:none}
+.logo-ja{font-family:'Noto Serif JP',serif;font-weight:900;font-size:1.2rem;color:var(--gold-l);letter-spacing:.06em}
+.logo-en{font-family:'Bebas Neue',sans-serif;font-size:.72rem;color:var(--text-mute);letter-spacing:.22em}
+nav a{color:var(--text-dim);text-decoration:none;font-size:.75rem;padding:6px 12px;transition:color .2s}
+nav a:hover,nav a.active{color:var(--gold-l)}
+
+/* HERO */
+.hero{background:linear-gradient(160deg,#0d1a2e 0%,#080c14 60%);padding:40px 20px 36px;border-bottom:1px solid var(--border);position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 50% 60% at 10% 50%,rgba(201,168,76,.07) 0%,transparent 70%);pointer-events:none}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:4px 14px;margin-bottom:16px;border:1px solid rgba(201,168,76,.3);border-radius:1px;font-size:.68rem;letter-spacing:.18em;color:var(--gold);background:rgba(201,168,76,.05)}
+.hero-badge::before{content:'🐴';font-size:.9rem}
+.hero-title{font-family:'Noto Serif JP',serif;font-weight:900;font-size:clamp(1.8rem,5vw,2.8rem);color:#fff;letter-spacing:.04em;margin-bottom:8px;line-height:1.2}
+.hero-title em{color:var(--gold-l);font-style:normal}
+.hero-sub{font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:.3em;color:var(--text-mute)}
+
+/* MAIN */
+.main{max-width:900px;margin:0 auto;padding:0 0 80px}
+.sec{padding:24px 20px 0}
+.sec-head{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.sec-line{width:3px;height:15px;background:var(--accent);border-radius:2px;flex-shrink:0}
+.sec-title{font-size:.76rem;letter-spacing:.12em;color:var(--accent);font-weight:700}
+
+/* 予想記事 */
+.article-card{background:var(--bg-card);border-left:4px solid var(--accent);padding:20px;margin-bottom:10px}
+.article-meta{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.article-date{font-size:.68rem;color:var(--text-mute)}
+.article-grade{font-family:'Bebas Neue',sans-serif;font-size:.75rem;padding:2px 8px;border-radius:2px}
+.ag-g1{background:var(--gold);color:#080c14}
+.ag-g2{background:#6a6a8a;color:#fff}
+.ag-g3{background:#3a6a3a;color:#fff}
+.article-race{font-size:.72rem;color:var(--text-dim)}
+.article-title{font-family:'Noto Serif JP',serif;font-weight:700;font-size:1.05rem;color:var(--text);margin-bottom:14px;line-height:1.4}
+.article-body{font-size:.84rem;line-height:1.9;color:var(--text-dim);margin-bottom:16px}
+.article-body p{margin-bottom:10px}
+
+/* 本命・対抗・穴 */
+.picks-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.pick-box{flex:1;min-width:100px;background:var(--bg-card2);border-top:2px solid transparent;padding:12px 14px}
+.pick-box.honmei{border-top-color:var(--gold)}
+.pick-box.taikou{border-top-color:#7a7aaa}
+.pick-box.ana{border-top-color:#3a8a5a}
+.pick-label{font-size:.62rem;letter-spacing:.1em;margin-bottom:4px;font-weight:700}
+.pick-box.honmei .pick-label{color:var(--gold)}
+.pick-box.taikou .pick-label{color:#9a9acc}
+.pick-box.ana    .pick-label{color:#5aaa7a}
+.pick-num{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--text);line-height:1;margin-bottom:2px}
+.pick-name{font-family:'Noto Serif JP',serif;font-weight:700;font-size:.88rem;color:var(--text)}
+.pick-reason{font-size:.7rem;color:var(--text-mute);margin-top:4px;line-height:1.5}
+
+/* EV */
+.ev-box{background:var(--bg-card2);border:1px solid var(--border);padding:14px 16px;margin-bottom:14px}
+.ev-title{font-size:.7rem;color:var(--text-mute);margin-bottom:8px;letter-spacing:.05em}
+.ev-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.ev-row:last-child{border-bottom:none}
+.ev-horse{font-size:.82rem;color:var(--text)}
+.ev-val{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;letter-spacing:.05em}
+.ev-pos{color:var(--gold-l)}
+.ev-neg{color:var(--text-mute)}
+
+/* 注意書き */
+.caution{background:rgba(201,168,76,.05);border:1px solid rgba(201,168,76,.15);padding:12px 16px;font-size:.72rem;color:var(--text-mute);line-height:1.7;margin-top:14px}
+.caution strong{color:var(--gold);display:block;margin-bottom:4px}
+
+/* レース一覧 */
+.race-table{width:100%;border-collapse:collapse}
+.race-table th{font-size:.68rem;color:var(--text-mute);padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;font-weight:400;letter-spacing:.05em}
+.race-table td{font-size:.78rem;padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--text)}
+.race-table tr:hover td{background:rgba(255,255,255,.02)}
+.race-table .grade{font-family:'Bebas Neue',sans-serif;font-size:.72rem;padding:1px 6px;border-radius:2px}
+.race-table .venue-tag{color:var(--text-mute);font-size:.72rem}
+.rt-g1{background:var(--gold);color:#080c14}
+.rt-g2{background:#6a6a8a;color:#fff}
+.rt-g3{background:#3a6a3a;color:#fff}
+.rt-plain{background:rgba(255,255,255,.07);color:var(--text-dim)}
+
+footer{background:#050810;border-top:1px solid rgba(201,168,76,.08);padding:28px 20px;text-align:center}
+.ft-logo{font-family:'Noto Serif JP',serif;font-weight:900;font-size:1rem;color:var(--gold-l);margin-bottom:8px}
+.ft-disc{font-size:.66rem;color:rgba(168,180,200,.45);line-height:1.7;max-width:460px;margin:0 auto 12px}
+.ft-links{display:flex;justify-content:center;gap:16px;flex-wrap:wrap}
+.ft-links a{font-size:.7rem;color:var(--text-mute);text-decoration:none}
+.ft-links a:hover{color:var(--gold-l)}
+/* SHARE BUTTONS */
+.share-block{background:var(--bg-card);border:1px solid var(--border);padding:14px 16px;margin-top:14px}
+.share-title{font-size:.68rem;color:var(--text-mute);margin-bottom:10px;letter-spacing:.05em}
+.share-buttons{display:flex;gap:8px;flex-wrap:wrap}
+.share-btn{display:flex;align-items:center;gap:6px;padding:9px 16px;border-radius:2px;font-size:.78rem;font-weight:700;text-decoration:none;border:none;cursor:pointer;font-family:'Noto Sans JP',sans-serif;transition:filter .2s;white-space:nowrap}
+.share-btn:hover{filter:brightness(1.15)}
+.share-x{background:#000;color:#fff;border:1px solid #333}
+.share-line{background:#06C755;color:#fff}
+.share-ig{background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff}
+.share-copy{background:var(--bg-card2);color:var(--text-dim);border:1px solid var(--border)}
+.share-copied{color:var(--gold)!important;border-color:var(--gold)!important}
+
+/* FLOAT SHARE */
+.float-share{position:fixed;bottom:20px;right:16px;z-index:150;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.float-share-btn{display:flex;align-items:center;gap:6px;padding:10px 14px;border-radius:24px;font-size:.75rem;font-weight:700;text-decoration:none;border:none;cursor:pointer;font-family:'Noto Sans JP',sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.5);transition:all .2s;white-space:nowrap}
+.float-share-btn:hover{transform:translateY(-2px)}
+.fsb-x{background:#000;color:#fff}
+.fsb-line{background:#06C755;color:#fff}
+.fsb-ig{background:linear-gradient(135deg,#f09433,#dc2743,#bc1888);color:#fff}
+
+@media(max-width:480px){.picks-row{flex-direction:column}nav{display:none}.share-buttons{gap:6px}.share-btn{font-size:.72rem;padding:8px 12px}}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="index.html"><span class="logo-ja">予想の鉄則</span><span class="logo-en">YOSO NO TESSOKU</span></a>
+  <nav><a href="keiba.html" class="active">🐴 競馬</a><a href="kyotei.html">🚤 競艇</a><a href="keirin.html">🚴 競輪</a></nav>
+</header>
+
+<div class="hero">
+  <div class="hero-badge">HORSE RACING</div>
+  <h1 class="hero-title">競馬<em>予想</em></h1>
+  <p class="hero-sub">JRA / 地方競馬 本命予想</p>
+</div>
+
+<div class="main">
+
+  <!-- 本日の予想記事 -->
+  <div class="sec" id="today-predictions">
+    <div class="sec-head"><div class="sec-line"></div><span class="sec-title">本日の予想</span></div>
+    <div id="keiba-article-list">
+      <div style="padding:32px;text-align:center;color:var(--text-mute);font-size:.82rem">読み込み中...</div>
+    </div>
+  </div>
+
+  <div class="sec" style="padding-bottom:24px">
+    <div class="sec-head"><div class="sec-line"></div><span class="sec-title">本日の開催レース一覧</span></div>
+    <table class="race-table">
+      <thead>
+        <tr>
+          <th>時刻</th><th>開催</th><th>レース名</th><th>条件</th><th>グレード</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>10:35</td><td class="venue-tag">中山</td><td>3歳未勝利</td><td>芝1200m</td><td><span class="grade rt-plain">一般</span></td></tr>
+        <tr><td>11:10</td><td class="venue-tag">阪神</td><td>4歳上1勝クラス</td><td>芝1800m</td><td><span class="grade rt-plain">一般</span></td></tr>
+        <tr><td>11:45</td><td class="venue-tag">福島</td><td>福島牝馬S</td><td>芝1800m</td><td><span class="grade rt-g3">G3</span></td></tr>
+        <tr><td>13:00</td><td class="venue-tag">中山</td><td>皐月賞トライアル</td><td>芝2000m</td><td><span class="grade rt-g2">G2</span></td></tr>
+        <tr><td>14:05</td><td class="venue-tag">阪神</td><td>阪神牝馬S</td><td>芝1600m</td><td><span class="grade rt-g2">G2</span></td></tr>
+        <tr><td>15:45</td><td class="venue-tag">中山</td><td>ニュージーランドT</td><td>芝1600m</td><td><span class="grade rt-g2">G2</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<div class="float-share">
+  <a class="float-share-btn fsb-x" id="float-x" href="#" target="_blank" rel="noopener">𝕏</a>
+  <a class="float-share-btn fsb-line" id="float-line" href="#" target="_blank" rel="noopener">LINE</a>
+</div>
+
+<footer>
+  <p class="ft-logo">予想の鉄則</p>
+  <p class="ft-disc">本サイトの予想は情報提供を目的としています。公営競技の投票は自己責任でお願いします。18歳未満の方の投票は法律で禁じられています。</p>
+  <div class="ft-links">
+    <a href="index.html">トップ</a>
+    <a href="results.html">実績</a>
+    <a href="premium.html">プレミアム</a>
+    <a href="tokushoho.html">特定商取引法に基づく表記</a>
+    <a href="privacy.html">プライバシーポリシー</a>
+  </div>
+</footer>
+</body>
+
+<!-- ═══ 解説コーナー ═══ -->
+<div class="sec" style="padding-bottom:0">
+  <div class="sec-head">
+    <div class="sec-line" style="background:var(--horse)"></div>
+    <span class="sec-title" style="color:var(--horse)">たかの予想メモ｜競馬</span>
+  </div>
+
+  <!-- 解説テキスト -->
+  <div style="background:var(--bg-card);border:1px solid var(--border);padding:18px 20px;margin-bottom:8px;line-height:1.9;font-size:.82rem;color:var(--text-dim)" id="keiba-kaisetsu">
+    <p style="color:#fff;font-weight:700;margin-bottom:8px;font-family:'Noto Serif JP',serif">今週のポイント</p>
+    <p>本日のEV計算で注目しているのは「人気と実力の乖離」が大きいレースです。単勝オッズが実際の勝率より高く設定されている馬を中心に組み立てます。</p>
+    <p style="margin-top:8px">競馬の控除率は約25%。つまり何も考えずに買い続けると長期的に必ず負けます。EV（期待値）がプラスになるレースだけを厳選して、負け越さない馬券を目指します。</p>
+    <p style="margin-top:8px;font-size:.75rem;color:var(--text-mute)">※予想は情報提供目的です。投票は自己責任でお願いします。</p>
+  </div>
+
+  <!-- 具体的買い目セクション -->
+  <div style="background:linear-gradient(135deg,rgba(201,168,76,.08),rgba(201,168,76,.03));border:1px solid rgba(201,168,76,.25);padding:16px 20px;margin-bottom:8px" id="keiba-kaime">
+    <p style="font-size:.65rem;color:var(--gold);letter-spacing:.12em;font-weight:700;margin-bottom:10px">📋 本日の推奨買い目</p>
+    <div id="keiba-kaime-body">
+      <p style="color:var(--text-mute);font-size:.8rem;text-align:center;padding:16px 0">races.jsonが更新されると本日の買い目が表示されます</p>
+    </div>
+    <p style="font-size:.62rem;color:var(--text-mute);margin-top:10px;border-top:1px solid var(--border);padding-top:8px">※EV+の場合のみ表示。見送り推奨レースは掲載しません。</p>
+  </div>
+
+  <!-- 口コミ・的中報告 -->
+  <div style="background:var(--bg-card);border:1px solid var(--border);padding:16px 20px;margin-bottom:8px">
+    <p style="font-size:.65rem;color:var(--gold);letter-spacing:.12em;font-weight:700;margin-bottom:12px">🎉 読者からの的中報告</p>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div style="background:rgba(46,204,113,.05);border-left:3px solid #2ecc71;padding:10px 14px">
+        <p style="font-size:.78rem;color:var(--text);margin-bottom:4px">「EVの考え方を知ってから、無駄なレースを買わなくなりました。先週の高松宮記念、本命が来て嬉しかった！」</p>
+        <p style="font-size:.65rem;color:var(--text-mute)">— LINE登録者 Kさん（40代）</p>
+      </div>
+      <div style="background:rgba(46,204,113,.05);border-left:3px solid #2ecc71;padding:10px 14px">
+        <p style="font-size:.78rem;color:var(--text);margin-bottom:4px">「感覚で買ってたのをやめて3ヶ月。回収率が上がってきました。毎朝の予想LINEが習慣になってます」</p>
+        <p style="font-size:.65rem;color:var(--text-mute)">— LINE登録者 Tさん（30代）</p>
+      </div>
+    </div>
+    <p style="margin-top:12px;font-size:.72rem;color:var(--text-dim)">
+      的中報告・ご感想は
+      <a href="https://line.me/R/ti/p/@414irikx" style="color:#06C755;font-weight:700" target="_blank" rel="noopener">LINE公式（@414irikx）</a>
+      へどうぞ
+    </p>
+  </div>
+</div>
+
+<script>
+const PAGE_URL = encodeURIComponent(location.href);
+const PAGE_TITLE = encodeURIComponent('【競馬予想】本日の本命はこれだ！ | 予想の鉄則');
+const X_TEXT = encodeURIComponent('【競馬予想】本日の注目レース予想を公開中！EV計算で根拠ある予想をチェック👇 #競馬予想 #予想の鉄則');
+
+const _sx = document.getElementById('share-x'); if (_sx) _sx.href = `https://twitter.com/intent/tweet?text=${X_TEXT}&url=${PAGE_URL}`;
+const _sl = document.getElementById('share-line'); if (_sl) _sl.href = `https://social-plugins.line.me/lineit/share?url=${PAGE_URL}`;
+const _fx = document.getElementById('float-x'); if (_fx) _fx.href = `https://twitter.com/intent/tweet?text=${X_TEXT}&url=${PAGE_URL}`;
+const _fl = document.getElementById('float-line'); if (_fl) _fl.href = `https://social-plugins.line.me/lineit/share?url=${PAGE_URL}`;
+
+function copyURL() {
+  navigator.clipboard.writeText(location.href).then(() => {
+    const btn = document.getElementById('share-copy');
+    btn.textContent = '✅ コピーしました';
+    btn.classList.add('share-copied');
+    setTimeout(() => { btn.textContent = '🔗 URLコピー'; btn.classList.remove('share-copied'); }, 2000);
+  });
+}
+
+// races.json から競馬の本命予想を取得して買い目を表示
+fetch('races.json?v=' + Date.now())
+  .then(r => r.ok ? r.json() : null)
+  .then(json => {
+    if (!json || !json.races) return;
+    const horseRaces = json.races.filter(r => r.sport === 'horse');
+    const el = document.getElementById('keiba-kaime-body');
+    if (!el) return;
+    const buyRaces = horseRaces.filter(r => r.judge && r.judge !== '見送り');
+    if (!buyRaces.length) {
+      el.innerHTML = '<p style="color:var(--text-mute);font-size:.8rem;text-align:center;padding:12px 0">本日のEV+レースはありません（見送り推奨）</p>';
+      return;
+    }
+    el.innerHTML = buyRaces.slice(0, 5).map(r => {
+      const evColor = r.judge === '強買い' ? '#2ecc71' : 'var(--gold)';
+      return `<div style="border-bottom:1px solid rgba(255,255,255,.05);padding:10px 0;display:flex;align-items:flex-start;gap:12px">
+        <div style="flex:1">
+          <p style="font-size:.75rem;color:var(--text-mute);margin-bottom:2px">${r.venue}／${r.grade||'一般'}</p>
+          <p style="font-size:.88rem;color:#fff;font-weight:700;margin-bottom:4px">${r.name}</p>
+          <p style="font-size:.78rem;color:var(--text-dim)">◎ 本命：<strong style="color:#fff">${r.honmei}</strong></p>
+          ${r.reason ? `<p style="font-size:.7rem;color:var(--text-mute);margin-top:2px">${r.reason.length>60?r.reason.slice(0,60)+'…':r.reason}</p>` : ''}
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <span style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:${evColor}">EV${r.ev||''}</span><br>
+          <span style="font-size:.62rem;color:${evColor}">${r.judge}</span>
+        </div>
+      </div>`;
+    }).join('') + `<p style="font-size:.7rem;color:var(--text-mute);margin-top:8px">💬 詳細な買い目（券種・点数）は<a href="https://line.me/R/ti/p/@414irikx" style="color:#06C755" target="_blank" rel="noopener">LINE公式</a>で配信中</p>`;
+  }).catch(() => {});
+
+// ── races.jsonから競馬予想を動的生成 ──────────────────
+fetch('races.json?v=' + Date.now())
+  .then(r => r.ok ? r.json() : null)
+  .then(json => {
+    if (!json || !json.races) return;
+    const horseRaces = json.races.filter(r => r.sport === 'horse');
+    const el = document.getElementById('keiba-article-list');
+    if (!el) return;
+    const showRaces = horseRaces.filter(r => r.judge && r.judge !== '見送り');
+    if (!showRaces.length) {
+      el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-mute);font-size:.82rem">本日の競馬予想は準備中です</div>';
+      return;
+    }
+    const GRADE_CLS = {G1:'ag-g1',G2:'ag-g2',G3:'ag-g3'};
+    const today = new Date();
+    const dateStr = `${today.getFullYear()}/${String(today.getMonth()+1).padStart(2,'0')}/${String(today.getDate()).padStart(2,'0')}(${['日','月','火','水','木','金','土'][today.getDay()]})`;
+    el.innerHTML = showRaces.map(r => {
+      const gc = GRADE_CLS[r.grade] || 'ag-g3';
+      const evColor = r.judge === '強買い' ? '#2ecc71' : r.judge === '買い' ? 'var(--gold)' : 'var(--text-mute)';
+      return `<div class="article-card">
+        <div class="article-meta">
+          <span class="article-date">${dateStr}</span>
+          ${r.grade ? `<span class="article-grade ${gc}">${r.grade}</span>` : ''}
+          <span class="article-race">${r.venue} ${r.name}</span>
+        </div>
+        <h2 class="article-title">【${r.grade||'注目'}】${r.name} 本命予想</h2>
+        <div class="article-body">
+          ${r.reason ? `<p>${r.reason}</p>` : '<p>EV計算に基づく本命予想です。</p>'}
+        </div>
+        ${r.honmei ? `
+        <div class="picks-row">
+          <div class="pick-box honmei">
+            <div class="pick-label">◎ 本命</div>
+            <div class="pick-num" style="font-size:1.8rem">${r.honmei}</div>
+            <div class="pick-reason" style="color:${evColor};font-size:.75rem;margin-top:4px">EV${r.ev||''} ${r.judge||''}</div>
+          </div>
+        </div>` : ''}
+        <div style="margin-top:12px;padding:10px 14px;background:rgba(6,199,85,.05);border:1px solid rgba(6,199,85,.15);font-size:.75rem;color:var(--text-dim)">
+          💬 詳細な買い目は<a href="https://line.me/R/ti/p/@414irikx" style="color:#06C755;font-weight:700" target="_blank" rel="noopener">LINE公式</a>で配信中
+        </div>
+      </div>`;
+    }).join('');
+  }).catch(() => {
+    const el = document.getElementById('keiba-article-list');
+    if (el) el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-mute);font-size:.82rem">本日の競馬予想は準備中です</div>';
+  });
+</script>
+</html>

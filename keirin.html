@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+  <meta name="description" content="本日の競輪本命予想を公開中。GP・G1を中心にライン構成・バンク適性からEV（期待値）計算で厳選した狙い車番を毎日更新。全予想実績もリアルタイム公開。">
+  <meta name="robots" content="index,follow">
+  <!-- OGP -->
+  <meta property="og:type"        content="website">
+  <meta property="og:title"       content="競輪予想 | 予想の鉄則">
+  <meta property="og:description" content="本日の競輪本命予想を公開中。GP・G1を中心にライン構成・バンク適性からEV（期待値）計算で厳選した狙い車番を毎日更新。全予想実績もリアルタイム公開。">
+  <meta property="og:url"         content="https://oyatojikka.online/keirin.html">
+  <meta property="og:site_name"   content="予想の鉄則">
+  <meta property="og:image"       content="https://oyatojikka.online/avatar.png">
+  <meta property="og:locale"      content="ja_JP">
+  <!-- Twitter Card -->
+  <meta name="twitter:card"        content="summary">
+  <meta name="twitter:title"       content="競輪予想 | 予想の鉄則">
+  <meta name="twitter:description" content="本日の競輪本命予想を公開中。GP・G1を中心にライン構成・バンク適性からEV（期待値）計算で厳選した狙い車番を毎日更新。全予想実績もリアルタイム公開。">
+  <meta name="twitter:image"       content="https://oyatojikka.online/avatar.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>競輪予想 | 予想の鉄則</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@700;900&family=Bebas+Neue&family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080c14;--bg-card:#0c1525;--bg-card2:#0f1e36;--navy:#0a1628;--gold:#c9a84c;--gold-l:#f0d080;--border:rgba(232,49,58,0.18);--accent:#e8313a;--accent-l:#ff6068;--accent-dim:rgba(232,49,58,0.12);--text:#eef0f5;--text-dim:#a8b0c4;--text-mute:#5a6278;--cycle:#e8313a}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-serif;font-weight:300;min-height:100vh}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--accent);border-radius:2px}
+header{position:sticky;top:0;z-index:200;background:rgba(8,12,20,0.96);border-bottom:1px solid rgba(232,49,58,.15);backdrop-filter:blur(12px);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:baseline;gap:10px;text-decoration:none}
+.logo-ja{font-family:'Noto Serif JP',serif;font-weight:900;font-size:1.2rem;color:var(--gold-l);letter-spacing:.06em}
+.logo-en{font-family:'Bebas Neue',sans-serif;font-size:.72rem;color:var(--text-mute);letter-spacing:.22em}
+nav a{color:var(--text-dim);text-decoration:none;font-size:.75rem;padding:6px 12px;transition:color .2s}
+nav a:hover,nav a.active{color:var(--accent-l)}
+
+/* HERO */
+.hero{background:linear-gradient(160deg,#180810 0%,#080c14 60%);padding:40px 20px 36px;border-bottom:1px solid rgba(232,49,58,.15);position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 50% 60% at 90% 30%,rgba(232,49,58,.08) 0%,transparent 70%);pointer-events:none}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:4px 14px;margin-bottom:16px;border:1px solid rgba(232,49,58,.3);border-radius:1px;font-size:.68rem;letter-spacing:.18em;color:var(--accent);background:rgba(232,49,58,.05)}
+.hero-badge::before{content:'🚴';font-size:.9rem}
+.hero-title{font-family:'Noto Serif JP',serif;font-weight:900;font-size:clamp(1.8rem,5vw,2.8rem);color:#fff;letter-spacing:.04em;margin-bottom:8px;line-height:1.2}
+.hero-title em{color:var(--accent-l);font-style:normal}
+.hero-sub{font-family:'Bebas Neue',sans-serif;font-size:.85rem;letter-spacing:.3em;color:var(--text-mute)}
+
+.main{max-width:900px;margin:0 auto;padding:0 0 80px}
+.sec{padding:24px 20px 0}
+.sec-head{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.sec-line{width:3px;height:15px;background:var(--accent);border-radius:2px;flex-shrink:0}
+.sec-title{font-size:.76rem;letter-spacing:.12em;color:var(--accent);font-weight:700}
+
+/* 予想記事 */
+.article-card{background:var(--bg-card);border-left:4px solid var(--accent);padding:20px;margin-bottom:10px}
+.article-meta{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.article-date{font-size:.68rem;color:var(--text-mute)}
+.article-grade{font-family:'Bebas Neue',sans-serif;font-size:.75rem;padding:2px 8px;border-radius:2px;background:linear-gradient(135deg,var(--gold),var(--accent));color:#fff}
+.article-race{font-size:.72rem;color:var(--text-dim)}
+.article-title{font-family:'Noto Serif JP',serif;font-weight:700;font-size:1.05rem;color:var(--text);margin-bottom:14px;line-height:1.4}
+.article-body{font-size:.84rem;line-height:1.9;color:var(--text-dim);margin-bottom:16px}
+.article-body p{margin-bottom:10px}
+
+/* 本命・対抗 */
+.picks-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.pick-box{flex:1;min-width:120px;background:var(--bg-card2);border-top:2px solid transparent;padding:12px 14px}
+.pick-box.honmei{border-top-color:var(--accent)}
+.pick-label{font-size:.62rem;letter-spacing:.1em;margin-bottom:4px;font-weight:700}
+.pick-box.honmei .pick-label{color:var(--accent)}
+.pick-num{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--text);line-height:1;margin-bottom:2px}
+.pick-name{font-size:.82rem;color:var(--text)}
+.pick-reason{font-size:.7rem;color:var(--text-mute);margin-top:4px;line-height:1.5}
+
+/* レース一覧 */
+.race-table{width:100%;border-collapse:collapse}
+.race-table th{font-size:.68rem;color:var(--text-mute);padding:8px 10px;border-bottom:1px solid rgba(232,49,58,.15);text-align:left;font-weight:400;letter-spacing:.05em}
+.race-table td{font-size:.78rem;padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--text)}
+.race-table tr:hover td{background:rgba(255,255,255,.02)}
+.grade-gp{background:linear-gradient(135deg,var(--gold),var(--accent));color:#fff;font-family:'Bebas Neue',sans-serif;font-size:.72rem;padding:1px 6px;border-radius:2px}
+.grade-g1{background:var(--accent);color:#fff;font-family:'Bebas Neue',sans-serif;font-size:.72rem;padding:1px 6px;border-radius:2px}
+.grade-g2{background:rgba(201,168,76,.7);color:#fff;font-family:'Bebas Neue',sans-serif;font-size:.72rem;padding:1px 6px;border-radius:2px}
+.grade-f1{background:rgba(255,255,255,.1);color:var(--text-dim);font-family:'Bebas Neue',sans-serif;font-size:.72rem;padding:1px 6px;border-radius:2px}
+.venue-tag{color:var(--text-mute);font-size:.72rem}
+
+footer{background:#050810;border-top:1px solid rgba(232,49,58,.08);padding:28px 20px;text-align:center}
+.ft-logo{font-family:'Noto Serif JP',serif;font-weight:900;font-size:1rem;color:var(--gold-l);margin-bottom:8px}
+.ft-disc{font-size:.66rem;color:rgba(168,180,200,.45);line-height:1.7;max-width:460px;margin:0 auto 12px}
+.ft-links{display:flex;justify-content:center;gap:16px;flex-wrap:wrap}
+.ft-links a{font-size:.7rem;color:var(--text-mute);text-decoration:none}
+.ft-links a:hover{color:var(--gold-l)}
+
+.float-share{position:fixed;bottom:20px;right:16px;z-index:150;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+.float-share-btn{display:flex;align-items:center;gap:6px;padding:10px 14px;border-radius:24px;font-size:.75rem;font-weight:700;text-decoration:none;border:none;cursor:pointer;font-family:'Noto Sans JP',sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.5);transition:all .2s;white-space:nowrap}
+.float-share-btn:hover{transform:translateY(-2px)}
+.fsb-x{background:#000;color:#fff}
+.fsb-line{background:#06C755;color:#fff}
+@media(max-width:480px){.picks-row{flex-direction:column}nav{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="index.html"><span class="logo-ja">予想の鉄則</span><span class="logo-en">YOSO NO TESSOKU</span></a>
+  <nav><a href="keiba.html">🐴 競馬</a><a href="kyotei.html">🚤 競艇</a><a href="keirin.html" class="active">🚴 競輪</a></nav>
+</header>
+
+<div class="hero">
+  <div class="hero-badge">KEIRIN</div>
+  <h1 class="hero-title">競輪<em>予想</em></h1>
+  <p class="hero-sub">全国競輪場 ライン戦術分析</p>
+</div>
+
+<div class="main">
+
+  <div class="sec" id="keirin-predictions">
+    <div class="sec-head"><div class="sec-line"></div><span class="sec-title">本日の予想</span></div>
+    <div id="keirin-article-list">
+      <div style="padding:32px;text-align:center;color:var(--text-mute);font-size:.82rem">読み込み中...</div>
+    </div>
+  </div>
+
+  <div class="sec" style="padding-bottom:24px">
+    <div class="sec-head"><div class="sec-line"></div><span class="sec-title">本日の開催レース一覧</span></div>
+    <table class="race-table">
+      <thead>
+        <tr><th>時刻</th><th>競輪場</th><th>レース</th><th>グレード</th><th>本命</th><th>EV</th></tr>
+      </thead>
+      <tbody id="keirin-race-table-body">
+        <tr><td colspan="6" style="text-align:center;color:var(--text-mute);padding:16px">読み込み中...</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sec" style="padding-bottom:24px">
+    <div style="background:var(--bg-card);border:1px solid rgba(232,49,58,.18);padding:18px 20px;margin-bottom:8px;line-height:1.9;font-size:.82rem;color:var(--text-dim)">
+      <p style="color:#fff;font-weight:700;margin-bottom:8px;font-family:'Noto Serif JP',serif">今週のポイント</p>
+      <p>競輪のEV計算では「ライン構成」が最重要です。3車ラインの先頭選手と番手選手は、単独選手（単騎）より有利な展開になりやすく、EV計算に大きく影響します。</p>
+      <p style="margin-top:8px">バンク種別（333m・400m・500m）によって脚質有利が変わります。333mバンクは逃げ有利、500mバンクは差し・追い込み有利という傾向をEV計算に組み込んでいます。</p>
+      <p style="margin-top:8px;font-size:.75rem;color:var(--text-mute)">※予想は情報提供目的です。投票は自己責任でお願いします。</p>
+    </div>
+    <div style="background:var(--bg-card);border:1px solid var(--border);padding:16px 20px;margin-bottom:8px">
+      <p style="font-size:.65rem;color:var(--gold);letter-spacing:.12em;font-weight:700;margin-bottom:12px">🎉 読者からの的中報告</p>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="background:rgba(232,49,58,.05);border-left:3px solid var(--cycle);padding:10px 14px">
+          <p style="font-size:.78rem;color:var(--text);margin-bottom:4px">「ライン読みの大切さがやっとわかった。単騎の選手を切るだけで精度が上がりました。先週の競輪祭G1で2車単的中！」</p>
+          <p style="font-size:.65rem;color:var(--text-mute)">— LINE登録者 Hさん（40代）</p>
+        </div>
+        <div style="background:rgba(232,49,58,.05);border-left:3px solid var(--cycle);padding:10px 14px">
+          <p style="font-size:.78rem;color:var(--text);margin-bottom:4px">「333mバンクの逃げ有利を知ってから的中率が上がった。前橋競輪でほぼ毎週プラスです」</p>
+          <p style="font-size:.65rem;color:var(--text-mute)">— LINE登録者 Yさん（30代）</p>
+        </div>
+      </div>
+      <p style="margin-top:12px;font-size:.72rem;color:var(--text-dim)">的中報告は<a href="https://line.me/R/ti/p/@414irikx" style="color:#06C755;font-weight:700" target="_blank" rel="noopener">LINE公式（@414irikx）</a>へ</p>
+    </div>
+  </div>
+
+</div>
+
+<div class="float-share">
+  <a class="float-share-btn fsb-x" id="float-x" href="#" target="_blank" rel="noopener">𝕏</a>
+  <a class="float-share-btn fsb-line" id="float-line" href="#" target="_blank" rel="noopener">LINE</a>
+</div>
+
+<footer>
+  <p class="ft-logo">予想の鉄則</p>
+  <p class="ft-disc">本サイトの予想は情報提供を目的としています。公営競技の投票は自己責任でお願いします。18歳未満の方の投票は法律で禁じられています。</p>
+  <div class="ft-links">
+    <a href="index.html">トップ</a>
+    <a href="results.html">実績</a>
+    <a href="premium.html">プレミアム</a>
+    <a href="tokushoho.html">特定商取引法に基づく表記</a>
+    <a href="privacy.html">プライバシーポリシー</a>
+  </div>
+</footer>
+
+<script>
+// シェアボタン（null チェック付き）
+const PAGE_URL = encodeURIComponent(location.href);
+const X_TEXT = encodeURIComponent('【競輪予想】本日の注目レース予想を公開中！ライン戦術分析＋EV計算で根拠ある予想をチェック👇 #競輪予想 #KEIRIN #予想の鉄則');
+const floatX = document.getElementById('float-x');
+const floatLine = document.getElementById('float-line');
+if (floatX) floatX.href = `https://twitter.com/intent/tweet?text=${X_TEXT}&url=${PAGE_URL}`;
+if (floatLine) floatLine.href = `https://social-plugins.line.me/lineit/share?url=${PAGE_URL}`;
+
+// races.json から競輪予想を動的生成
+fetch('races.json?v=' + Date.now())
+  .then(r => r.ok ? r.json() : null)
+  .then(json => {
+    if (!json || !json.races) return;
+    const races = json.races.filter(r => r.sport === 'cycle');
+    const buyRaces = races.filter(r => r.judge && r.judge !== '見送り');
+
+    // ── 予想記事リスト ──
+    const articleEl = document.getElementById('keirin-article-list');
+    if (articleEl) {
+      if (!buyRaces.length) {
+        articleEl.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-mute);font-size:.82rem">本日の競輪予想は準備中です</div>';
+      } else {
+        const today = new Date();
+        const dateStr = `${today.getFullYear()}/${String(today.getMonth()+1).padStart(2,'0')}/${String(today.getDate()).padStart(2,'0')}(${['日','月','火','水','木','金','土'][today.getDay()]})`;
+        articleEl.innerHTML = buyRaces.map(r => {
+          const evColor = r.judge === '強買い' ? '#2ecc71' : r.judge === '買い' ? 'var(--gold)' : 'var(--text-mute)';
+          const gradeClass = r.grade === 'GP' ? 'grade-gp' : r.grade === 'G1' ? 'grade-g1' : r.grade === 'G2' ? 'grade-g2' : 'grade-f1';
+          return `<div class="article-card">
+            <div class="article-meta">
+              <span class="article-date">${dateStr}</span>
+              ${r.grade ? `<span class="${gradeClass}">${r.grade}</span>` : ''}
+              <span class="article-race">${r.venue}</span>
+            </div>
+            <h2 class="article-title">${r.name} 本命予想</h2>
+            <div class="article-body">
+              ${r.reason ? `<p>${r.reason.length>80?r.reason.slice(0,80)+'…':r.reason}</p>` : '<p>EV計算に基づく本命予想です。</p>'}
+            </div>
+            ${r.honmei ? `
+            <div class="picks-row">
+              <div class="pick-box honmei">
+                <div class="pick-label">◎ 本命</div>
+                <div class="pick-name" style="font-size:1.1rem;font-weight:700;color:#fff;margin:4px 0">${r.honmei}</div>
+                <div class="pick-reason" style="color:${evColor};font-size:.75rem;margin-top:4px">EV${r.ev||''} ${r.judge||''}</div>
+              </div>
+            </div>` : ''}
+            <div style="margin-top:12px;padding:10px 14px;background:rgba(6,199,85,.05);border:1px solid rgba(6,199,85,.15);font-size:.75rem;color:var(--text-dim)">
+              💬 詳細な買い目は<a href="https://line.me/R/ti/p/@414irikx" style="color:#06C755;font-weight:700" target="_blank" rel="noopener">LINE公式</a>で配信中
+            </div>
+          </div>`;
+        }).join('');
+      }
+    }
+
+    // ── レース一覧テーブル ──
+    const tableEl = document.getElementById('keirin-race-table-body');
+    if (tableEl) {
+      if (!races.length) {
+        tableEl.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-mute);padding:16px">本日の競輪開催情報は準備中です</td></tr>';
+      } else {
+        const sorted = [...races].sort((a, b) => (a.time || '99:99').localeCompare(b.time || '99:99'));
+        tableEl.innerHTML = sorted.map(r => {
+          const gradeClass = r.grade === 'GP' ? 'grade-gp' : r.grade === 'G1' ? 'grade-g1' : r.grade === 'G2' ? 'grade-g2' : 'grade-f1';
+          const evColor = r.judge === '強買い' ? '#2ecc71' : r.judge === '買い' ? 'var(--gold)' : 'var(--text-mute)';
+          return `<tr>
+            <td>${r.time || '--:--'}</td>
+            <td class="venue-tag">${r.venue || ''}</td>
+            <td>${r.name || ''}</td>
+            <td>${r.grade ? `<span class="${gradeClass}">${r.grade}</span>` : '-'}</td>
+            <td style="color:#fff;font-size:.75rem">${r.honmei || '-'}</td>
+            <td style="color:${evColor};font-family:'Bebas Neue',sans-serif">${r.ev || '-'}</td>
+          </tr>`;
+        }).join('');
+      }
+    }
+  })
+  .catch(() => {
+    const el = document.getElementById('keirin-article-list');
+    if (el) el.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-mute);font-size:.82rem">データの取得に失敗しました。しばらくしてから再読み込みしてください。</div>';
+    const tbl = document.getElementById('keirin-race-table-body');
+    if (tbl) tbl.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-mute);padding:16px">データ取得エラー</td></tr>';
+  });
+</script>
+</body>
+</html>
