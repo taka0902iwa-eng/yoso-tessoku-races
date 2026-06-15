@@ -1,13 +1,13 @@
 {
   "summary": {
     "total": 70,
-    "hit": 1,
-    "hit_rate": 1.4,
+    "hit": 3,
+    "hit_rate": 4.3,
     "bet": 70000,
-    "return": 26100,
-    "recovery_rate": 37.3,
-    "profit": -43900,
-    "streak": -58
+    "return": 26150,
+    "recovery_rate": 37.4,
+    "profit": -43850,
+    "streak": -18
   },
   "by_sport": {
     "horse": {
@@ -20,11 +20,11 @@
     },
     "boat": {
       "total": 57,
-      "hit": 0,
+      "hit": 2,
       "bet": 57000,
-      "return": 0,
-      "hit_rate": 0.0,
-      "recovery_rate": 0.0
+      "return": 50,
+      "hit_rate": 3.5,
+      "recovery_rate": 0.1
     },
     "cycle": {
       "total": 13,
@@ -44,9 +44,9 @@
     },
     "2026-05": {
       "total": 39,
-      "hit": 0,
+      "hit": 2,
       "bet": 39000,
-      "return": 0
+      "return": 50
     },
     "2026-06": {
       "total": 18,
@@ -162,11 +162,11 @@
     },
     "boat_江戸川": {
       "total": 20,
-      "hit": 0,
+      "hit": 2,
       "bet": 20000,
-      "return": 0,
-      "hit_rate": 0.0,
-      "recovery_rate": 0.0
+      "return": 50,
+      "hit_rate": 10.0,
+      "recovery_rate": 0.2
     },
     "boat_平和島": {
       "total": 4,
@@ -417,8 +417,8 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 7.4,
-      "winner": "石田　　貴洋",
+      "actual_odds": 0.01,
+      "winner": "石田 貴洋",
       "odds": 7.4,
       "memo": ""
     },
@@ -434,8 +434,8 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 20.0,
-      "winner": "飯島　　昌弘",
+      "actual_odds": 0.01,
+      "winner": "飯島 昌弘",
       "odds": 20.0,
       "memo": ""
     },
@@ -451,8 +451,8 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 103.1,
-      "winner": "坂元　　浩仁",
+      "actual_odds": 0.05,
+      "winner": "山口 達也",
       "odds": 103.1,
       "memo": ""
     },
@@ -468,8 +468,8 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 77.9,
-      "winner": "吉田　　拡郎",
+      "actual_odds": 0.01,
+      "winner": "吉田 拡郎",
       "odds": 77.9,
       "memo": ""
     },
@@ -485,9 +485,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 1.3,
+      "actual_odds": 0.01,
       "memo": "EV+6%",
-      "winner": "4100 松田　　隆司"
+      "winner": "石田 貴洋"
     },
     {
       "race_id": "2026-05-15_boat_戸田_戸田_12R",
@@ -501,9 +501,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 1.1,
+      "actual_odds": 0.01,
       "memo": "EV+11%",
-      "winner": "4050 田口　　節子"
+      "winner": "飯島 昌弘"
     },
     {
       "race_id": "2026-05-15_boat_江戸川_江戸川_12R",
@@ -517,8 +517,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.0,
-      "memo": "EV+32%"
+      "actual_odds": 0.05,
+      "memo": "EV+32%",
+      "winner": "山口 達也"
     },
     {
       "race_id": "2026-05-15_boat_平和島_平和島_12R",
@@ -532,8 +533,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.0,
-      "memo": "EV+3%"
+      "actual_odds": 0.01,
+      "memo": "EV+3%",
+      "winner": "吉田 拡郎"
     },
     {
       "date": "2026-05-16",
@@ -547,7 +549,9 @@
       "odds": 4.4,
       "winner": "坪井 康晴",
       "name": "桐生 12R",
-      "bet_amount": 1000
+      "bet_amount": 1000,
+      "return_amount": 0,
+      "actual_odds": 0.03
     },
     {
       "date": "2026-05-16",
@@ -561,7 +565,9 @@
       "odds": 1.0,
       "winner": "椎名 豊",
       "name": "戸田 12R",
-      "bet_amount": 1000
+      "bet_amount": 1000,
+      "return_amount": 0,
+      "actual_odds": 0.01
     },
     {
       "date": "2026-05-16",
@@ -575,7 +581,9 @@
       "odds": 0.0,
       "winner": "小池 修平",
       "name": "江戸川 12R",
-      "bet_amount": 1000
+      "bet_amount": 1000,
+      "return_amount": 0,
+      "actual_odds": 0.01
     },
     {
       "date": "2026-05-16",
@@ -589,7 +597,9 @@
       "odds": 1.0,
       "winner": "吉田 拡郎",
       "name": "平和島 12R",
-      "bet_amount": 1000
+      "bet_amount": 1000,
+      "return_amount": 0,
+      "actual_odds": 0.01
     },
     {
       "date": "2026-05-16",
@@ -617,9 +627,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 4.4,
+      "actual_odds": 0.03,
       "memo": "EV+21%",
-      "winner": "3952 中澤　　和志"
+      "winner": "坪井 康晴"
     },
     {
       "race_id": "2026-05-16_boat_戸田_戸田_12R",
@@ -633,9 +643,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 1.0,
+      "actual_odds": 0.01,
       "memo": "EV+27%",
-      "winner": "4819 蜂須　　瑞生"
+      "winner": "椎名 豊"
     },
     {
       "race_id": "2026-05-16_boat_江戸川_江戸川_12R",
@@ -649,9 +659,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 1.8,
+      "actual_odds": 0.01,
       "memo": "EV+28%",
-      "winner": "4826 井上　　一輝"
+      "winner": "小池 修平"
     },
     {
       "race_id": "2026-05-16_boat_平和島_平和島_12R",
@@ -665,9 +675,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 1.0,
+      "actual_odds": 0.01,
       "memo": "EV+9%",
-      "winner": "4478 櫻本　あゆみ"
+      "winner": "吉田 拡郎"
     },
     {
       "race_id": "2026-05-16_boat_若松_若松_12R",
@@ -681,9 +691,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 9.2,
+      "actual_odds": 0.02,
       "memo": "EV",
-      "winner": "4927 関野　　　文"
+      "winner": "清水 愛海"
     },
     {
       "race_id": "2026-05-17_boat_戸田_戸田_12R",
@@ -697,9 +707,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 6.9,
+      "actual_odds": 0.03,
       "memo": "EV+33%",
-      "winner": "4047 吉永　　浩則"
+      "winner": "大澤 普司"
     },
     {
       "race_id": "2026-05-18_boat_戸田_戸田_12R",
@@ -713,9 +723,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 1.5,
+      "actual_odds": 0.01,
       "memo": "EV+27%",
-      "winner": "4061 萩原　　秀人"
+      "winner": "石田 章央"
     },
     {
       "race_id": "2026-05-19_boat_桐生_桐生_12R",
@@ -729,9 +739,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 1.3,
+      "actual_odds": 0.01,
       "memo": "EV+17%",
-      "winner": "3541 三嶌　　誠司"
+      "winner": "田中 信一郎"
     },
     {
       "race_id": "2026-05-19_boat_戸田_戸田_12R",
@@ -745,9 +755,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 1.5,
+      "actual_odds": 0.01,
       "memo": "EV+8%",
-      "winner": "4787 椎名　　　豊"
+      "winner": "石田 章央"
     },
     {
       "race_id": "2026-05-21_boat_桐生_桐生_12R",
@@ -761,9 +771,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 1.2,
+      "actual_odds": 0.01,
       "memo": "EV+17%",
-      "winner": "3556 田中　信一郎"
+      "winner": "高橋 竜矢"
     },
     {
       "race_id": "2026-05-22_boat_桐生_桐生_12R",
@@ -777,9 +787,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 1.1,
+      "actual_odds": 0.01,
       "memo": "EV",
-      "winner": "4857 加藤　　翔馬"
+      "winner": "田中 信一郎"
     },
     {
       "race_id": "2026-05-25_boat_江戸川_江戸川_12R",
@@ -793,9 +803,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 1.7,
+      "actual_odds": 0.01,
       "memo": "EV+30%",
-      "winner": "4470 平田　健之佑"
+      "winner": "中澤 和志"
     },
     {
       "race_id": "2026-05-26_boat_江戸川_江戸川_12R",
@@ -809,9 +819,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 1.4,
+      "actual_odds": 0.01,
       "memo": "EV+3%",
-      "winner": "3436 柏野　　幸二"
+      "winner": "北山 康介"
     },
     {
       "race_id": "2026-05-27_boat_江戸川_江戸川_12R",
@@ -822,12 +832,12 @@
       "honmei": "石倉 洋行",
       "ev": "+17%",
       "judge": "買い",
-      "result": "miss",
+      "result": "hit",
       "bet_amount": 1000,
-      "return_amount": 0,
-      "actual_odds": 6.1,
+      "return_amount": 20,
+      "actual_odds": 0.02,
       "memo": "EV+17%",
-      "winner": "2 ="
+      "winner": "石倉 洋行"
     },
     {
       "race_id": "2026-05-27_boat_浜名湖_浜名湖_12R",
@@ -841,9 +851,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 14.4,
+      "actual_odds": 0.05,
       "memo": "EV",
-      "winner": "4573 佐藤　　　翼"
+      "winner": "山口 剛"
     },
     {
       "race_id": "2026-05-28_boat_戸田_戸田_12R",
@@ -857,9 +867,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 10.2,
+      "actual_odds": 0.05,
       "memo": "EV+35%",
-      "winner": "3852 澤　　　大介"
+      "winner": "藤田 竜弘"
     },
     {
       "race_id": "2026-05-28_boat_江戸川_江戸川_12R",
@@ -873,9 +883,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 41.2,
+      "actual_odds": 0.06,
       "memo": "EV+34%",
-      "winner": "3752 宇土　　泰就"
+      "winner": "柴田 朋哉"
     },
     {
       "race_id": "2026-05-29_boat_桐生_桐生_12R",
@@ -905,9 +915,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 1.4,
+      "actual_odds": 0.01,
       "memo": "EV+21%",
-      "winner": "5368 宮崎　心之介"
+      "winner": "石渡 鉄兵"
     },
     {
       "race_id": "2026-05-29_boat_江戸川_江戸川_12R",
@@ -937,9 +947,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 1.2,
+      "actual_odds": 0.01,
       "memo": "EV+22%",
-      "winner": "5117 冨名腰　桃奈"
+      "winner": "杉山 正樹"
     },
     {
       "race_id": "2026-05-30_boat_戸田_戸田_12R",
@@ -953,9 +963,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 1.0,
+      "actual_odds": 0.01,
       "memo": "EV+30%",
-      "winner": "4150 山田　　雄太"
+      "winner": "宮之原 輝紀"
     },
     {
       "race_id": "2026-05-30_boat_江戸川_江戸川_12R",
@@ -969,9 +979,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 1.2,
+      "actual_odds": 0.01,
       "memo": "EV+2%",
-      "winner": "4614 石倉　　洋行"
+      "winner": "北山 康介"
     },
     {
       "race_id": "2026-05-31_boat_桐生_桐生_12R",
@@ -985,9 +995,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 1.2,
+      "actual_odds": 0.01,
       "memo": "EV",
-      "winner": "3833 中辻　　博訓"
+      "winner": "前田 将太"
     },
     {
       "race_id": "2026-05-31_boat_戸田_戸田_12R",
@@ -1001,9 +1011,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 4.3,
+      "actual_odds": 0.04,
       "memo": "EV+19%",
-      "winner": "3696 白井　　友晴"
+      "winner": "宮之原 輝紀"
     },
     {
       "race_id": "2026-05-31_boat_江戸川_江戸川_12R",
@@ -1014,12 +1024,12 @@
       "honmei": "永井 源",
       "ev": "+10%",
       "judge": "買い",
-      "result": "miss",
+      "result": "hit",
       "bet_amount": 1000,
-      "return_amount": 0,
-      "actual_odds": 7.1,
+      "return_amount": 30,
+      "actual_odds": 0.03,
       "memo": "EV+10%",
-      "winner": "4614 石倉　　洋行"
+      "winner": "永井 源"
     },
     {
       "race_id": "2026-06-01_boat_桐生_桐生_12R",
@@ -1033,9 +1043,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 2.1,
+      "actual_odds": 0.01,
       "memo": "EV",
-      "winner": "5314 中曽　　瑠華"
+      "winner": "冨名腰 桃奈"
     },
     {
       "race_id": "2026-06-03_boat_江戸川_江戸川_12R",
@@ -1065,9 +1075,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 8.1,
+      "actual_odds": 0.03,
       "memo": "EV",
-      "winner": "4983 前田　　篤哉"
+      "winner": "金子 萌"
     },
     {
       "race_id": "2026-06-04_boat_江戸川_江戸川_12R",
@@ -1081,9 +1091,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 6.7,
+      "actual_odds": 0.03,
       "memo": "EV+25%",
-      "winner": "3 ="
+      "winner": "西村 拓也"
     },
     {
       "race_id": "2026-06-05_boat_江戸川_江戸川_12R",
@@ -1097,9 +1107,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 1.0,
+      "actual_odds": 0.01,
       "memo": "EV+19%",
-      "winner": "4839 四宮　　与寛"
+      "winner": "西村 拓也"
     },
     {
       "race_id": "2026-06-06_boat_桐生_桐生_12R",
@@ -1113,8 +1123,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.0,
-      "memo": "EV+18%"
+      "actual_odds": 0.03,
+      "memo": "EV+18%",
+      "winner": "竹之内 極"
     },
     {
       "race_id": "2026-06-06_boat_江戸川_江戸川_12R",
@@ -1128,8 +1139,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.0,
-      "memo": "EV+29%"
+      "actual_odds": 0.01,
+      "memo": "EV+29%",
+      "winner": "山本 寛久"
     },
     {
       "race_id": "2026-06-07_boat_桐生_桐生_12R",
@@ -1143,9 +1155,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 1.7,
+      "actual_odds": 0.01,
       "memo": "EV",
-      "winner": "4120 柘植　　政浩"
+      "winner": "仲谷 颯仁"
     },
     {
       "race_id": "2026-06-07_boat_江戸川_江戸川_12R",
@@ -1159,9 +1171,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 1.3,
+      "actual_odds": 0.01,
       "memo": "EV+19%",
-      "winner": "4218 吉川　　喜継"
+      "winner": "山本 寛久"
     },
     {
       "race_id": "2026-06-08_boat_桐生_桐生_12R",
@@ -1175,9 +1187,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 1.3,
+      "actual_odds": 0.01,
       "memo": "EV+2%",
-      "winner": "4120 柘植　　政浩"
+      "winner": "今垣 光太郎"
     },
     {
       "race_id": "2026-06-09_boat_桐生_桐生_12R",
@@ -1191,9 +1203,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 1.2,
+      "actual_odds": 0.01,
       "memo": "EV+19%",
-      "winner": "3804 中渡　　修作"
+      "winner": "下出 卓矢"
     },
     {
       "race_id": "2026-06-09_boat_宮島_宮島_12R",
@@ -1207,9 +1219,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 1.3,
+      "actual_odds": 0.01,
       "memo": "EV",
-      "winner": "4760 山崎　　　郡"
+      "winner": "岩瀬 裕亮"
     },
     {
       "race_id": "2026-06-10_boat_桐生_桐生_12R",
@@ -1223,9 +1235,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 1.5,
+      "actual_odds": 0.01,
       "memo": "EV",
-      "winner": "4619 伏田　　裕隆"
+      "winner": "塚越 海斗"
     },
     {
       "race_id": "2026-06-11_boat_江戸川_江戸川_12R",
@@ -1239,9 +1251,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 10.4,
+      "actual_odds": 0.03,
       "memo": "EV+35%",
-      "winner": "5257 西丸　侑太朗"
+      "winner": "竹間 隆晟"
     },
     {
       "race_id": "2026-06-12_boat_江戸川_江戸川_12R",
@@ -1255,9 +1267,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 29.6,
+      "actual_odds": 0.04,
       "memo": "EV+15%",
-      "winner": "5351 齊藤　　　廉"
+      "winner": "樅山 拓馬"
     },
     {
       "race_id": "2026-06-13_boat_江戸川_江戸川_12R",
@@ -1271,9 +1283,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 10.4,
+      "actual_odds": 0.04,
       "memo": "EV+18%",
-      "winner": "5197 中野　　仁照"
+      "winner": "西川 拓利"
     },
     {
       "race_id": "2026-06-14_boat_桐生_桐生_12R",
@@ -1287,9 +1299,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 7.3,
+      "actual_odds": 0.05,
       "memo": "EV+20%",
-      "winner": "4953 尾上　　雅也"
+      "winner": "若林 義人"
     },
     {
       "race_id": "2026-06-14_boat_江戸川_江戸川_12R",
@@ -1303,9 +1315,9 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 1.3,
+      "actual_odds": 0.01,
       "memo": "EV+31%",
-      "winner": "5381 有山　　　望"
+      "winner": "竹間 隆晟"
     }
   ]
 }
