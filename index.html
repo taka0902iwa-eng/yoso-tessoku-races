@@ -750,8 +750,8 @@ async function loadStats() {
         const d = bs[sp]; if (!d) continue;
         const hEl = document.getElementById(`stat-${sp}-hit`);
         const rEl = document.getElementById(`stat-${sp}-rec`);
-        if (hEl) { hEl.textContent = d.hit_rate + '%'; hEl.style.color = parseFloat(d.hit_rate) >= 50 ? 'var(--green)' : '#fff'; }
-        if (rEl) { rEl.textContent = d.recovery_rate + '%'; rEl.style.color = parseFloat(d.recovery_rate) >= 100 ? 'var(--green)' : 'var(--gold-l)'; }
+        if (hEl) { hEl.textContent = d.total > 0 ? d.hit_rate + '%' : '—'; hEl.style.color = d.total === 0 ? 'var(--text-mute)' : parseFloat(d.hit_rate) >= 50 ? 'var(--green)' : '#fff'; }
+        if (rEl) { const rec = parseFloat(d.recovery_rate || 0); rEl.textContent = d.total > 0 ? d.recovery_rate + '%' : '—'; rEl.style.color = d.total === 0 ? 'var(--text-mute)' : rec >= 100 ? 'var(--green)' : rec >= 50 ? 'var(--gold-l)' : 'var(--red)'; }
       }
     }
   } catch {}

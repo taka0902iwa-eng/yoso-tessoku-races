@@ -244,12 +244,12 @@ footer{background:#050810;border-top:1px solid rgba(201,168,76,.08);padding:28px
   <div class="sec">
     <div class="sec-head"><div class="sec-line"></div><span class="sec-title">全予想履歴</span></div>
     <div class="record-filters">
-      <button class="filter-btn active" onclick="setFilter('all')">すべて</button>
-      <button class="filter-btn" onclick="setFilter('horse')">🐴 競馬</button>
-      <button class="filter-btn" onclick="setFilter('boat')">🚤 競艇</button>
-      <button class="filter-btn" onclick="setFilter('cycle')">🚴 競輪</button>
-      <button class="filter-btn" onclick="setFilter('hit')">◎ 的中</button>
-      <button class="filter-btn" onclick="setFilter('miss')">✕ 外れ</button>
+      <button class="filter-btn active" onclick="setFilter('all',event)">すべて</button>
+      <button class="filter-btn" onclick="setFilter('horse',event)">🐴 競馬</button>
+      <button class="filter-btn" onclick="setFilter('boat',event)">🚤 競艇</button>
+      <button class="filter-btn" onclick="setFilter('cycle',event)">🚴 競輪</button>
+      <button class="filter-btn" onclick="setFilter('hit',event)">◎ 的中</button>
+      <button class="filter-btn" onclick="setFilter('miss',event)">✕ 外れ</button>
     </div>
     <div class="record-list" id="record-list">
       <div class="loading">実績データを読み込み中...</div>
@@ -534,10 +534,10 @@ function renderChart(monthly) {
 }
 
 // ── フィルター ──────────────────────────────────────────
-function setFilter(f) {
+function setFilter(f, e) {
   currentFilter = f;
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
+  if (e && e.target) e.target.classList.add('active');
   renderRecords();
 }
 
