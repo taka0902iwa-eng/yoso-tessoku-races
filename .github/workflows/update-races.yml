@@ -35,6 +35,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add races_${TODAY}.json
           git diff --cached --quiet || git commit -m "auto: races_${TODAY}.json を保存"
+          git pull --rebase origin main || true
           git push
       - name: 昨日のレース結果を取得してresults.jsonを更新・FTPアップロード
         env:
@@ -52,6 +53,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add results.json ev_calibration.json profit_chart.png 2>/dev/null || true
           git diff --cached --quiet || git commit -m "auto: results.json更新 $(date -u +%Y-%m-%d)"
+          git pull --rebase origin main || true
           git push
       - name: races.json の内容確認
         run: |
