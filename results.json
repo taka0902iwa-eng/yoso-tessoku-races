@@ -4,9 +4,9 @@
     "hit": 3,
     "hit_rate": 4.3,
     "bet": 70000,
-    "return": 26150,
-    "recovery_rate": 37.4,
-    "profit": -43850,
+    "return": 39300,
+    "recovery_rate": 56.1,
+    "profit": -30700,
     "streak": -18
   },
   "by_sport": {
@@ -22,9 +22,9 @@
       "total": 57,
       "hit": 2,
       "bet": 57000,
-      "return": 50,
+      "return": 13200,
       "hit_rate": 3.5,
-      "recovery_rate": 0.1
+      "recovery_rate": 23.2
     },
     "cycle": {
       "total": 13,
@@ -46,7 +46,7 @@
       "total": 39,
       "hit": 2,
       "bet": 39000,
-      "return": 50
+      "return": 13200
     },
     "2026-06": {
       "total": 18,
@@ -164,9 +164,9 @@
       "total": 20,
       "hit": 2,
       "bet": 20000,
-      "return": 50,
+      "return": 13200,
       "hit_rate": 10.0,
-      "recovery_rate": 0.2
+      "recovery_rate": 66.0
     },
     "boat_平和島": {
       "total": 4,
@@ -417,7 +417,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.01,
+      "actual_odds": 1.3,
       "winner": "石田 貴洋",
       "odds": 7.4,
       "memo": ""
@@ -434,7 +434,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.01,
+      "actual_odds": 1.1,
       "winner": "飯島 昌弘",
       "odds": 20.0,
       "memo": ""
@@ -451,7 +451,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.05,
+      "actual_odds": 5.5,
       "winner": "山口 達也",
       "odds": 103.1,
       "memo": ""
@@ -468,7 +468,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.01,
+      "actual_odds": 1.0,
       "winner": "吉田 拡郎",
       "odds": 77.9,
       "memo": ""
@@ -485,7 +485,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.01,
+      "actual_odds": 1.3,
       "memo": "EV+6%",
       "winner": "石田 貴洋"
     },
@@ -501,7 +501,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.01,
+      "actual_odds": 1.1,
       "memo": "EV+11%",
       "winner": "飯島 昌弘"
     },
@@ -517,7 +517,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.05,
+      "actual_odds": 5.5,
       "memo": "EV+32%",
       "winner": "山口 達也"
     },
@@ -533,7 +533,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.01,
+      "actual_odds": 1.0,
       "memo": "EV+3%",
       "winner": "吉田 拡郎"
     },
@@ -551,7 +551,7 @@
       "name": "桐生 12R",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.03
+      "actual_odds": 4.4
     },
     {
       "date": "2026-05-16",
@@ -567,7 +567,7 @@
       "name": "戸田 12R",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.01
+      "actual_odds": 1.0
     },
     {
       "date": "2026-05-16",
@@ -583,7 +583,7 @@
       "name": "江戸川 12R",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.01
+      "actual_odds": 1.8
     },
     {
       "date": "2026-05-16",
@@ -599,7 +599,7 @@
       "name": "平和島 12R",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.01
+      "actual_odds": 1.0
     },
     {
       "date": "2026-05-16",
@@ -613,7 +613,9 @@
       "odds": 9.2,
       "winner": "清水 愛海",
       "name": "若松 12R",
-      "bet_amount": 1000
+      "bet_amount": 1000,
+      "return_amount": 0,
+      "actual_odds": 9.2
     },
     {
       "race_id": "2026-05-16_boat_桐生_桐生_12R",
@@ -627,7 +629,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.03,
+      "actual_odds": 4.4,
       "memo": "EV+21%",
       "winner": "坪井 康晴"
     },
@@ -643,7 +645,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.01,
+      "actual_odds": 1.0,
       "memo": "EV+27%",
       "winner": "椎名 豊"
     },
@@ -659,7 +661,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.01,
+      "actual_odds": 1.8,
       "memo": "EV+28%",
       "winner": "小池 修平"
     },
@@ -675,7 +677,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.01,
+      "actual_odds": 1.0,
       "memo": "EV+9%",
       "winner": "吉田 拡郎"
     },
@@ -691,7 +693,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.02,
+      "actual_odds": 9.2,
       "memo": "EV",
       "winner": "清水 愛海"
     },
@@ -707,7 +709,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.03,
+      "actual_odds": 6.9,
       "memo": "EV+33%",
       "winner": "大澤 普司"
     },
@@ -723,7 +725,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.01,
+      "actual_odds": 1.5,
       "memo": "EV+27%",
       "winner": "石田 章央"
     },
@@ -739,7 +741,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.01,
+      "actual_odds": 1.3,
       "memo": "EV+17%",
       "winner": "田中 信一郎"
     },
@@ -755,7 +757,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.01,
+      "actual_odds": 1.5,
       "memo": "EV+8%",
       "winner": "石田 章央"
     },
@@ -771,7 +773,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.01,
+      "actual_odds": 1.2,
       "memo": "EV+17%",
       "winner": "高橋 竜矢"
     },
@@ -787,7 +789,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.01,
+      "actual_odds": 1.1,
       "memo": "EV",
       "winner": "田中 信一郎"
     },
@@ -803,7 +805,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.01,
+      "actual_odds": 1.7,
       "memo": "EV+30%",
       "winner": "中澤 和志"
     },
@@ -819,7 +821,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.01,
+      "actual_odds": 1.4,
       "memo": "EV+3%",
       "winner": "北山 康介"
     },
@@ -834,8 +836,8 @@
       "judge": "買い",
       "result": "hit",
       "bet_amount": 1000,
-      "return_amount": 20,
-      "actual_odds": 0.02,
+      "return_amount": 6100,
+      "actual_odds": 6.1,
       "memo": "EV+17%",
       "winner": "石倉 洋行"
     },
@@ -851,7 +853,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.05,
+      "actual_odds": 14.4,
       "memo": "EV",
       "winner": "山口 剛"
     },
@@ -867,7 +869,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.05,
+      "actual_odds": 10.2,
       "memo": "EV+35%",
       "winner": "藤田 竜弘"
     },
@@ -883,7 +885,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.06,
+      "actual_odds": 41.2,
       "memo": "EV+34%",
       "winner": "柴田 朋哉"
     },
@@ -915,7 +917,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.01,
+      "actual_odds": 1.4,
       "memo": "EV+21%",
       "winner": "石渡 鉄兵"
     },
@@ -947,7 +949,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.01,
+      "actual_odds": 1.2,
       "memo": "EV+22%",
       "winner": "杉山 正樹"
     },
@@ -963,7 +965,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.01,
+      "actual_odds": 1.0,
       "memo": "EV+30%",
       "winner": "宮之原 輝紀"
     },
@@ -979,7 +981,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.01,
+      "actual_odds": 1.2,
       "memo": "EV+2%",
       "winner": "北山 康介"
     },
@@ -995,7 +997,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.01,
+      "actual_odds": 1.2,
       "memo": "EV",
       "winner": "前田 将太"
     },
@@ -1011,7 +1013,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.04,
+      "actual_odds": 4.3,
       "memo": "EV+19%",
       "winner": "宮之原 輝紀"
     },
@@ -1026,8 +1028,8 @@
       "judge": "買い",
       "result": "hit",
       "bet_amount": 1000,
-      "return_amount": 30,
-      "actual_odds": 0.03,
+      "return_amount": 7100,
+      "actual_odds": 7.1,
       "memo": "EV+10%",
       "winner": "永井 源"
     },
@@ -1043,7 +1045,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.01,
+      "actual_odds": 2.1,
       "memo": "EV",
       "winner": "冨名腰 桃奈"
     },
@@ -1075,7 +1077,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.03,
+      "actual_odds": 8.1,
       "memo": "EV",
       "winner": "金子 萌"
     },
@@ -1091,7 +1093,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.03,
+      "actual_odds": 6.7,
       "memo": "EV+25%",
       "winner": "西村 拓也"
     },
@@ -1107,7 +1109,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.01,
+      "actual_odds": 1.0,
       "memo": "EV+19%",
       "winner": "西村 拓也"
     },
@@ -1123,7 +1125,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.03,
+      "actual_odds": 12.9,
       "memo": "EV+18%",
       "winner": "竹之内 極"
     },
@@ -1139,7 +1141,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.01,
+      "actual_odds": 1.7,
       "memo": "EV+29%",
       "winner": "山本 寛久"
     },
@@ -1155,7 +1157,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.01,
+      "actual_odds": 1.7,
       "memo": "EV",
       "winner": "仲谷 颯仁"
     },
@@ -1171,7 +1173,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.01,
+      "actual_odds": 1.3,
       "memo": "EV+19%",
       "winner": "山本 寛久"
     },
@@ -1187,7 +1189,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.01,
+      "actual_odds": 1.3,
       "memo": "EV+2%",
       "winner": "今垣 光太郎"
     },
@@ -1203,7 +1205,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.01,
+      "actual_odds": 1.2,
       "memo": "EV+19%",
       "winner": "下出 卓矢"
     },
@@ -1219,7 +1221,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.01,
+      "actual_odds": 1.3,
       "memo": "EV",
       "winner": "岩瀬 裕亮"
     },
@@ -1235,7 +1237,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.01,
+      "actual_odds": 1.5,
       "memo": "EV",
       "winner": "塚越 海斗"
     },
@@ -1251,7 +1253,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.03,
+      "actual_odds": 10.4,
       "memo": "EV+35%",
       "winner": "竹間 隆晟"
     },
@@ -1267,7 +1269,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.04,
+      "actual_odds": 29.6,
       "memo": "EV+15%",
       "winner": "樅山 拓馬"
     },
@@ -1283,7 +1285,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.04,
+      "actual_odds": 10.4,
       "memo": "EV+18%",
       "winner": "西川 拓利"
     },
@@ -1299,7 +1301,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.05,
+      "actual_odds": 7.3,
       "memo": "EV+20%",
       "winner": "若林 義人"
     },
@@ -1315,7 +1317,7 @@
       "result": "miss",
       "bet_amount": 1000,
       "return_amount": 0,
-      "actual_odds": 0.01,
+      "actual_odds": 1.3,
       "memo": "EV+31%",
       "winner": "竹間 隆晟"
     }
