@@ -22,19 +22,14 @@ jobs:
           python-version: '3.11'
       - name: install
         run: pip install requests beautifulsoup4 lxml matplotlib
-      - name: get results
-        run: |
-          python3 -c "
-          import json, os
-          # GitHubリポジトリのresults.jsonをそのまま使う（checkout済み）
-          if os.path.exists('results.json'):
-              data = json.loads(open('results.json').read())
-              print(f'リポジトリから取得: {len(data.get(chr(34)+chr(114)+chr(101)+chr(99)+chr(111)+chr(114)+chr(100)+chr(115)+chr(34),[]))}件')
-          else:
-              open('results.json','w').write('{"summary":{},"by_sport":{},"records":[]}')
-              print('results.json新規作成')
-          "
       - name: backfill
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USER: ${{ secrets.FTP_USER }}
+          FTP_PASS: ${{ secrets.FTP_PASS }}
+          FTP_REMOTE: ${{ secrets.FTP_REMOTE }}
         run: |
           python3 -c "
           import os
@@ -52,25 +47,13 @@ jobs:
                   print(f'スキップ: {ds}')
               d += timedelta(days=1)
           "
-      - name: ftp upload
-        env:
-          FTP_HOST: ${{ secrets.FTP_HOST }}
-          FTP_USER: ${{ secrets.FTP_USER }}
-          FTP_PASS: ${{ secrets.FTP_PASS }}
-          FTP_REMOTE: ${{ secrets.FTP_REMOTE }}
+      - name: Gitコミット（results.json更新）
         run: |
-          python3 -c "
-          import ftplib, os
-          host=os.environ['FTP_HOST'].strip()
-          user=os.environ['FTP_USER'].strip()
-          pw=os.environ['FTP_PASS'].strip()
-          base=os.environ.get('FTP_REMOTE','').strip().replace('/races.json','') or '/home/c9048134/public_html/oyatojikka.online'
-          with ftplib.FTP(timeout=30) as ftp:
-              ftp.connect(host,21); ftp.login(user,pw); ftp.set_pasv(True)
-              ftp.cwd(base)
-              with open('results.json','rb') as f: ftp.storbinary('STOR results.json',f)
-          print('完了')
-          "
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add results.json ev_calibration.json profit_chart.png 2>/dev/null || true
+          git diff --cached --quiet || git commit -m "auto: backfill results.json更新"
+          git push
       - uses: actions/upload-artifact@v4
         if: always()
         with:
