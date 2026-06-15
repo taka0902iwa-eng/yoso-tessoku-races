@@ -1,12 +1,12 @@
 {
   "summary": {
-    "total": 70,
+    "total": 65,
     "hit": 3,
-    "hit_rate": 4.3,
-    "bet": 70000,
+    "hit_rate": 4.6,
+    "bet": 65000,
     "return": 39300,
-    "recovery_rate": 56.1,
-    "profit": -30700,
+    "recovery_rate": 60.5,
+    "profit": -25700,
     "streak": -18
   },
   "by_sport": {
@@ -19,12 +19,12 @@
       "recovery_rate": 0.0
     },
     "boat": {
-      "total": 57,
+      "total": 52,
       "hit": 2,
-      "bet": 57000,
+      "bet": 52000,
       "return": 13200,
-      "hit_rate": 3.5,
-      "recovery_rate": 23.2
+      "hit_rate": 3.8,
+      "recovery_rate": 25.4
     },
     "cycle": {
       "total": 13,
@@ -43,9 +43,9 @@
       "return": 26100
     },
     "2026-05": {
-      "total": 39,
+      "total": 34,
       "hit": 2,
-      "bet": 39000,
+      "bet": 34000,
       "return": 13200
     },
     "2026-06": {
@@ -145,41 +145,41 @@
       "recovery_rate": 0.0
     },
     "boat_桐生": {
-      "total": 17,
+      "total": 16,
       "hit": 0,
-      "bet": 17000,
+      "bet": 16000,
       "return": 0,
       "hit_rate": 0.0,
       "recovery_rate": 0.0
     },
     "boat_戸田": {
-      "total": 11,
+      "total": 10,
       "hit": 0,
-      "bet": 11000,
+      "bet": 10000,
       "return": 0,
       "hit_rate": 0.0,
       "recovery_rate": 0.0
     },
     "boat_江戸川": {
-      "total": 20,
+      "total": 19,
       "hit": 2,
-      "bet": 20000,
+      "bet": 19000,
       "return": 13200,
-      "hit_rate": 10.0,
-      "recovery_rate": 66.0
+      "hit_rate": 10.5,
+      "recovery_rate": 69.5
     },
     "boat_平和島": {
-      "total": 4,
+      "total": 3,
       "hit": 0,
-      "bet": 4000,
+      "bet": 3000,
       "return": 0,
       "hit_rate": 0.0,
       "recovery_rate": 0.0
     },
     "boat_若松": {
-      "total": 2,
+      "total": 1,
       "hit": 0,
-      "bet": 2000,
+      "bet": 1000,
       "return": 0,
       "hit_rate": 0.0,
       "recovery_rate": 0.0
@@ -223,7 +223,8 @@
       "bet_amount": 1000,
       "return_amount": 0,
       "actual_odds": 0.0,
-      "memo": "推定勝率58%・EV2.40倍"
+      "memo": "推定勝率58%・EV2.40倍",
+      "winner": ""
     },
     {
       "race_id": "2026-04-15_cycle_岐阜競輪場_岐阜競輪場_注目レース",
@@ -238,7 +239,8 @@
       "bet_amount": 1000,
       "return_amount": 0,
       "actual_odds": 0.0,
-      "memo": "推定勝率35%・EV1.21倍"
+      "memo": "推定勝率35%・EV1.21倍",
+      "winner": ""
     },
     {
       "race_id": "2026-04-16_cycle_松戸競輪場_松戸競輪場_注目レース",
@@ -253,7 +255,8 @@
       "bet_amount": 1000,
       "return_amount": 0,
       "actual_odds": 0.0,
-      "memo": "推定勝率58%・EV2.40倍"
+      "memo": "推定勝率58%・EV2.40倍",
+      "winner": ""
     },
     {
       "race_id": "2026-04-16_cycle_岐阜競輪場_岐阜競輪場_注目レース",
@@ -268,7 +271,8 @@
       "bet_amount": 1000,
       "return_amount": 0,
       "actual_odds": 0.0,
-      "memo": "推定勝率35%・EV1.21倍"
+      "memo": "推定勝率35%・EV1.21倍",
+      "winner": ""
     },
     {
       "race_id": "2026-04-17_cycle_大宮競輪場_大宮競輪場_注目レース",
@@ -283,7 +287,8 @@
       "bet_amount": 1000,
       "return_amount": 0,
       "actual_odds": 0.0,
-      "memo": "推定勝率22%・EV1.81倍"
+      "memo": "推定勝率22%・EV1.81倍",
+      "winner": ""
     },
     {
       "race_id": "2026-04-17_cycle_keiokaku競輪場_keiokaku競輪場_注目レース",
@@ -298,7 +303,8 @@
       "bet_amount": 1000,
       "return_amount": 0,
       "actual_odds": 0.0,
-      "memo": "推定勝率25%・EV1.43倍"
+      "memo": "推定勝率25%・EV1.43倍",
+      "winner": ""
     },
     {
       "race_id": "2026-04-18_cycle_ito競輪場_ito競輪場_注目レース",
@@ -313,7 +319,8 @@
       "bet_amount": 1000,
       "return_amount": 0,
       "actual_odds": 0.0,
-      "memo": "推定勝率78%・EV5.19倍"
+      "memo": "推定勝率78%・EV5.19倍",
+      "winner": ""
     },
     {
       "race_id": "2026-04-18_cycle_奈良競輪場_奈良競輪場_注目レース",
@@ -328,7 +335,8 @@
       "bet_amount": 1000,
       "return_amount": 0,
       "actual_odds": 0.0,
-      "memo": "推定勝率43%・EV1.60倍"
+      "memo": "推定勝率43%・EV1.60倍",
+      "winner": ""
     },
     {
       "race_id": "2026-04-18_cycle_防府競輪場_防府競輪場_注目レース",
@@ -343,7 +351,8 @@
       "bet_amount": 1000,
       "return_amount": 0,
       "actual_odds": 0.0,
-      "memo": "推定勝率36%・EV1.73倍"
+      "memo": "推定勝率36%・EV1.73倍",
+      "winner": ""
     },
     {
       "race_id": "2026-04-18_cycle_武雄競輪場_武雄競輪場_注目レース",
@@ -358,7 +367,8 @@
       "bet_amount": 1000,
       "return_amount": 0,
       "actual_odds": 0.0,
-      "memo": "推定勝率32%・EV2.60倍"
+      "memo": "推定勝率32%・EV2.60倍",
+      "winner": ""
     },
     {
       "race_id": "2026-04-20_cycle_伊東競輪場_伊東競輪場_注目レース",
@@ -373,7 +383,8 @@
       "bet_amount": 1000,
       "return_amount": 0,
       "actual_odds": 0.0,
-      "memo": "推定勝率25%・EV1.01倍"
+      "memo": "推定勝率25%・EV1.01倍",
+      "winner": ""
     },
     {
       "race_id": "2026-04-20_cycle_松山競輪場_松山競輪場_注目レース",
@@ -388,7 +399,8 @@
       "bet_amount": 1000,
       "return_amount": 26100,
       "actual_odds": 26.1,
-      "memo": "推定勝率26%・EV1.04倍"
+      "memo": "推定勝率26%・EV1.04倍",
+      "winner": ""
     },
     {
       "race_id": "2026-04-21_cycle_静岡競輪場_静岡競輪場_注目レース",
@@ -403,7 +415,8 @@
       "bet_amount": 1000,
       "return_amount": 0,
       "actual_odds": 0.0,
-      "memo": "推定勝率25%・EV1.00倍"
+      "memo": "推定勝率25%・EV1.00倍",
+      "winner": ""
     },
     {
       "race_id": "2026-05-15_boat_桐生_12R",
@@ -536,86 +549,6 @@
       "actual_odds": 1.0,
       "memo": "EV+3%",
       "winner": "吉田 拡郎"
-    },
-    {
-      "date": "2026-05-16",
-      "sport": "boat",
-      "venue": "桐生",
-      "race_name": "桐生 12R",
-      "honmei": "濱本 優一",
-      "result": "miss",
-      "bet": 1000,
-      "return": 0,
-      "odds": 4.4,
-      "winner": "坪井 康晴",
-      "name": "桐生 12R",
-      "bet_amount": 1000,
-      "return_amount": 0,
-      "actual_odds": 4.4
-    },
-    {
-      "date": "2026-05-16",
-      "sport": "boat",
-      "venue": "戸田",
-      "race_name": "戸田 12R",
-      "honmei": "入澤 友治",
-      "result": "miss",
-      "bet": 1000,
-      "return": 0,
-      "odds": 1.0,
-      "winner": "椎名 豊",
-      "name": "戸田 12R",
-      "bet_amount": 1000,
-      "return_amount": 0,
-      "actual_odds": 1.0
-    },
-    {
-      "date": "2026-05-16",
-      "sport": "boat",
-      "venue": "江戸川",
-      "race_name": "江戸川 12R",
-      "honmei": "井上 一輝",
-      "result": "miss",
-      "bet": 1000,
-      "return": 0,
-      "odds": 0.0,
-      "winner": "小池 修平",
-      "name": "江戸川 12R",
-      "bet_amount": 1000,
-      "return_amount": 0,
-      "actual_odds": 1.8
-    },
-    {
-      "date": "2026-05-16",
-      "sport": "boat",
-      "venue": "平和島",
-      "race_name": "平和島 12R",
-      "honmei": "松田 祐季",
-      "result": "miss",
-      "bet": 1000,
-      "return": 0,
-      "odds": 1.0,
-      "winner": "吉田 拡郎",
-      "name": "平和島 12R",
-      "bet_amount": 1000,
-      "return_amount": 0,
-      "actual_odds": 1.0
-    },
-    {
-      "date": "2026-05-16",
-      "sport": "boat",
-      "venue": "若松",
-      "race_name": "若松 12R",
-      "honmei": "後藤 美翼",
-      "result": "miss",
-      "bet": 1000,
-      "return": 0,
-      "odds": 9.2,
-      "winner": "清水 愛海",
-      "name": "若松 12R",
-      "bet_amount": 1000,
-      "return_amount": 0,
-      "actual_odds": 9.2
     },
     {
       "race_id": "2026-05-16_boat_桐生_桐生_12R",
