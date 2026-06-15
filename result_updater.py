@@ -250,6 +250,77 @@ def update_ev_calibration(records: list, calib_path: str = "ev_calibration.json"
 
 
 # ──────────────────────────────────────────────
+# 競馬単一レース結果取得（race_idから直接）
+# ──────────────────────────────────────────────
+def fetch_single_horse_result(race_id: str) -> dict:
+    """
+    指定race_idの競馬レース結果を直接取得する。
+    返り値: {"race_id": "...", "winner": "馬名", "odds": 3.5} or None
+    """
+    result_url = f"https://race.netkeiba.com/race/result.html?race_id={race_id}"
+    result_html = fetch_html(result_url)
+    if not result_html:
+        return None
+    time.sleep(0.5)
+
+    # 1着馬名を取得（複数パターン対応）
+    winner = ""
+    # パターン1: HorseList クラスの1着行
+    winner_m = re.search(
+        r'<tr[^>]*class="[^"]*HorseList[^"]*"[^>]*>.*?<td[^>]*class="[^"]*Umaban[^"]*"[^>]*>\s*1\s*</td>.*?<span[^>]*class="[^"]*HorseName[^"]*"[^>]*>\s*([^<]+?)\s*</span>',
+        result_html, re.DOTALL
+    )
+    if winner_m:
+        winner = winner_m.group(1).strip()
+    if not winner:
+        # パターン2: Rank クラスの1着行
+        winner_m = re.search(
+            r'<td[^>]*class="[^"]*Rank[^"]*"[^>]*>\s*1\s*</td>.*?<a[^>]*>([^<]{2,10})</a>',
+            result_html, re.DOTALL
+        )
+        if winner_m:
+            winner = winner_m.group(1).strip()
+    if not winner:
+        # パターン3: 着順テーブルから1着馬名
+        winner_m = re.search(
+            r'<td[^>]*>\s*1\s*</td>.*?<a[^>]*href="[^"]*horse[^"]*"[^>]*>([^<]{2,15})</a>',
+            result_html, re.DOTALL
+        )
+        if winner_m:
+            winner = winner_m.group(1).strip()
+
+    # 単勝オッズ
+    odds = 0.0
+    odds_m = re.search(
+        r'<td[^>]*class="[^"]*Tansho[^"]*"[^>]*>.*?<span[^>]*>([0-9.]+)</span>',
+        result_html, re.DOTALL
+    )
+    if odds_m:
+        try:
+            odds = float(odds_m.group(1))
+        except:
+            pass
+    if not odds:
+        # フォールバック: 単勝の数値を探す
+        odds_m2 = re.search(r'単勝[^<]*<[^>]*>([0-9]+\.[0-9]+)</[^>]*>', result_html)
+        if odds_m2:
+            try:
+                odds = float(odds_m2.group(1))
+            except:
+                pass
+
+    if not winner:
+        print(f"  [競馬結果] winner未取得: {race_id}")
+        return None
+
+    return {
+        "race_id": race_id,
+        "winner": winner,
+        "odds": odds,
+    }
+
+
+# ──────────────────────────────────────────────
 # 競馬結果取得（netkeiba）
 # ──────────────────────────────────────────────
 def fetch_horse_results(date_str: str) -> list:
@@ -705,28 +776,35 @@ def match_and_update(
 
         # ── 競馬の照合 ──────────────────────────────────────────────────────────
         if sport == "horse":
-            # races.jsonにrace_idが含まれている場合はそれを使用
             race_id_in_json = race.get("race_id", "")
-            for hr in horse_results:
-                # レースIDが一致する場合（最優先）
-                if race_id_in_json and hr.get("race_id") == race_id_in_json:
-                    if honmei and honmei in hr.get("winner", ""):
+            # races.jsonにrace_idがある場合は直接結果ページにアクセス（最優先）
+            if race_id_in_json:
+                hr_direct = fetch_single_horse_result(race_id_in_json)
+                if hr_direct:
+                    honmei_clean = honmei.strip() if honmei else ""
+                    if honmei_clean and honmei_clean in hr_direct.get("winner", ""):
                         result = "hit"
-                        actual_odds = hr.get("odds", 0.0)
+                        actual_odds = hr_direct.get("odds", 0.0)
                         return_amount = int(actual_odds * bet_amount)
                     else:
                         result = "miss"
-                    break
-                # 会場名が一致する場合
-                elif venue and hr.get("venue") == venue.replace("競馬場", ""):
-                    if honmei and honmei in hr.get("winner", ""):
-                        result = "hit"
-                        actual_odds = hr.get("odds", 0.0)
-                        return_amount = int(actual_odds * bet_amount)
-                        break
+                else:
+                    result = "miss"  # 結果ページが取得できない場合は外れ扱い
             else:
-                if horse_results:
-                    result = "miss"
+                # race_idがない場合はhorse_resultsから会場名で照合
+                for hr in horse_results:
+                    if venue and hr.get("venue") == venue.replace("競馬場", ""):
+                        if honmei and honmei.strip() in hr.get("winner", ""):
+                            result = "hit"
+                            actual_odds = hr.get("odds", 0.0)
+                            return_amount = int(actual_odds * bet_amount)
+                            break
+                        else:
+                            result = "miss"
+                            break
+                else:
+                    if horse_results:
+                        result = "miss"
 
         # ── 競艇の照合 ──────────────────────────────────────────────────────────
         elif sport == "boat":

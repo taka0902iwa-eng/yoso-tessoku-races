@@ -984,6 +984,7 @@ def fetch_race_details(base, race_id, history):
                 ev_val = f"+{min(int((best_for_display['ev']-1)*100),999)}%" if best_for_display['ev'] > 1 else ""
         return {
             "sport":         "horse",
+            "race_id":       race_id,
             "name":          race_name,
             "venue":         venue,
             "time":          race_time,
