@@ -967,7 +967,7 @@ def fetch_race_details(base, race_id, history):
         pace_summary   = ev_results[0].get("pace_summary", "")   if ev_results else ""
 
         # 展開予想をreasonに組み込む
-        reason_text = f"推定勝率{int(best['prob']*100)}%・EV{best['ev']:.2f}倍・{track_condition}" if best else ""
+        reason_text = f"EV{'+' if best.get('ev',0)>=1 else ''}{int((best.get('ev',1)-1)*100)}% ({track_condition})" if best else ""
         if pace_summary:
             reason_text += f" / 展開: {pace_summary}"
 
@@ -1681,7 +1681,7 @@ def fetch_boat_all():
                     "race_summary":  race_summary,
                 }
                 if best and best.get("judge") in ["強買い", "買い"]:
-                    reason_text = f"推定勝率{int(best['prob']*100)}%・EV{best['ev']:.2f}倍・{int(best.get('frame_num',1))}号艇"
+                    reason_text = f"EV{'+' if best.get('ev',0)>=1 else ''}{int((best.get('ev',1)-1)*100)}% ({int(best.get('frame_num',1))}号艇)"
                     if race_summary:
                         reason_text += f" / 展開: {race_summary.split('|')[0].strip()}"
                     race.update({
@@ -1861,7 +1861,7 @@ def fetch_cycle_all():
                     "race_summary":  race_summary,
                 }
                 if best and best.get("judge") in ["強買い", "買い"]:
-                    reason_text = f"推定勝率{int(best['prob']*100)}%・EV{best['ev']:.2f}倍"
+                    reason_text = f"EV{'+' if best.get('ev',0)>=1 else ''}{int((best.get('ev',1)-1)*100)}%"
                     if race_summary:
                         reason_text += f" / 展開: {race_summary.split('|')[0].strip()}"
                     race.update({
