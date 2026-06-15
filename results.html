@@ -93,14 +93,20 @@ nav a.active{color:var(--gold-l)}
 
 /* MONTH CHART */
 .month-chart{background:var(--bg-card);padding:16px;border:1px solid var(--border)}
-.chart-bars{display:flex;align-items:flex-end;gap:4px;height:80px;margin-bottom:8px}
-.chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
-.chart-bar{width:100%;border-radius:2px 2px 0 0;min-height:2px;transition:height .3s}
-.chart-bar.pos{background:linear-gradient(to top,rgba(201,168,76,.6),rgba(240,208,128,.8))}
-.chart-bar.neg{background:linear-gradient(to top,rgba(232,49,58,.4),rgba(232,49,58,.6))}
-.chart-bar.zero{background:rgba(255,255,255,.1);min-height:4px}
-.chart-label{font-size:.58rem;color:var(--text-mute);text-align:center}
-.chart-val{font-size:.6rem;color:var(--text-dim);text-align:center}
+.chart-container{position:relative;height:120px;margin-bottom:8px}
+.chart-zero-line{position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(255,255,255,.2);z-index:1}
+.chart-bars{display:flex;align-items:stretch;gap:4px;height:100%;position:relative;z-index:2}
+.chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;position:relative}
+.chart-bar-pos-area{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;width:100%}
+.chart-bar-neg-area{flex:1;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;width:100%}
+.chart-bar{width:80%;border-radius:2px;min-height:2px;transition:height .3s}
+.chart-bar.pos{background:linear-gradient(to top,rgba(201,168,76,.6),rgba(240,208,128,.8));border-radius:2px 2px 0 0}
+.chart-bar.neg{background:linear-gradient(to bottom,rgba(232,49,58,.4),rgba(232,49,58,.6));border-radius:0 0 2px 2px}
+.chart-bar.zero{background:rgba(255,255,255,.1);min-height:4px;height:4px}
+.chart-labels{display:flex;gap:4px;margin-top:4px}
+.chart-label-wrap{flex:1;text-align:center}
+.chart-label{font-size:.58rem;color:var(--text-mute);text-align:center;display:block}
+.chart-val{font-size:.58rem;color:var(--text-dim);text-align:center;display:block;white-space:nowrap}
 
 /* RECORD TABLE */
 .record-filters{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
@@ -224,9 +230,13 @@ footer{background:#050810;border-top:1px solid rgba(201,168,76,.08);padding:28px
   <div class="sec">
     <div class="sec-head"><div class="sec-line"></div><span class="sec-title">月別収支</span></div>
     <div class="month-chart">
-      <div class="chart-bars" id="chart-bars">
-        <div class="empty" style="width:100%">データを読み込み中...</div>
+      <div class="chart-container">
+        <div class="chart-zero-line"></div>
+        <div class="chart-bars" id="chart-bars">
+          <div class="empty" style="width:100%;font-size:.75rem">データを読み込み中...</div>
+        </div>
       </div>
+      <div class="chart-labels" id="chart-labels"></div>
     </div>
   </div>
 
@@ -472,25 +482,54 @@ function renderSports(by_sport) {
 
 function renderChart(monthly) {
   const el = document.getElementById('chart-bars');
+  const labelsEl = document.getElementById('chart-labels');
   const keys = Object.keys(monthly).sort().slice(-6);
   if (!keys.length) {
     el.innerHTML = '<div class="empty" style="width:100%;font-size:.75rem">データなし</div>';
+    if (labelsEl) labelsEl.innerHTML = '';
     return;
   }
   const profits = keys.map(k => (monthly[k].ret - monthly[k].bet));
   const maxAbs = Math.max(...profits.map(Math.abs), 1);
+  // プラスの最大値とマイナスの最大値を計算（上下各50%の領域を使用）
+  const maxPos = Math.max(...profits.filter(p=>p>0), 0);
+  const maxNeg = Math.max(...profits.filter(p=>p<0).map(Math.abs), 0);
+  const maxAll = Math.max(maxPos, maxNeg, 1);
 
   el.innerHTML = keys.map((k, i) => {
     const p = profits[i];
-    const pct = Math.abs(p) / maxAbs * 100;
-    const cls = p>0?'pos':p<0?'neg':'zero';
-    const label = k.slice(5) + '月';
-    return `<div class="chart-bar-wrap">
-      <div class="chart-val">${p>=0?'+':''}${Math.round(p/100)*100>=0?'':''}<span style="font-size:.58rem">${p>=0?'+':''}¥${Math.abs(p).toLocaleString()}</span></div>
-      <div class="chart-bar ${cls}" style="height:${Math.max(pct,3)}%"></div>
-      <div class="chart-label">${label}</div>
-    </div>`;
+    const pct = Math.abs(p) / maxAll * 45; // 最大で上下各45%
+    if (p > 0) {
+      return `<div class="chart-bar-wrap">
+        <div class="chart-bar-pos-area">
+          <span class="chart-val" style="color:var(--gold-l)">${p>=0?'+':''}\u00a5${Math.abs(p).toLocaleString()}</span>
+          <div class="chart-bar pos" style="height:${Math.max(pct,3)}%"></div>
+        </div>
+        <div class="chart-bar-neg-area"></div>
+      </div>`;
+    } else if (p < 0) {
+      return `<div class="chart-bar-wrap">
+        <div class="chart-bar-pos-area"></div>
+        <div class="chart-bar-neg-area">
+          <div class="chart-bar neg" style="height:${Math.max(pct,3)}%"></div>
+          <span class="chart-val" style="color:var(--red)">-\u00a5${Math.abs(p).toLocaleString()}</span>
+        </div>
+      </div>`;
+    } else {
+      return `<div class="chart-bar-wrap">
+        <div class="chart-bar-pos-area"></div>
+        <div class="chart-bar-neg-area"></div>
+      </div>`;
+    }
   }).join('');
+
+  // 月ラベルを別要素に表示
+  if (labelsEl) {
+    labelsEl.innerHTML = keys.map(k => {
+      const label = k.slice(5) + '月';
+      return `<div class="chart-label-wrap"><span class="chart-label">${label}</span></div>`;
+    }).join('');
+  }
 }
 
 // ── フィルター ──────────────────────────────────────────
@@ -522,7 +561,7 @@ function renderRecords() {
       <span class="ri-sport ${m.cls}">${m.label}</span>
       <div class="ri-info">
         <div class="ri-race">${r.race||''}</div>
-        <div class="ri-honmei">${r.honmei||''}${r.memo?' · '+r.memo:''}</div>
+        <div class="ri-honmei">${r.honmei||''}${(()=>{ const m=r.memo||''; const ev=r.ev||''; if(m&&m!=='EV') return ' · '+m; if(ev) return ' · EV'+ev; return ''; })()}</div>
       </div>
       <div class="ri-badge">
         <span class="ri-result ${r.result}">${r.result==='hit'?'◎ 的中':'✕ 外れ'}</span>
