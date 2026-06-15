@@ -1,12 +1,17 @@
 name: results.jsonをFTPアップロード
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - 'results.json'
+      - 'results.html'
+      - 'index.html'
 jobs:
   upload-results:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: results.jsonをFTPアップロード
+      - name: results.json・results.html・index.htmlをFTPアップロード
         env:
           FTP_HOST:   ${{ secrets.FTP_HOST }}
           FTP_USER:   ${{ secrets.FTP_USER }}
@@ -22,33 +27,42 @@ jobs:
           if not all([ftp_host, ftp_user, ftp_pass]):
               print('FTP環境変数が設定されていません')
               exit(1)
-          # result_updater.pyと同じパス処理
           parts = [p for p in remote_base.split('/') if p]
           remote_dir = '/' + '/'.join(parts[:-1])
-          remote_path = remote_dir + '/results.json'
-          print(f'アップロード先: {remote_path}')
+          print(f'アップロード先ディレクトリ: {remote_dir}')
           ftp = ftplib.FTP()
           ftp.connect(ftp_host, 21, timeout=30)
           ftp.login(ftp_user, ftp_pass)
           ftp.set_pasv(True)
-          with open('results.json', 'rb') as f:
-              ftp.storbinary(f'STOR {remote_path}', f)
+          # アップロードするファイル一覧
+          files_to_upload = [
+              ('results.json', remote_dir + '/results.json'),
+              ('results.html', remote_dir + '/results.html'),
+              ('index.html',   remote_dir + '/index.html'),
+          ]
+          for local_file, remote_path in files_to_upload:
+              if os.path.exists(local_file):
+                  with open(local_file, 'rb') as f:
+                      ftp.storbinary(f'STOR {remote_path}', f)
+                  print(f'アップロード完了: {local_file} -> {remote_path}')
+              else:
+                  print(f'スキップ（ファイルなし）: {local_file}')
           ftp.quit()
-          print(f'FTPアップロード完了: {remote_path}')
+          print('全FTPアップロード完了')
           "
-      - name: results.json の内容確認
+      - name: アップロード内容確認
         run: |
           python3 -c "
-          import json
+          import json, os
           with open('results.json') as f:
               d = json.load(f)
           s = d.get('summary', {})
-          print(f'総戦数: {s.get(\"total\",0)}件')
-          print(f'的中率: {s.get(\"hit_rate\",0)}%')
-          print(f'収支: ¥{s.get(\"profit\",0):,}')
+          print(f'総戦数: {s.get("total",0)}件')
+          print(f'的中率: {s.get("hit_rate",0)}%')
+          print(f'収支: ¥{s.get("profit",0):,}')
           records = d.get('records', [])
           print(f'レコード数: {len(records)}件')
           if records:
               latest = sorted(records, key=lambda x: x.get('date',''), reverse=True)[0]
-              print(f'最新: {latest.get(\"date\",\"\")} {latest.get(\"name\",\"\")} {latest.get(\"result\",\"\")}')
+              print(f'最新: {latest.get("date","")} {latest.get("name","")} {latest.get("result","")}')
           "
