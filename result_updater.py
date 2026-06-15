@@ -25,6 +25,12 @@ import urllib.error
 from datetime import datetime, timedelta, timezone
 from collections import defaultdict
 
+try:
+    from bs4 import BeautifulSoup
+    BS4_AVAILABLE = True
+except ImportError:
+    BS4_AVAILABLE = False
+
 JST = timezone(timedelta(hours=9))
 
 # ──────────────────────────────────────────────
@@ -334,44 +340,79 @@ def fetch_boat_results(date_str: str) -> list:
     results = []
 
     def parse_race_result(result_html, jcd, rno, hd):
-        """レース結果HTMLから1着・全選手・オッズを取得する"""
+        """レース結果HTMLから1着・全選手・オッズを取得する（BeautifulSoup版）"""
         if not result_html or "システムエラー" in result_html:
             return None
-        # 1着の行: <td>１</td> <td class="...is-boatColorX...">X</td> <td>...<span>名前</span>...</td>
         winner_boat = ""
         winner_name = ""
-        first_row_m = re.search(
-            r'<td[^>]*>１</td>\s*<td[^>]*is-boatColor(\d)[^>]*>(\d)</td>\s*<td[^>]*>.*?<span[^>]*>\d+</span>\s*\u3000\s*<span[^>]*>([^<]+)</span>',
-            result_html, re.DOTALL
-        )
-        if first_row_m:
-            winner_boat = first_row_m.group(2)
-            winner_name = re.sub(r'\s+', ' ', first_row_m.group(3).strip()).replace("\u3000", " ").strip()
-        # 全選手リスト（照合用）
         all_racers = []
-        boats = re.findall(
-            r'<td[^>]*is-boatColor\d[^>]*>(\d)</td>\s*<td[^>]*>.*?<span[^>]*>\d+</span>\s*\u3000\s*<span[^>]*>([^<]+)</span>',
-            result_html, re.DOTALL
-        )
-        for boat_num, name in boats:
-            name_clean = re.sub(r'\s+', ' ', name.strip()).replace("\u3000", " ").strip()
-            all_racers.append({"boat": boat_num, "name": name_clean})
-        # 単勝配当（&yen;XXX 形式）
         odds = 0.0
-        odds_m = re.search(r'単勝.*?&yen;([\d,]+)', result_html, re.DOTALL)
-        if odds_m:
-            try:
-                odds = float(odds_m.group(1).replace(",", "")) / 100.0
-            except:
-                pass
-        if not odds:
-            # is-payout1 クラスのパターン
-            payout_m = re.search(r'is-payout1[^>]*>&yen;([\d,]+)', result_html)
-            if payout_m:
+
+        if BS4_AVAILABLE:
+            soup = BeautifulSoup(result_html, "html.parser")
+            # 着順テーブルから1着を取得
+            for table in soup.find_all("table"):
+                rows = table.find_all("tr")
+                for row in rows:
+                    cells = row.find_all("td")
+                    if cells and cells[0].get_text(strip=True) in ["1", "１"]:
+                        if len(cells) > 1:
+                            winner_boat = cells[1].get_text(strip=True)
+                        if len(cells) > 2:
+                            raw = cells[2].get_text(strip=True)
+                            # 先頭4桁の登録番号を除去
+                            name = re.sub(r"^\d{4}", "", raw).strip()
+                            winner_name = name.replace("\u3000", " ").strip()
+                        break
+                if winner_name:
+                    break
+            # 全選手リスト（着順テーブルの全行）
+            for table in soup.find_all("table"):
+                rows = table.find_all("tr")
+                for row in rows:
+                    cells = row.find_all("td")
+                    if len(cells) >= 3:
+                        boat_num = cells[1].get_text(strip=True) if len(cells) > 1 else ""
+                        raw = cells[2].get_text(strip=True) if len(cells) > 2 else ""
+                        if boat_num.isdigit() and raw:
+                            name = re.sub(r"^\d{4}", "", raw).strip().replace("\u3000", " ").strip()
+                            if name:
+                                all_racers.append({"boat": boat_num, "name": name})
+                if all_racers:
+                    break
+            # 単勝払戻金
+            tansho = soup.find(string=re.compile("単勝"))
+            if tansho:
+                parent = tansho.find_parent("tr")
+                if parent:
+                    for cell in parent.find_all("td"):
+                        text = cell.get_text(strip=True)
+                        m = re.search(r"[¥¥]([\d,]+)", text)
+                        if m:
+                            try:
+                                odds = float(m.group(1).replace(",", "")) / 100.0
+                            except:
+                                pass
+                            break
+        else:
+            # フォールバック: 正規表現版
+            # 1着の行（テーブルセル形式）
+            first_row_m = re.search(
+                r"<td[^>]*>[１1]</td>\s*<td[^>]*>(\d)</td>\s*<td[^>]*>(\d{4}[^<]+)</td>",
+                result_html, re.DOTALL
+            )
+            if first_row_m:
+                winner_boat = first_row_m.group(1)
+                raw = first_row_m.group(2).strip()
+                winner_name = re.sub(r"^\d{4}", "", raw).replace("\u3000", " ").strip()
+            # 単勝配当
+            odds_m = re.search(r"単勝.*?&yen;([\d,]+)", result_html, re.DOTALL)
+            if odds_m:
                 try:
-                    odds = float(payout_m.group(1).replace(",", "")) / 100.0
+                    odds = float(odds_m.group(1).replace(",", "")) / 100.0
                 except:
                     pass
+
         if winner_boat:
             return {
                 "race_id": f"{jcd}_{rno}_{hd}",
@@ -794,6 +835,78 @@ def match_and_update(
 
 
 # ──────────────────────────────────────────────
+# GitHubへのコミット
+# ──────────────────────────────────────────────
+def commit_results_to_github(results_json_path: str = "results.json"):
+    """results.jsonをGitHubリポジトリにコミットする"""
+    import base64 as b64
+    github_token = os.environ.get("GITHUB_TOKEN", "").strip()
+    github_repo = os.environ.get("GITHUB_REPOSITORY", "").strip()
+    if not github_token or not github_repo:
+        print("  [SKIP] GITHUB_TOKEN/GITHUB_REPOSITORYが設定されていません")
+        return False
+    try:
+        with open(results_json_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        data = json.loads(content)
+        total = data.get("summary", {}).get("total", 0)
+        # 現在のSHAを取得
+        api_url = f"https://api.github.com/repos/{github_repo}/contents/results.json"
+        headers = {
+            "Authorization": f"token {github_token}",
+            "Accept": "application/vnd.github.v3+json"
+        }
+        r = urllib.request.Request(api_url, headers=headers)
+        try:
+            with urllib.request.urlopen(r, timeout=15) as resp:
+                file_data = json.loads(resp.read().decode("utf-8"))
+                sha = file_data.get("sha", "")
+        except Exception as e:
+            print(f"  [WARN] SHA取得失敗: {e}")
+            sha = ""
+        # コミット
+        payload = {
+            "message": f"auto: results.json更新 ({total}件)",
+            "content": b64.b64encode(content.encode("utf-8")).decode("utf-8"),
+        }
+        if sha:
+            payload["sha"] = sha
+        req_data = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(api_url, data=req_data, headers={
+            **headers, "Content-Type": "application/json"
+        }, method="PUT")
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            print(f"  ✅ GitHubコミット完了: results.json ({total}件)")
+            return True
+    except Exception as e:
+        print(f"  [ERROR] GitHubコミット失敗: {e}")
+        return False
+
+def load_results_from_github() -> dict:
+    """GitHubからresults.jsonを取得する（GITHUB_TOKENが設定されている場合）"""
+    import base64 as b64
+    github_token = os.environ.get("GITHUB_TOKEN", "").strip()
+    github_repo = os.environ.get("GITHUB_REPOSITORY", "").strip()
+    if not github_token or not github_repo:
+        return None
+    try:
+        api_url = f"https://api.github.com/repos/{github_repo}/contents/results.json"
+        headers = {
+            "Authorization": f"token {github_token}",
+            "Accept": "application/vnd.github.v3+json"
+        }
+        req = urllib.request.Request(api_url, headers=headers)
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            file_data = json.loads(resp.read().decode("utf-8"))
+            content = b64.b64decode(file_data["content"]).decode("utf-8")
+            data = json.loads(content)
+            print(f"  ✅ GitHubからresults.json取得: {len(data.get('records', []))}件")
+            return data
+    except Exception as e:
+        print(f"  [WARN] GitHub取得失敗: {e}")
+        return None
+
+# ──────────────────────────────────────────────
 # FTPアップロード
 # ──────────────────────────────────────────────
 
@@ -945,12 +1058,23 @@ def run_result_update(target_date: str = None):
         races_json_path = "races.json"
         print(f"  予想ファイル: races.json（{dated_races_path} が見つからないため）")
 
+    # GitHubからresults.jsonを取得（GITHUB_TOKENが設定されている場合）
+    github_results = load_results_from_github()
+    if github_results is not None:
+        # GitHubのresults.jsonをローカルに保存してから処理
+        with open("results.json", "w", encoding="utf-8") as f:
+            json.dump(github_results, f, ensure_ascii=False, indent=2)
+        print(f"  GitHubのresults.jsonをローカルに保存: {len(github_results.get('records', []))}件")
+
     results = match_and_update(target_date, races_json_path=races_json_path)
     
     # 成績グラフ生成
     generate_profit_chart()
     
-    # 新規レコードがなくてもFTPアップロードを実行（results.jsonを常に最新に保つ）
+    # GitHubにコミット（GITHUB_TOKENが設定されている場合）
+    commit_results_to_github()
+    
+    # FTPアップロード
     upload_results_ftp()
     return results
 
