@@ -1,12 +1,12 @@
 {
   "summary": {
-    "total": 70,
+    "total": 63,
     "hit": 3,
-    "hit_rate": 4.3,
-    "bet": 70000,
+    "hit_rate": 4.8,
+    "bet": 63000,
     "return": 39300,
-    "recovery_rate": 56.1,
-    "profit": -30700,
+    "recovery_rate": 62.4,
+    "profit": -23700,
     "streak": -20
   },
   "by_sport": {
@@ -27,12 +27,12 @@
       "recovery_rate": 25.4
     },
     "cycle": {
-      "total": 18,
+      "total": 11,
       "hit": 1,
-      "bet": 18000,
+      "bet": 11000,
       "return": 26100,
-      "hit_rate": 5.6,
-      "recovery_rate": 145.0
+      "hit_rate": 9.1,
+      "recovery_rate": 237.3
     }
   },
   "by_month": {
@@ -1220,118 +1220,6 @@
       "return_amount": 0,
       "actual_odds": 0.0,
       "memo": "推定勝率35%・EV1.21倍",
-      "winner": ""
-    },
-    {
-      "race_id": "2026-04-15_cycle_取手競輪場_取手競輪場_注目レース",
-      "date": "2026-04-15",
-      "sport": "cycle",
-      "name": "取手競輪場 注目レース",
-      "venue": "取手競輪場",
-      "honmei": "杉森 輝大",
-      "ev": "+2514%",
-      "judge": "強買い",
-      "result": "miss",
-      "bet_amount": 1000,
-      "return_amount": 0,
-      "actual_odds": 0.0,
-      "memo": "",
-      "winner": ""
-    },
-    {
-      "race_id": "2026-04-15_cycle_伊東競輪場_伊東競輪場_注目レース",
-      "date": "2026-04-15",
-      "sport": "cycle",
-      "name": "伊東競輪場 注目レース",
-      "venue": "伊東競輪場",
-      "honmei": "西岡 利起",
-      "ev": "+2542%",
-      "judge": "強買い",
-      "result": "miss",
-      "bet_amount": 1000,
-      "return_amount": 0,
-      "actual_odds": 0.0,
-      "memo": "",
-      "winner": ""
-    },
-    {
-      "race_id": "2026-04-15_cycle_大垣競輪場_大垣競輪場_注目レース",
-      "date": "2026-04-15",
-      "sport": "cycle",
-      "name": "大垣競輪場 注目レース",
-      "venue": "大垣競輪場",
-      "honmei": "伊藤 世哉",
-      "ev": "+2319%",
-      "judge": "強買い",
-      "result": "miss",
-      "bet_amount": 1000,
-      "return_amount": 0,
-      "actual_odds": 0.0,
-      "memo": "",
-      "winner": ""
-    },
-    {
-      "race_id": "2026-04-15_cycle_小松島競輪場_小松島競輪場_注目レース",
-      "date": "2026-04-15",
-      "sport": "cycle",
-      "name": "小松島競輪場 注目レース",
-      "venue": "小松島競輪場",
-      "honmei": "犬伏 湧也",
-      "ev": "+2694%",
-      "judge": "強買い",
-      "result": "miss",
-      "bet_amount": 1000,
-      "return_amount": 0,
-      "actual_odds": 0.0,
-      "memo": "",
-      "winner": ""
-    },
-    {
-      "race_id": "2026-04-15_cycle_高知競輪場_高知競輪場_注目レース",
-      "date": "2026-04-15",
-      "sport": "cycle",
-      "name": "高知競輪場 注目レース",
-      "venue": "高知競輪場",
-      "honmei": "瀧本 匡平",
-      "ev": "+1764%",
-      "judge": "強買い",
-      "result": "miss",
-      "bet_amount": 1000,
-      "return_amount": 0,
-      "actual_odds": 0.0,
-      "memo": "",
-      "winner": ""
-    },
-    {
-      "race_id": "2026-04-15_cycle_小倉競輪場_小倉競輪場_注目レース",
-      "date": "2026-04-15",
-      "sport": "cycle",
-      "name": "小倉競輪場 注目レース",
-      "venue": "小倉競輪場",
-      "honmei": "藤井 栄二",
-      "ev": "+2496%",
-      "judge": "強買い",
-      "result": "miss",
-      "bet_amount": 1000,
-      "return_amount": 0,
-      "actual_odds": 0.0,
-      "memo": "",
-      "winner": ""
-    },
-    {
-      "race_id": "2026-04-15_cycle_熊本競輪場_熊本競輪場_注目レース",
-      "date": "2026-04-15",
-      "sport": "cycle",
-      "name": "熊本競輪場 注目レース",
-      "venue": "熊本競輪場",
-      "honmei": "八尋 英輔",
-      "ev": "+2302%",
-      "judge": "強買い",
-      "result": "miss",
-      "bet_amount": 1000,
-      "return_amount": 0,
-      "actual_odds": 0.0,
-      "memo": "",
       "winner": ""
     }
   ]
