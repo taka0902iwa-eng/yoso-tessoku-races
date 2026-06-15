@@ -304,7 +304,7 @@ async function loadData() {
             hit:           json.summary.hit           || s.hit,
             hit_rate:      json.summary.hit_rate      || s.hit_rate,
             total_bet:     json.summary.bet           || s.total_bet,
-            total_ret:     json.summary.return        || s.total_ret,
+            total_ret:     json.summary.total_return  || json.summary.return || s.total_ret,
             recovery:      json.summary.recovery_rate || s.recovery,
             profit:        json.summary.profit        || s.profit,
           });
@@ -313,19 +313,11 @@ async function loadData() {
         return;
       }
     }
-  } catch {}
+  } catch(e) {
+    console.error('results.json load error:', e);
+  }
 
-  // フォールバック: Claude Storageから読み込む
-  try {
-    const r = await window.storage.get('yoso-results');
-    if (r) {
-      allRecords = JSON.parse(r.value);
-      renderAll(calcSummary(allRecords));
-      return;
-    }
-  } catch {}
-
-  // results.jsonもストレージも取得できなかった場合はデータなしで表示
+  // フォールバック: データなしで表示
   renderAll(calcSummary(allRecords));
 }
 
@@ -377,6 +369,7 @@ function calcSummary(recs) {
 
 // ── 描画 ────────────────────────────────────────────
 function renderAll(s) {
+  try {
   // sは calcSummary()の返り値形式を期待する
   if (!s || (!s.total && !s.summary)) s = calcSummary(allRecords);
   // summaryフィールドがあればそちらを使用、なければsそのまま
@@ -428,6 +421,11 @@ function renderAll(s) {
 
   // SNS
   setupShare(rec, d.hit_rate, d.total);
+  } catch(e) {
+    console.error('renderAll error:', e);
+    // エラーが発生しても最低限の表示
+    document.getElementById('updated-date').textContent = 'データ読み込みエラー';
+  }
 }
 
 function renderStreak(streak, type) {
