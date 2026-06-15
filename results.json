@@ -306,7 +306,7 @@
       "bet_amount": 1000,
       "return_amount": 0,
       "actual_odds": 1.5,
-      "memo": "EV",
+      "memo": "",
       "winner": "塚越 海斗"
     },
     {
@@ -338,7 +338,7 @@
       "bet_amount": 1000,
       "return_amount": 0,
       "actual_odds": 1.3,
-      "memo": "EV",
+      "memo": "",
       "winner": "岩瀬 裕亮"
     },
     {
@@ -370,7 +370,7 @@
       "bet_amount": 1000,
       "return_amount": 0,
       "actual_odds": 1.7,
-      "memo": "EV",
+      "memo": "",
       "winner": "仲谷 颯仁"
     },
     {
@@ -482,7 +482,7 @@
       "bet_amount": 1000,
       "return_amount": 0,
       "actual_odds": 8.1,
-      "memo": "EV",
+      "memo": "",
       "winner": "金子 萌"
     },
     {
@@ -498,7 +498,7 @@
       "bet_amount": 1000,
       "return_amount": 0,
       "actual_odds": 2.1,
-      "memo": "EV",
+      "memo": "",
       "winner": "冨名腰 桃奈"
     },
     {
@@ -514,7 +514,7 @@
       "bet_amount": 1000,
       "return_amount": 0,
       "actual_odds": 1.2,
-      "memo": "EV",
+      "memo": "",
       "winner": "前田 将太"
     },
     {
@@ -706,7 +706,7 @@
       "bet_amount": 1000,
       "return_amount": 0,
       "actual_odds": 14.4,
-      "memo": "EV",
+      "memo": "",
       "winner": "山口 剛"
     },
     {
@@ -754,7 +754,7 @@
       "bet_amount": 1000,
       "return_amount": 0,
       "actual_odds": 1.1,
-      "memo": "EV",
+      "memo": "",
       "winner": "田中 信一郎"
     },
     {
@@ -914,7 +914,7 @@
       "bet_amount": 1000,
       "return_amount": 0,
       "actual_odds": 9.2,
-      "memo": "EV",
+      "memo": "",
       "winner": "清水 愛海"
     },
     {
