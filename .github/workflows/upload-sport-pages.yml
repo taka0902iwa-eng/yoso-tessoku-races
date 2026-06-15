@@ -18,7 +18,7 @@ jobs:
       - name: リポジトリをチェックアウト
         uses: actions/checkout@v4
 
-      - name: 競技別HTMLをFTPアップロード
+      - name: 競技別HTMLをFTPアップロード（削除→再アップロードでキャッシュ無効化）
         env:
           FTP_HOST: ${{ secrets.FTP_HOST }}
           FTP_USER: ${{ secrets.FTP_USER }}
@@ -42,6 +42,13 @@ jobs:
                   for fname in files:
                       if os.path.exists(fname):
                           remote = f'{base_dir}/{fname}'
+                          # まず既存ファイルを削除（Nginxキャッシュ無効化のため）
+                          try:
+                              ftp.delete(remote)
+                              print(f'削除完了: {fname}')
+                          except Exception:
+                              pass  # ファイルが存在しない場合はスキップ
+                          # 再アップロード
                           with open(fname, 'rb') as f:
                               ftp.storbinary(f'STOR {remote}', f)
                           print(f'FTPアップロード完了: {fname}')
@@ -49,5 +56,7 @@ jobs:
                           print(f'ファイルなし（スキップ）: {fname}')
           except Exception as e:
               print(f'FTPエラー: {e}')
+              import traceback
+              traceback.print_exc()
               exit(1)
           EOF
