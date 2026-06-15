@@ -467,7 +467,7 @@ function renderSports(by_sport) {
   el.innerHTML = sports.map(s => {
     const d = by_sport[s.key] || {total:0,hit:0,hit_rate:0,recovery_rate:0,recovery:0,profit:0};
     const rec = parseFloat(d.recovery_rate || d.recovery || 0);
-    const col = d.total===0?'var(--text-mute)':rec>=100?'var(--green)':rec>0?'var(--gold-l)':'var(--red)';
+    const col = d.total===0?'var(--text-mute)':rec>=100?'var(--green)':rec>=50?'var(--gold-l)':'var(--red)';
     const profitStr = d.total===0 ? '—' : (d.profit>=0?'+':'')+'¥'+(d.profit||0).toLocaleString();
     return `<div class="sport-card ${s.cls}">
       <div class="sport-head"><span class="sport-icon">${s.icon}</span><span class="sport-name">${s.label}</span></div>
