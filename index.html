@@ -679,8 +679,7 @@ function renderSportSection(sport, races) {
       <div class="honmei-row">
         <span class="honmei-mark">◎</span>
         <span class="honmei-name">${honmei}</span>
-        ${evDisplay ? `<span class="ev-badge ${judgeClass}">${evDisplay}</span>` : ''}
-        <span class="ev-badge ${judgeClass}">${judgeLabel}</span>
+        <span class="ev-badge ${judgeClass}">${evDisplay ? evDisplay + ' ' : ''}${judgeLabel}</span>
       </div>`;
 
     if (top.reason) {
@@ -740,7 +739,8 @@ async function loadStats() {
     if (s) {
       const rEl = document.getElementById('idx-recovery');
       rEl.textContent = s.recovery_rate + '%';
-      rEl.style.color = parseFloat(s.recovery_rate) >= 100 ? 'var(--green)' : 'var(--gold-l)';
+      const recRate = parseFloat(s.recovery_rate);
+      rEl.style.color = recRate >= 100 ? 'var(--green)' : recRate >= 50 ? 'var(--gold-l)' : 'var(--red)';
       document.getElementById('idx-hitrate').textContent = s.hit_rate + '%';
       document.getElementById('idx-total').textContent   = s.total;
     }
