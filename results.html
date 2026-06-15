@@ -418,7 +418,10 @@ function renderAll(s) {
     `${d.total||0}戦の累計`;
 
   // STREAK
-  renderStreak(d.streak||0, d.streak_type||'');
+  // streakは符号付き整数（+n=的中連続, -n=外れ連続）またはtype文字列
+  const rawStreak = d.streak || 0;
+  const streakIsHit = typeof rawStreak === 'number' ? rawStreak > 0 : (d.streak_type === 'hit');
+  renderStreak(Math.abs(rawStreak), streakIsHit ? 'hit' : 'miss');
 
   // SPORT BREAKDOWN
   renderSports(d.by_sport || s.by_sport || {});
@@ -441,7 +444,7 @@ function renderAll(s) {
 function renderStreak(streak, type) {
   const el = document.getElementById('streak-wrap');
   if (!streak) { el.innerHTML=''; return; }
-  const isHit = type==='hit';
+  const isHit = type==='hit' || type===true;
   el.innerHTML = `
     <div class="streak-banner ${isHit?'':'miss'}" style="margin:12px 20px 0;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;background:var(--bg-card);border-left:4px solid ${isHit?'var(--green)':'var(--red)'}">
       <span style="font-size:1.6rem">${isHit?'🔥':'😓'}</span>
@@ -468,7 +471,8 @@ function renderSports(by_sport) {
     const d = by_sport[s.key] || {total:0,hit:0,hit_rate:0,recovery_rate:0,recovery:0,profit:0};
     const rec = parseFloat(d.recovery_rate || d.recovery || 0);
     const col = d.total===0?'var(--text-mute)':rec>=100?'var(--green)':rec>=50?'var(--gold-l)':'var(--red)';
-    const profitStr = d.total===0 ? '—' : (d.profit>=0?'+':'')+'¥'+(d.profit||0).toLocaleString();
+    const profit = d.profit !== undefined ? d.profit : ((d.return||d.total_ret||0) - (d.bet||d.total_bet||0));
+    const profitStr = d.total===0 ? '—' : (profit>=0?'+':'')+'¥'+Math.abs(profit).toLocaleString();
     return `<div class="sport-card ${s.cls}">
       <div class="sport-head"><span class="sport-icon">${s.icon}</span><span class="sport-name">${s.label}</span></div>
       <div class="sport-recovery" style="color:${col}">${d.total?rec+'%':'—'}</div>
@@ -503,7 +507,7 @@ function renderChart(monthly) {
     if (p > 0) {
       return `<div class="chart-bar-wrap">
         <div class="chart-bar-pos-area">
-          <span class="chart-val" style="color:var(--gold-l)">${p>=0?'+':''}\u00a5${Math.abs(p).toLocaleString()}</span>
+          <span class="chart-val" style="color:var(--gold-l)">+\u00a5${Math.abs(p).toLocaleString()}</span>
           <div class="chart-bar pos" style="height:${Math.max(pct,3)}%"></div>
         </div>
         <div class="chart-bar-neg-area"></div>
@@ -562,7 +566,7 @@ function renderRecords() {
       <span class="ri-sport ${m.cls}">${m.label}</span>
       <div class="ri-info">
         <div class="ri-race">${r.race||''}</div>
-        <div class="ri-honmei">${r.honmei||''}${(()=>{ const m=r.memo||''; const ev=r.ev||''; if(m&&m!=='EV') return ' · '+m; if(ev) return ' · EV'+ev; return ''; })()}</div>
+        <div class="ri-honmei">${r.honmei||''}${(()=>{ const ev=r.ev||''; const m=r.memo||''; const evNum=parseInt(ev.replace(/[^\d-]/g,''),10)||0; if(ev&&evNum>0) return ' · EV'+ev; if(m&&m!=='EV'&&!m.startsWith('推定勝率')) return ' · '+m; return ''; })()}</div>
       </div>
       <div class="ri-badge">
         <span class="ri-result ${r.result}">${r.result==='hit'?'◎ 的中':'✕ 外れ'}</span>

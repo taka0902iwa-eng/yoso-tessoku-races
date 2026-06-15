@@ -644,7 +644,7 @@ function renderSportSection(sport, races) {
   // タブのカウント更新
   const buyCount = sportRaces.filter(r => r.judge === '強買い' || r.judge === '買い').length;
   const tabEl = document.getElementById(`tab-${sport}-count`);
-  if (tabEl) tabEl.textContent = buyCount > 0 ? `${buyCount}件推奨` : `${sportRaces.length}件`;
+  if (tabEl) tabEl.textContent = buyCount > 0 ? `${buyCount}件推奨` : `0件推奨`;
 
   if (!sorted.length) {
     bodyEl.innerHTML = '<div class="no-pick">本日の予想はまだ準備中です</div>';

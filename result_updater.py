@@ -110,6 +110,7 @@ def recalc_summary(data: dict) -> dict:
         by_sport[sport] = {
             "total": sp_total, "hit": sp_hit,
             "bet": sp_bet, "return": sp_ret,
+            "profit": sp_ret - sp_bet,
             "hit_rate": round(sp_hit / sp_total * 100, 1) if sp_total > 0 else 0.0,
             "recovery_rate": round(sp_ret / sp_bet * 100, 1) if sp_bet > 0 else 0.0,
         }
@@ -133,6 +134,19 @@ def recalc_summary(data: dict) -> dict:
         v["hit_rate"] = round(v["hit"] / v["total"] * 100, 1) if v["total"] > 0 else 0.0
         v["recovery_rate"] = round(v["return"] / v["bet"] * 100, 1) if v["bet"] > 0 else 0.0
 
+    # 月別集計
+    by_month = {}
+    for r in records:
+        ym = r.get("date", "")[:7] if r.get("date") else "不明"
+        if not ym: ym = "不明"
+        if ym not in by_month:
+            by_month[ym] = {"bet": 0, "return": 0, "hit": 0, "total": 0}
+        by_month[ym]["bet"] += r.get("bet_amount", 0)
+        by_month[ym]["return"] += r.get("return_amount", 0)
+        by_month[ym]["total"] += 1
+        if r.get("result") == "hit":
+            by_month[ym]["hit"] += 1
+
     data["summary"] = {
         "total": total, "hit": hit, "hit_rate": hit_rate,
         "bet": bet, "return": ret, "recovery_rate": recovery_rate,
@@ -140,6 +154,7 @@ def recalc_summary(data: dict) -> dict:
     }
     data["by_sport"] = by_sport
     data["by_venue"] = by_venue
+    data["by_month"] = by_month
     return data
 
 

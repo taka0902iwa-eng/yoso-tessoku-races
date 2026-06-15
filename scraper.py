@@ -718,12 +718,11 @@ def calc_race_ev_cycle(riders, history=None):
         # EV異常値防止
         # - オッズ50倍超は計算精度が低い（先人: 高オッズは的中率低い）
         # - EV5.0超は計算バグの可能性（オッズ取得失敗によるダミー値）
-        # - 勝率25%未満は見送り（先人: 実力差が明確なレースのみ狙う）
+        # - 勝率15%未満は見送り（競輪は9人レースのため平均勝率は約11%）
         # - オッズ未取得（odds==0）は見送り（ダミー値によるEV異常値防止）
-        # バックテスト結果: EV1.00以上・勝率26%以上が最も回収率高（870%）
         if odds == 0:
             judge = "見送り"  # オッズ未取得は見送り
-        elif odds > 50.0 or ev > 5.0 or prob < 0.25:
+        elif odds > 50.0 or ev > 5.0 or prob < 0.15:
             judge = "見送り"
         else:
             judge = "強買い" if ev >= threshold_strong else "買い" if ev >= threshold_buy else "見送り"
