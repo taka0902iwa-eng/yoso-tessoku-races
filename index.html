@@ -683,7 +683,8 @@ function renderSportSection(sport, races) {
       </div>`;
 
     if (top.reason) {
-      html += `<div class="reason-text">${top.reason}</div>`;
+      const reasonShort = top.reason.length > 60 ? top.reason.slice(0,60) + '…' : top.reason;
+      html += `<div class="reason-text">${reasonShort}</div>`;
     }
   } else {
     html += `<div class="no-pick">本日は推奨レースなし（見送り）</div>`;
